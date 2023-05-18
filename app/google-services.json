@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "525252999196",
+    "project_id": "siheung-delivery",
+    "storage_bucket": "siheung-delivery.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:525252999196:android:a20d943ce3c16f544d07d9",
+        "android_client_info": {
+          "package_name": "com.tuk.shdelivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "525252999196-gl0pa73t8n54go9cinqah1851e6cd6ei.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC77KMezjC_FhzhLRkLmVZx9N5aIUCekCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "525252999196-gl0pa73t8n54go9cinqah1851e6cd6ei.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
