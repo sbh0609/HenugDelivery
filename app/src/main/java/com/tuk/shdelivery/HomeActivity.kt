@@ -26,15 +26,15 @@ class HomeActivity : AppCompatActivity() {
     }
     fun createTabMenu(): Unit {
         //프래그먼트 리스트 생성
-        val fragMentList = listOf(CreateFragment(), HomeFragment(), ChatListFragment(), MypageFragment())
+        val fragMentList = listOf(HomeFragment(), ChatListFragment(), MypageFragment(), CreateFragment())
         //어뎁터를 이용한 뷰 페이저와 프래그 먼트 연결
         binding.viewPager.adapter = fragMentAdapter(fragMentList, this)
 
         //탭메뉴에 들어갈 제목들
-        val titles = listOf<String>("매칭방 생성", "홈", "매칭방", "MyPage")
+        val titles = listOf<String>("Home", "List", "MyPage", "Create")
         //탭메뉴에 들어갈 아이콘들
         var icons = arrayListOf<Drawable>()
-        for (i in listOf(R.drawable.add, R.drawable.home, R.drawable.chaticon, R.drawable.person)) {
+        for (i in listOf(R.drawable.home, R.drawable.chaticon, R.drawable.person, R.drawable.add)) {
             icons.add((resources.getDrawable(i)))
         }
         //탭 레이아웃에 탭 메뉴들 추가
@@ -43,8 +43,6 @@ class HomeActivity : AppCompatActivity() {
             tab.icon = icons.get(position)
         }.attach()
     }
-
-
 }
 
 //뷰 페이저와 프래그먼트를 연결할 어댑터 클래스 생성
