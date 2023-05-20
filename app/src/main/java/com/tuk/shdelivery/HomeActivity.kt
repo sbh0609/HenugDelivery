@@ -3,6 +3,8 @@ package com.tuk.shdelivery
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.renderscript.ScriptGroup.Binding
+import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -19,7 +21,10 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
+        //탭메뉴 생성함수 실행
+        createTabMenu()
+    }
+    fun createTabMenu(): Unit {
         //프래그먼트 리스트 생성
         val fragMentList = listOf(CreateFragment(), HomeFragment(), ChatListFragment(), MypageFragment())
         //어뎁터를 이용한 뷰 페이저와 프래그 먼트 연결
@@ -38,6 +43,8 @@ class HomeActivity : AppCompatActivity() {
             tab.icon = icons.get(position)
         }.attach()
     }
+
+
 }
 
 //뷰 페이저와 프래그먼트를 연결할 어댑터 클래스 생성
