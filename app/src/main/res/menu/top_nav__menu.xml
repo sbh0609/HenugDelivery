@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/searchIcon"
+        android:icon="@drawable/search2"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.SearchView"
+        android:title="검색" />
+    <item
+        android:id="@+id/categoryIcon"
+        android:icon="@drawable/category"
+        app:showAsAction="always"
+        android:title="카테고리" />
+</menu>
