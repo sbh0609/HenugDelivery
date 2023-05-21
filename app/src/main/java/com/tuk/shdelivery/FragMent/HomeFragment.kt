@@ -76,12 +76,10 @@ class HomeFragment : Fragment() {
     fun loadData(): ArrayList<MatchRoomData> {
         var matchDataList = ArrayList<MatchRoomData>()
 
-        for (no in 1..10) {
-            var st = "Dumy $no"
-            var num = no
-            matchDataList.add(MatchRoomData(st, no))
-        }
-        Toast.makeText(this.context, "DB에서 매칭방 데이터 불러옴", Toast.LENGTH_SHORT).show()
+        matchDataList.add(MatchRoomData("Dumy 1", 1))
+
+        ToastCustom.toast(requireActivity(), "DB에서 매칭방 데이터 불러옴")
+
         return matchDataList
     }
 
@@ -91,11 +89,7 @@ class HomeFragment : Fragment() {
         var listData = (binding.recycleView.adapter as RecycleAdapter).listData
 
 
-        for (no in 10..20) {
-            var st = "Dumy $no"
-            var num = no
-            listData.add(MatchRoomData(st, no))
-        }
+        listData.add(MatchRoomData("Dumy 1", 1))
 
         //어댑터 생성
         RecycleAdapter(listData)
