@@ -1,5 +1,6 @@
 package com.tuk.shdelivery.FragMent
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.HomeActivity
 import com.tuk.shdelivery.R
+import com.tuk.shdelivery.categoryActivity
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.MatchRoomBinding
 import java.lang.Thread.sleep
@@ -90,6 +92,10 @@ class HomeFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener { item: MenuItem->
             when(item.itemId){
                 R.id.categoryIcon->{
+                    var intent = Intent(activity,categoryActivity::class.java)
+
+                    startActivityForResult(intent,0)
+
                     Toast.makeText(activity,"카테고리 액티비티 생성",Toast.LENGTH_SHORT).show()
                 }
                 R.id.searchIcon ->{
