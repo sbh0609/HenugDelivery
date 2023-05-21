@@ -6,10 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.tuk.shdelivery.R
+import com.tuk.shdelivery.databinding.FragmentChatListBinding
 
 
 class ChatListFragment : Fragment() {
-
+    val binding by lazy { FragmentChatListBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -19,6 +20,6 @@ class ChatListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat_list, container, false)
+        return binding.root
     }
 }
