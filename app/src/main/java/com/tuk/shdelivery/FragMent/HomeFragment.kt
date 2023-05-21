@@ -26,11 +26,32 @@ class HomeFragment : Fragment() {
         //툴바 리스너 달기
         createToolbarListener()
 
+        //search 리스너 달기
+        createSearchListener()
 
         //매칭방 생성 버튼 리스너 달기
         binding.createMatching.setOnClickListener {createMatching()}
         //새로고침 리스너 달기
         binding.swiper.setOnRefreshListener { reFresh() }
+    }
+
+    /**서치 리스너 달기*/
+    private fun createSearchListener() {
+        val search = binding.toolbar.menu.findItem(R.id.searchIcon).actionView as SearchView
+        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                ToastCustom.toast(activity!!, "$query 검색!")
+
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                // 검색어가 변경될 때마다 호출됨
+                // 여기서 필요한 작업을 수행합니다. (예: 실시간 검색 결과 업데이트)
+                Log.d("Search", newText)
+                return true
+            }
+        })
     }
 
     override fun onCreateView(
@@ -80,13 +101,17 @@ class HomeFragment : Fragment() {
         RecycleAdapter(listData)
         binding.recycleView.adapter?.notifyDataSetChanged()
 
-        Toast.makeText(this.context, "새로고침 완료!!", Toast.LENGTH_SHORT).show()
+        ToastCustom.toast(requireActivity(),"새로고침 완료!!")
+
         binding.swiper.isRefreshing = false
     }
 
     /**매칭방 생성 함수*/
     fun createMatching(): Unit {
-        Toast.makeText(this.context, "매칭방생성 화면 출력", Toast.LENGTH_SHORT).show()
+        ToastCustom.toast(requireActivity(),"매칭방 액티비티 출력")
+        var intent = Intent(activity,createActivity::class.java)
+
+        startActivity(intent)
     }
     private fun createToolbarListener() {
         binding.toolbar.setOnMenuItemClickListener { item: MenuItem->
@@ -96,10 +121,7 @@ class HomeFragment : Fragment() {
 
                     startActivityForResult(intent,0)
 
-                    Toast.makeText(activity,"카테고리 액티비티 생성",Toast.LENGTH_SHORT).show()
-                }
-                R.id.searchIcon ->{
-                    Toast.makeText(activity,"검색 아이콘 클릭",Toast.LENGTH_SHORT).show()
+                   ToastCustom.toast(requireActivity(), "카테고리 액티비티 출력")
                 }
             }
             true
