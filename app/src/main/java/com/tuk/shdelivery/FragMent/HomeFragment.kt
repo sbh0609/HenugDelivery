@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,6 +13,8 @@ import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.HomeActivity
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.categoryActivity
+import com.tuk.shdelivery.createActivity
+import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.MatchRoomBinding
 import java.lang.Thread.sleep
@@ -103,7 +106,7 @@ class HomeFragment : Fragment() {
     /**매칭방 생성 함수*/
     fun createMatching(): Unit {
         ToastCustom.toast(requireActivity(),"매칭방 액티비티 출력")
-        var intent = Intent(activity,createActivity::class.java)
+        var intent = Intent(activity, createActivity::class.java)
 
         startActivity(intent)
     }
