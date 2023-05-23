@@ -1,62 +1,51 @@
 package com.tuk.shdelivery
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.*
 import com.tuk.shdelivery.databinding.ActivityListRoomBinding
 
 class ListRoomActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityListRoomBinding // Replace with your actual binding class
+    //클래스 맴버 변수 선언
+    private lateinit var binding: ActivityListRoomBinding
+    private lateinit var database: DatabaseReference
+    private var chatrooms = mutableListOf<Chatroom>()
 
+    //onCreate override
     override fun onCreate(savedInstanceState: Bundle?) {
+        //뷰 바인딩 초기화
         super.onCreate(savedInstanceState)
-
-        // Initialize view binding
         binding = ActivityListRoomBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // 데이터베이스의 reference datbase에 가져옴
+        //FirebaseDatabase.getInstance().reference는 데이터베이스의 위치를 나타낸다.
+        database = FirebaseDatabase.getInstance().reference
+        //this는 현재 액티비티 클래스, 선형 레아이웃 매니저 설정
+        // LayoutManager은 recyclerview에 항목이 어떻게 배치될지 결정
+        binding.recyclerview.layoutManager = LinearLayoutManager(this)
 
-        // Get a reference to the database
-        val database = FirebaseDatabase.getInstance().reference
-
-        // Get a reference to the chatrooms node
-        val chatroomsRef = database.child("chatrooms")
-
-        // Attach a ValueEventListener to the chatrooms
-        chatroomsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Clear the chatroom list
-                binding.chatroomList.removeAllViews()
-
-                // Loop through all children of the chatrooms node
-                for (chatroomSnapshot in snapshot.children) {
-                    // Get the chatroom name
-                    val chatroomName = chatroomSnapshot.child("storeName").getValue(String::class.java)
-
-                    // Create a new Button for this chatroom
-                    val chatroomButton = Button(this@ListRoomActivity)
-                    chatroomButton.text = chatroomName
-                    chatroomButton.setOnClickListener {
-                        // Start ChatRoomActivity when this button is clicked
-                        val intent = Intent(this@ListRoomActivity, ChatRoomActivity::class.java)
-                        intent.putExtra("chatroomId", chatroomSnapshot.key)
-                        startActivity(intent)
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                chatrooms.clear()
+                for (chatroomSnapshot in dataSnapshot.children) {
+                    val chatroom = chatroomSnapshot.getValue(Chatroom::class.java)?.apply {
+                        id = chatroomSnapshot.key ?: ""
                     }
-
-                    // Add the button to the chatroom list
-                    binding.chatroomList.addView(chatroomButton)
+                    if (chatroom != null) {
+                        chatrooms.add(chatroom)
+                    }
                 }
+
+                // Set the adapter
+                binding.recyclerview.adapter = ChatroomAdapter(chatrooms)
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException())
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting data failed, log a message
+                // ...
             }
-        })
-    }
-
-    companion object {
-        const val TAG = "ListRoomActivity"
+        }
+        database.child("chatrooms").addValueEventListener(postListener)
     }
 }
