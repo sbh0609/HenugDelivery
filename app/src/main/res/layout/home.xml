@@ -23,10 +23,10 @@
 
 
   <com.google.android.material.tabs.TabLayout
+      app:tabIndicatorHeight="0dp"
       android:id="@+id/tabLayout"
       android:layout_width="match_parent"
       android:layout_height="55dp"
-      android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
