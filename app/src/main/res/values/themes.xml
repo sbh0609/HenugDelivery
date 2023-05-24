@@ -1,7 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Shdelivery" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-
+    <style name="Theme.Shdelivery" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/orange</item>
+        <item name="android:windowBackground">#3C3F41</item>
+        <item  name="android:colorPrimaryDark">#3C3F41</item>
     </style>
 
 </resources>
