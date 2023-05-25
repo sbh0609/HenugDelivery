@@ -28,10 +28,13 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        //프래그먼트 설정
         createFragMentList()
 
+        //탭 메뉴 넣기
         createTabMenu()
 
+        //탭 리스너 달기
         setTabListener()
     }
 
