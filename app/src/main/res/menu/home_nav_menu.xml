@@ -7,9 +7,4 @@
         app:showAsAction="always"
         app:actionViewClass="android.widget.SearchView"
         android:title="검색" />
-    <item
-        android:id="@+id/categoryIcon"
-        android:icon="@drawable/category"
-        app:showAsAction="always"
-        android:title="카테고리" />
 </menu>
