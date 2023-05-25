@@ -3,11 +3,14 @@ package com.tuk.shdelivery.FragMent
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.transition.Visibility
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2.ScrollState
 import com.tuk.shdelivery.Activity.HomeActivity
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.R
@@ -21,6 +24,7 @@ import com.tuk.shdelivery.databinding.MatchRoomBinding
 
 
 val categoryMap = Data.category()
+
 class HomeFragment : Fragment() {
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var test = 2
@@ -30,17 +34,8 @@ class HomeFragment : Fragment() {
         //카테고리 생성
         createCategory()
 
-        //데이터를 불러온다.
-        var matchDataList = loadData()
-
-        //어댑터 생성
-        val adapter = CustomAdapter(activity as Activity, matchDataList)
-
-        binding.recycleView.adapter = adapter
-
-        //레이아웃 매니져 설정
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
+        //리사이클러뷰 설정
+        createRecyclerView()
 
         //툴바 리스너 달기
         createToolbarListener()
@@ -52,6 +47,47 @@ class HomeFragment : Fragment() {
         binding.createMatching.setOnClickListener { createMatching() }
         //새로고침 리스너 달기
         binding.swiper.setOnRefreshListener { reFresh() }
+
+        //upscroll리스너 달기
+        binding.scrollUpButton.setOnClickListener {
+            binding.recycleView.smoothScrollToPosition(0);
+        }
+    }
+
+    private fun createRecyclerView() {
+        //데이터를 불러온다.
+        var matchDataList = loadData()
+
+        //어댑터 생성
+        val adapter = CustomAdapter(activity as Activity, matchDataList)
+
+        binding.recycleView.adapter = adapter
+
+        //레이아웃 매니져 설정
+        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
+
+        //스크롤 리스너 설정
+        createScrollListener()
+    }
+
+    private fun createScrollListener() {
+        binding.recycleView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            var temp = 0
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (temp == 1) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    binding.createText.visibility = View.GONE
+                    binding.scrollUpButton.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                binding.scrollUpButton.visibility = View.VISIBLE
+                binding.createText.visibility = View.VISIBLE
+                temp = 1
+            }
+        })
     }
 
     /**서치 리스너 달기*/
@@ -87,7 +123,7 @@ class HomeFragment : Fragment() {
          * */
 
         for (i in 1..1) {
-            matchDataList.add(MatchRoomData("Title ${i}", "decription$i", i, "storeName",i, i))
+            matchDataList.add(MatchRoomData("Title ${i}", "decription$i", i, "storeName", i, i))
         }
 
         ToastCustom.toast(requireActivity(), "DB에서 매칭방 데이터 불러옴")
@@ -104,7 +140,16 @@ class HomeFragment : Fragment() {
 
         val sample = loadData()
         for (i in 1..test) {
-            sample.add(MatchRoomData("Title ${i}", getString(R.string.dumyText), i, "storeName",i,i))
+            sample.add(
+                MatchRoomData(
+                    "Title ${i}",
+                    getString(R.string.dumyText),
+                    i,
+                    "storeName",
+                    i,
+                    i
+                )
+            )
         }
 
         test = test + 1
@@ -137,8 +182,8 @@ class HomeFragment : Fragment() {
 
     private fun createCategory() {
         var drawList = ArrayList<IconData>()
-        for((key, value) in categoryMap){
-            drawList.add(IconData(key,value))
+        for ((key, value) in categoryMap) {
+            drawList.add(IconData(key, value))
         }
 
         //어댑터 생성
@@ -163,7 +208,7 @@ class CustomAdapter(var activity: Activity, val listData: ArrayList<MatchRoomDat
         init {
             binding.root.setOnClickListener {
                 ToastCustom.toast(
-                    binding.root.context ,
+                    binding.root.context,
                     "${binding.title.text} ${binding.description.text} 매칭방 입장!"
                 )
             }
@@ -174,7 +219,7 @@ class CustomAdapter(var activity: Activity, val listData: ArrayList<MatchRoomDat
             binding.description.text = data.description
             binding.count.text = data.count.toString()
             binding.time.text = data.time.toString() + ":40"
-            binding.tag.text =  "족발/보쌈"
+            binding.tag.text = "족발/보쌈"
             binding.store.text = "아웃닭 산기대학로점"
             binding.tagImage.setImageResource(categoryMap["족발/보쌈"]!!)
         }
