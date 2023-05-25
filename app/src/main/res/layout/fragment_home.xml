@@ -15,8 +15,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/home_nav_menu"
-        app:title="흥배달" />
+        app:navigationIcon="@mipmap/app_icon"
+        app:menu="@menu/home_nav_menu" />
+
+
+
+
 
 
     <Button
@@ -55,5 +59,8 @@
             android:layout_height="match_parent" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
