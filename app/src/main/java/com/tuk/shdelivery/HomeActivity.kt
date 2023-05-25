@@ -1,5 +1,7 @@
 package com.tuk.shdelivery
 
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -46,7 +48,7 @@ class HomeActivity : AppCompatActivity() {
 
     fun createTabMenu(): Unit {
 
-        val titles = listOf<String>("홈", "채팅 리스트", "마이페이지")
+        val titles = listOf<String>("홈", "채팅", "마이페이지")
 
         //탭메뉴에 들어갈 아이콘들
         var icons = arrayListOf<Drawable>()
@@ -61,6 +63,7 @@ class HomeActivity : AppCompatActivity() {
             newTab.setIcon(icons.get(i))
             binding.tabLayout.addTab(newTab)
         }
+        binding.tabLayout.getTabAt(0)?.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
 
     }
 
@@ -68,21 +71,16 @@ class HomeActivity : AppCompatActivity() {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                when (tab?.position) {
-                    0 -> transaction.show(listFragment.get(0)).commit()
-                    1 -> transaction.show(listFragment.get(1)).commit()
-                    2 -> transaction.show(listFragment.get(2)).commit()
-                }
+                transaction.show(listFragment.get(tab?.position!!)).commit()
+                tab?.icon?.setColorFilter(getColor(R.color.orange),PorterDuff.Mode.SRC_IN)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                when (tab?.position) {
-                    0 -> transaction.hide(listFragment.get(0)).commit()
-                    1 -> transaction.hide(listFragment.get(1)).commit()
-                    2 -> transaction.hide(listFragment.get(2)).commit()
-                }
+                transaction.hide(listFragment.get(tab?.position!!)).commit()
+                tab?.icon?.setColorFilter(getColor(R.color.white),PorterDuff.Mode.SRC_IN)
             }
+
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
         })
@@ -107,11 +105,12 @@ class HomeActivity : AppCompatActivity() {
         val position = binding.tabLayout.selectedTabPosition
         if (position == 0) {
             val currentTime = System.currentTimeMillis()
-            if (currentTime - backPressedTime <= backPressedInterval) {
+            if (currentTime - backPressedTime > backPressedInterval) {
+                backPressedTime = currentTime
+                ToastCustom.toast(this, "한번더 누르면 종료됩니다.")
+            } else {
                 super.onBackPressed()
             }
-            backPressedTime = currentTime
-            ToastCustom.toast(this, "한번더 누르면 종료됩니다.")
         }
         binding.tabLayout.getTabAt(0)?.select()
     }

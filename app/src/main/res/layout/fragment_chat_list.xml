@@ -10,12 +10,11 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@drawable/bottomline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/chatlist_nav_menu"
-        app:title="채팅 목록" />
+        app:title="채팅" />
 
 
 

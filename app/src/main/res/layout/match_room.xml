@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mother"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
     >
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button" />
-
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
+        android:background="@drawable/bottomline"
         android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/zokval"
         android:layout_weight="1"
-        android:text="Button" />
+        android:textStyle="bold"
+        android:textSize="24dp"
+        android:text="매칭방" />
 
 </LinearLayout>

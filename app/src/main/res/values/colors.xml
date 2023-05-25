@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="orange">#EA5200</color>
     <color name="orangeClick">#FF9760</color>
+    <color name="backgroundColor">#222425</color>
+    <color name="backgroundClick">#525659</color>
 </resources>

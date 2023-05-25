@@ -17,6 +17,7 @@ import com.tuk.shdelivery.databinding.MatchRoomBinding
 
 class HomeFragment : Fragment() {
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
+    var test = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,6 +47,7 @@ class HomeFragment : Fragment() {
     /**서치 리스너 달기*/
     private fun createSearchListener() {
         val search = binding.toolbar.menu.findItem(R.id.searchIcon).actionView as SearchView
+        search.maxWidth = Int.MAX_VALUE
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 ToastCustom.toast(activity!!, "$query 검색!")
@@ -90,9 +92,11 @@ class HomeFragment : Fragment() {
         adapter.listData.clear()
 
         val sample = loadData()
-        for (i in 2..2) {
+        for (i in 1..test) {
             sample.add(MatchRoomData("Dumy ${i}", i))
         }
+
+        test = test + 1
 
         for (data in sample) {
             adapter.listData.add(data)
@@ -118,7 +122,7 @@ class HomeFragment : Fragment() {
             when (item.itemId) {
                 R.id.categoryIcon -> {
                     var intent = Intent(activity, categoryActivity::class.java)
-
+                    intent.putExtra("width",binding.toolbar.width)
                     startActivityForResult(intent, 0)
 
                     ToastCustom.toast(requireActivity(), "카테고리 액티비티 출력")
