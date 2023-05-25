@@ -73,19 +73,25 @@ class HomeFragment : Fragment() {
     private fun createScrollListener() {
         binding.recycleView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var temp = 0
+            var direc = 0
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (temp == 1) {
                     super.onScrolled(recyclerView, dx, dy)
                     binding.createText.visibility = View.GONE
                     binding.scrollUpButton.visibility = View.INVISIBLE
+                    direc = dy
                 }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                binding.scrollUpButton.visibility = View.VISIBLE
                 binding.createText.visibility = View.VISIBLE
+                binding.scrollUpButton.visibility = View.VISIBLE
                 temp = 1
+                //맨위로 올라왔을땐 스크롤업 버튼 안보이게
+                if(direc < 0){
+                    binding.scrollUpButton.visibility = View.INVISIBLE
+                }
             }
         })
     }
