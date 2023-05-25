@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">흥배달</string>
+    <string name="족발_보쌈">족발/보쌈</string>
+    <string name="찜_탕_찌개">찜/탕/찌개</string>
+    <string name="돈까스_일식">돈까스/일식</string>
+    <string name="피자">피자</string>
+    <string name="고기_구기">고기/구기</string>
+    <string name="양식">양식</string>
+    <string name="치킨">치킨</string>
+    <string name="중식">중식</string>
+    <string name="백반_죽_국수">백반/죽/국수</string>
+    <string name="도시락">도시락</string>
+    <string name="분식">분식</string>
+    <string name="카페_디저트">카페/디저트</string>
+    <string name="패스트푸드">패스트푸드</string>
+    <string name="dumyText">dumyText|askjdhaskdjhaosikjdhaksudhqwknmbzkxuchkjqhwikudhaskmnbskzxuhcqkwmnkzxjhdkasjdhiuqwyeodqwiuodam,nckzuxhcozxlknclqwidhykjasnbd,mzxnckuqwwhelqwmn,ashddsadadsdwqdasd</string>
 </resources>
