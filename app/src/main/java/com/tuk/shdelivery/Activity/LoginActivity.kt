@@ -1,4 +1,4 @@
-package com.tuk.shdelivery
+package com.tuk.shdelivery.Activity
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity

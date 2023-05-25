@@ -1,4 +1,4 @@
-package com.tuk.shdelivery
+package com.tuk.shdelivery.Activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

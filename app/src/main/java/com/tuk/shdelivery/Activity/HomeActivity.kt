@@ -1,6 +1,5 @@
-package com.tuk.shdelivery
+package com.tuk.shdelivery.Activity
 
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +12,7 @@ import com.google.android.material.tabs.TabLayout
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
+import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.HomeBinding
 

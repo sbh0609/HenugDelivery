@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.R
-import com.tuk.shdelivery.categoryActivity
-import com.tuk.shdelivery.createActivity
+import com.tuk.shdelivery.Activity.categoryActivity
+import com.tuk.shdelivery.Activity.createActivity
 import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.MatchRoomBinding
