@@ -11,17 +11,11 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        app:layout_constraintBottom_toTopOf="@id/swiper"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@mipmap/app_icon"
         app:menu="@menu/home_nav_menu" />
-
-
-
-
-
 
     <Button
         android:id="@+id/createMatching"
@@ -29,11 +23,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="30dp"
         android:layout_marginBottom="30dp"
-        android:background="@drawable/createbutton"
+        android:background="@drawable/custom_createbutton"
         android:drawableLeft="@drawable/add"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingLeft="15dp"
+        android:paddingLeft="10dp"
         android:paddingRight="20dp"
         android:text="글쓰기"
         android:textColor="@color/white"
@@ -42,6 +36,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:scrollbars="horizontal"
+        android:overScrollMode="always"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbarSize="10dp"
+        android:scrollbarThumbHorizontal="@drawable/custom_scrollbar"
+        android:paddingBottom="10dp"
+        android:background="@drawable/line_bottom"
+        android:id="@+id/IconScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiper"
         android:layout_width="match_parent"
@@ -49,14 +59,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/IconScroll"
         tools:context=".FragMent.HomeFragment">
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycleView"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+
+
+
+        </androidx.recyclerview.widget.RecyclerView>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
