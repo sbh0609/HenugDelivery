@@ -15,7 +15,7 @@ class Data {
             "찜/탕/찌개" to R.drawable.icon_tang,
             "돈까스/일식" to R.drawable.icon_dongas1sick,
             "피자" to  R.drawable.icon_pizza,
-            "고기/구기" to  R.drawable.icon_goki,
+            "고기/구이" to  R.drawable.icon_goki,
             "양식" to  R.drawable.icon_pasta,
             "치킨" to  R.drawable.icon_chicken,
             "중식" to  R.drawable.icon_joongsick,
@@ -23,7 +23,7 @@ class Data {
             "도시락" to  R.drawable.icon_dosirock,
             "분식" to R.drawable.icon_boonsick,
             "카페/디저트" to R.drawable.icon_cafedisert,
-            "패스트푸드" to  R.drawable.icon_fastfood,
+            "패스트 푸드" to  R.drawable.icon_fastfood,
          )
          return map
       }

@@ -1,21 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".Activity.createActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@drawable/line_bottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/no_icon_nav_menu"
-        app:title="매칭방 생성" />
+        android:background="@color/backgroundColor"
+        app:title="방 만들기" />
+
+    <ScrollView
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:hint="제목"
+                android:background="@drawable/line_noripple_bottom"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="22dp"
+                android:textStyle="bold"
+                android:ems="10"
+                android:inputType="textPersonName"
+               />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <EditText
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:hint="내용을 입력하세요."
+                android:background="@drawable/line_noripple_bottom"
+                android:textSize="18dp"
+                android:inputType="textMultiLine"/>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:background="@drawable/line_noripple_bottom"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="메뉴 >"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <Spinner
+                        android:id="@+id/category"
+                        android:layout_weight="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:background="@drawable/line_noripple_bottom"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:text="가게 >"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <Spinner
+                        android:id="@+id/store"
+                        android:layout_weight="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:background="@drawable/line_noripple_bottom"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="주문 시간 >"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/time"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="오후 4:40"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
