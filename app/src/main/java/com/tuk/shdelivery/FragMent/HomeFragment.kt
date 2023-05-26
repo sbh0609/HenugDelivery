@@ -7,6 +7,7 @@ import android.transition.Visibility
 import android.util.Log
 import android.view.*
 import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +31,7 @@ class HomeFragment : Fragment() {
     var test = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (fragmentManager?.fragments?.get(0) as HomeFragment).
 
         //카테고리 생성
         createCategory()
@@ -59,7 +61,7 @@ class HomeFragment : Fragment() {
         var matchDataList = loadData()
 
         //어댑터 생성
-        val adapter = CustomAdapter(activity as Activity, matchDataList)
+        val adapter = CustomAdapter(matchDataList)
 
         binding.recycleView.adapter = adapter
 
@@ -89,7 +91,7 @@ class HomeFragment : Fragment() {
                 binding.scrollUpButton.visibility = View.VISIBLE
                 temp = 1
                 //맨위로 올라왔을땐 스크롤업 버튼 안보이게
-                if(direc < 0){
+                if (direc < 0) {
                     binding.scrollUpButton.visibility = View.INVISIBLE
                 }
             }
@@ -204,97 +206,99 @@ class HomeFragment : Fragment() {
         )
 
     }
-}
 
-//신경쓰지 않아도 되는 스크롤 뷰
-class CustomAdapter(var activity: Activity, val listData: ArrayList<MatchRoomData>) :
-    RecyclerView.Adapter<CustomAdapter.Holder>() {
-    class Holder(var activity: Activity, var binding: MatchRoomBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        init {
-            binding.root.setOnClickListener {
-                ToastCustom.toast(
-                    binding.root.context,
-                    "${binding.title.text} ${binding.description.text} 매칭방 입장!"
-                )
+    //신경쓰지 않아도 되는 스크롤 뷰
+    inner class CustomAdapter(val listData: ArrayList<MatchRoomData>) :
+        RecyclerView.Adapter<CustomAdapter.Holder>() {
+        inner class Holder(var bd: MatchRoomBinding) :
+            RecyclerView.ViewHolder(bd.root) {
+            init {
+                bd.root.setOnClickListener {
+                    ToastCustom.toast(
+                        context!!,
+                        "${bd.title.text} ${bd.description.text} 매칭방 입장!"
+                    )
+                }
+            }
+
+            fun setData(data: MatchRoomData) {
+                bd.title.text = "${data.title}"
+                bd.description.text = data.description
+                bd.count.text = data.count.toString()
+                bd.time.text = data.time.toString() + ":40"
+                bd.tag.text = "족발/보쌈"
+                bd.store.text = "아웃닭 산기대학로점"
+                bd.tagImage.setImageResource(categoryMap["족발/보쌈"]!!)
             }
         }
 
-        fun setData(data: MatchRoomData) {
-            binding.title.text = "${data.title}"
-            binding.description.text = data.description
-            binding.count.text = data.count.toString()
-            binding.time.text = data.time.toString() + ":40"
-            binding.tag.text = "족발/보쌈"
-            binding.store.text = "아웃닭 산기대학로점"
-            binding.tagImage.setImageResource(categoryMap["족발/보쌈"]!!)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+            val b =
+                MatchRoomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val holder = Holder(b)
+
+            return holder
+        }
+
+        override fun getItemCount(): Int {
+            return listData.size
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return position
+        }
+
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            //사용할 데이터를 꺼내고
+            val data = listData.get(position)
+            //홀더에 데이터를 전달한다.
+            holder.setData(data)
+            //홀더는 받은 데이터를 화면에 출력한다.
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        val binding = MatchRoomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val holder = Holder(activity, binding)
 
-        holder.setIsRecyclable(false);
-        return holder
-    }
-
-    override fun getItemCount(): Int {
-        return listData.size
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        //사용할 데이터를 꺼내고
-        val data = listData.get(position)
-        //홀더에 데이터를 전달한다.
-        holder.setData(data)
-        //홀더는 받은 데이터를 화면에 출력한다.
-    }
-
-
-}
-
-class IconAdapter(val listData: ArrayList<IconData>) :
-    RecyclerView.Adapter<IconAdapter.Holder>() {
-    class Holder(var binding: CategoryIconBinding) : RecyclerView.ViewHolder(binding.root) {
-        init {
-            binding.root.setOnClickListener {
-                ToastCustom.toast(binding.root.context, "${binding.TextView.text} 메뉴 선택!")
+    inner class IconAdapter(val listData: ArrayList<IconData>) :
+        RecyclerView.Adapter<IconAdapter.Holder>() {
+        inner class Holder(var bd: CategoryIconBinding) : RecyclerView.ViewHolder(bd.root) {
+            init {
+                bd.root.setOnClickListener {
+                    binding.toolbar.title = bd.TextView.text
+                    ToastCustom.toast(context!!, "${bd.TextView.text} 메뉴 선택!")
+                }
             }
+
+            fun setData(data: IconData) {
+                bd.ImageView.setImageResource(data.drawableId)
+                bd.TextView.text = data.name
+            }
+
         }
 
-        fun setData(data: IconData) {
-            binding.ImageView.setImageResource(data.drawableId)
-            binding.TextView.text = data.name
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+            val b =
+                CategoryIconBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val holder = Holder(b)
+
+            return holder
         }
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        val binding =
-            CategoryIconBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val holder = Holder(binding)
+        override fun getItemCount(): Int {
+            return listData.size
+        }
 
-        holder.setIsRecyclable(false);
-        return holder
-    }
+        override fun getItemViewType(position: Int): Int {
+            return position
+        }
 
-    override fun getItemCount(): Int {
-        return listData.size
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return position
-    }
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        //사용할 데이터를 꺼내고
-        val data = listData.get(position)
-        //홀더에 데이터를 전달한다.
-        holder.setData(data)
-        //홀더는 받은 데이터를 화면에 출력한다.
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            //사용할 데이터를 꺼내고
+            val data = listData.get(position)
+            //홀더에 데이터를 전달한다.
+            holder.setData(data)
+            //홀더는 받은 데이터를 화면에 출력한다.
+        }
     }
 }
+
+

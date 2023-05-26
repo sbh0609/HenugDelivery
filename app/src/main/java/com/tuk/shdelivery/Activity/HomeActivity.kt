@@ -20,7 +20,8 @@ class HomeActivity : AppCompatActivity() {
     //바인딩 객체 생성
     val binding by lazy { HomeBinding.inflate(layoutInflater) }
     var listFragment = ArrayList<Fragment>()
-    var search: SearchView? = null
+    lateinit var search : SearchView
+
 
     private var backPressedTime: Long = 0
     private val backPressedInterval: Long = 2000 // 뒤로가기 버튼을 연타 했을때 꺼질 간격
@@ -90,10 +91,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (search == null) {
-            val layout = binding.viewPager.get(0) as ConstraintLayout
-            val toolbar = layout.getViewById(R.id.toolbar) as androidx.appcompat.widget.Toolbar
-            search = toolbar.menu.findItem(R.id.searchIcon).actionView as SearchView
+        if (!::search.isInitialized) {
+            search = (fragmentManager?.fragments?.get(0) as HomeFragment).binding.toolbar.menu.getItem(R.id.searchIcon) as SearchView
         }
 
         //만약 입력상자가 켜져 있다면
