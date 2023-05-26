@@ -3,6 +3,7 @@ package com.tuk.shdelivery.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import com.tuk.shdelivery.R
 import com.tuk.shdelivery.databinding.SettingBinding
 
 class settingActivity : AppCompatActivity() {
@@ -21,7 +22,6 @@ class settingActivity : AppCompatActivity() {
                 onBackPressed()
             }
         }
-
         return super.onOptionsItemSelected(item)
     }
 }

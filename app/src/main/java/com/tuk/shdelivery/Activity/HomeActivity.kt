@@ -14,13 +14,14 @@ import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.ToastCustom
+import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.HomeBinding
 
 class HomeActivity : AppCompatActivity() {
     //바인딩 객체 생성
     val binding by lazy { HomeBinding.inflate(layoutInflater) }
     var listFragment = ArrayList<Fragment>()
-    lateinit var search : SearchView
+    var search : SearchView? = null
 
 
     private var backPressedTime: Long = 0
@@ -91,8 +92,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (!::search.isInitialized) {
-            search = (fragmentManager?.fragments?.get(0) as HomeFragment).binding.toolbar.menu.getItem(R.id.searchIcon) as SearchView
+        if (search == null) {
+            search = binding.viewPager.get(0).findViewById(R.id.searchIcon) as SearchView
         }
 
         //만약 입력상자가 켜져 있다면
@@ -103,7 +104,6 @@ class HomeActivity : AppCompatActivity() {
             //포커스 해제후 리턴
             return
         }
-
         val position = binding.tabLayout.selectedTabPosition
         if (position == 0) {
             val currentTime = System.currentTimeMillis()

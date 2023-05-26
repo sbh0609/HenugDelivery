@@ -26,16 +26,12 @@ class HomeFragment : Fragment() {
     var test = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (fragmentManager?.fragments?.get(0) as HomeFragment).
 
-            //카테고리 생성
+        //카테고리 생성
         createCategory()
 
         //리사이클러뷰 설정
         createRecyclerView()
-
-        //툴바 리스너 달기
-        createToolbarListener()
 
         //search 리스너 달기
         createSearchListener()
@@ -174,13 +170,6 @@ class HomeFragment : Fragment() {
         var intent = Intent(activity, createActivity::class.java)
 
         startActivity(intent)
-    }
-
-    private fun createToolbarListener() {
-        binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
-
-            true
-        }
     }
 
     private fun createCategory() {
