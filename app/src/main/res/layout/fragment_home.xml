@@ -65,38 +65,23 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/vector_up"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <LinearLayout
-        android:paddingRight="10dp"
-        android:paddingLeft="8dp"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp"
+
+    <ImageView
         android:id="@+id/createMatching"
+        android:padding="10dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="30dp"
-        android:background="@drawable/custom_createbutton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/add"/>
-        <TextView
-            android:id="@+id/createText"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textColor="@color/white"
-            android:gravity="center_vertical"
-            android:text="글쓰기"
-            android:textSize="20dp"
-            android:textStyle="bold"/>
-    </LinearLayout>
+        android:background="@drawable/custom_createbutton"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/add"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

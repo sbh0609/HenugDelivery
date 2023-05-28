@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,134 +12,173 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="@color/backgroundColor"
+        app:layout_constraintBottom_toTopOf="@+id/scrollView2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:title="방 만들기" />
 
     <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        app:layout_constraintBottom_toTopOf="@id/buttonLinear"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:hint="제목"
-                android:background="@drawable/line_noripple_bottom"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                android:textSize="22dp"
-                android:textStyle="bold"
-                android:ems="10"
-                android:inputType="textPersonName"
-               />
 
 
             <EditText
                 android:id="@+id/description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/line_noripple_bottom"
+                android:hint="내용을 입력하세요."
+                android:inputType="textMultiLine"
                 android:paddingTop="15dp"
                 android:paddingBottom="15dp"
-                android:hint="내용을 입력하세요."
-                android:background="@drawable/line_noripple_bottom"
-                android:textSize="18dp"
-                android:inputType="textMultiLine"/>
+                android:textSize="18dp" />
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/line_noripple_bottom"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp">
 
-                <LinearLayout
-                    android:paddingTop="15dp"
-                    android:paddingBottom="15dp"
-                    android:background="@drawable/line_noripple_bottom"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:text="메뉴 >"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:text="메뉴 >"
-                        android:textSize="18dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <Spinner
-                        android:id="@+id/category"
-                        android:layout_weight="1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:paddingTop="15dp"
-                    android:paddingBottom="15dp"
-                    android:background="@drawable/line_noripple_bottom"
-                    android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:textSize="18dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:text="가게 >"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <Spinner
-                        android:id="@+id/store"
-                        android:layout_weight="1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:paddingTop="15dp"
-                    android:paddingBottom="15dp"
-                    android:background="@drawable/line_noripple_bottom"
-                    android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:text="주문 시간 >"
-                        android:textSize="18dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <TextView
-                        android:id="@+id/time"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="오후 4:40"
-                        android:textSize="18dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-
-                </LinearLayout>
+                <Spinner
+                    android:id="@+id/category"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/line_noripple_bottom"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="가게 >"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/store"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/line_noripple_bottom"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="주문 시작 시간 >"
+                        android:textColor="@color/white"
+                        android:textSize="18dp"
+                        android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:id="@+id/day"
+                        android:text="05 / 25"
+                        android:textColor="@color/white"
+                        android:textSize="16dp"
+                        android:textStyle="bold"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/deliveryTime"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="오후 5 : 30"
+                        android:textColor="@color/white"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
 
 
         </LinearLayout>
 
     </ScrollView>
 
-</LinearLayout>
+    <LinearLayout
+        android:padding="10dp"
+        android:id="@+id/buttonLinear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scrollView2">
+
+        <Button
+            android:id="@+id/cancle"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/custom_button_cancle"
+            android:layout_weight="1"
+            android:text="취소"
+            android:textSize="18dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/done"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/custom_button_done"
+            android:text="생성"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

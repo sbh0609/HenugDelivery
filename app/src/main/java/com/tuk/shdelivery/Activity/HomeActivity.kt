@@ -1,14 +1,18 @@
 package com.tuk.shdelivery.Activity
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.SearchView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
+import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
@@ -20,6 +24,7 @@ import com.tuk.shdelivery.databinding.HomeBinding
 class HomeActivity : AppCompatActivity() {
     //바인딩 객체 생성
     val binding by lazy { HomeBinding.inflate(layoutInflater) }
+    val homeFragment by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var listFragment = ArrayList<Fragment>()
     var search : SearchView? = null
 
@@ -38,6 +43,8 @@ class HomeActivity : AppCompatActivity() {
 
         //탭 리스너 달기
         setTabListener()
+
+//        createMatching()
     }
 
     private fun createFragMentList() {
@@ -89,6 +96,21 @@ class HomeActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
         })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("intent",data.toString())
+        Log.d("intent",resultCode.toString())
+        Log.d("intent",requestCode.toString())
+        if(requestCode == 0 && resultCode == Activity.RESULT_OK){
+            Log.d("intent",data.toString())
+            var newCreateData = data?.getSerializableExtra("createData") as MatchRoomData
+            val fragment = listFragment.get(0) as HomeFragment
+            fragment.adapter?.listData?.add(newCreateData)
+            fragment.adapter?.notifyDataSetChanged()
+        }
+
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onBackPressed() {

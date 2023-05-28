@@ -1,6 +1,9 @@
 package com.tuk.shdelivery.Activity
 
+import android.app.Activity
+import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
@@ -8,61 +11,69 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tuk.shdelivery.Data.MatchRoomData
-import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.Data
+import com.tuk.shdelivery.custom.Data.Companion.store
+import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.CreateBinding
 import java.util.*
-import kotlin.collections.ArrayList
 import android.R as r
 
 class createActivity : AppCompatActivity() {
     val binding by lazy { CreateBinding.inflate(layoutInflater) }
     val categoryMap = Data.category()
-    var createData : MatchRoomData? = null
+
+    var deliveryCalendar: Calendar = Calendar.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        Log.d("intent", intent.toString())
+
+
         //액션바 설정
         createActionBar()
 
-        // 카테고리 선택 스피너 설정
+        //스피너 선택 설정
         setcategorySpinner()
+        setStoreSpinner()
+
 
         //타임피커다이얼로그 생성
-        binding.time.setOnClickListener{
+        createTimePicker()
 
-            val calendar = Calendar.getInstance()
-            val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
-            val minute = calendar.get(Calendar.MINUTE)
+        //데이트 피커 생성
+        createaDatePicker()
 
-            val timePickerDialog = TimePickerDialog(
-                this,
-                { _ , hour, minute ->
-                    var isAfterNoon : Boolean = false
-                    var hour2 = hour
-                    if(hour>=12){
-                        isAfterNoon = true
-                        hour2 = hour - 12
-                    }
-                    if(isAfterNoon)
-                    val selectedTime = String.format("%02d:%02d", hour, minute)
-                    binding.time.text = selectedTime
-                },
-                hourOfDay,
-                minute,
-                DateFormat.is24HourFormat(this)
+        //취소 버튼 클릭 리스너 등록
+        binding.cancle.setOnClickListener { finish() }
+
+        //생성 버튼 클릭 리스너 등록
+        binding.done.setOnClickListener {
+            Calendar.getInstance()
+            val createData = MatchRoomData(
+                binding.category.selectedItem as String,
+                deliveryCalendar,
+                binding.description.text.toString(),
+                1,
+                Calendar.getInstance(),
+                binding.store.selectedItem as String
             )
-            timePickerDialog.show()
+
+            intent.putExtra("createData", createData)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
         }
     }
 
-    private fun setcategorySpinner() {
+    private fun setStoreSpinner() {
         val items = ArrayList<String>()
-        for ((key, value) in categoryMap) {
-            items.add(key)
+        for (value in store) {
+            items.add(value)
         }
         // 어댑터 생성
         val adapter = ArrayAdapter(this, r.layout.simple_spinner_item, items)
@@ -71,10 +82,10 @@ class createActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(r.layout.simple_spinner_dropdown_item)
 
         // 카테고리에 어댑터 설정
-        binding.category.adapter = adapter
+        binding.store.adapter = adapter
 
         // 선택 이벤트 처리
-        binding.category.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.store.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
                 view: View?,
@@ -92,6 +103,106 @@ class createActivity : AppCompatActivity() {
         }
     }
 
+    private fun createaDatePicker() {
+        //텍스트 바꿔준다.
+        binding.day.text = DeliverTime(deliveryCalendar).getDay()
+        fun showDatePicker(context: Context) {
+            val calendar = deliveryCalendar
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val listener =
+                DatePickerDialog.OnDateSetListener { _, selectedYear, selectedMonth, selectedDayOfMonth ->
+                    val current = Calendar.getInstance()
+                    val selected = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, selectedYear)
+                        set(Calendar.MONTH, selectedMonth)
+                        set(Calendar.DAY_OF_MONTH, selectedDayOfMonth)
+                    }
+
+
+                    if (selected.before(current)) {
+                        Toast.makeText(this, "이전 날짜는 선택 할수 없습니다.", Toast.LENGTH_SHORT).show()
+                        showDatePicker(context)  // 다시 데이트 피커 다이얼로그를 띄웁니다.
+                    } else {
+                        //calender 객체 등록한다.
+                        deliveryCalendar.set(Calendar.YEAR, selectedYear)
+                        deliveryCalendar.set(Calendar.MONTH, selectedMonth)
+                        deliveryCalendar.set(Calendar.DAY_OF_MONTH, selectedDayOfMonth)
+
+                        //텍스트 바꿔준다.
+                        binding.day.text = DeliverTime(deliveryCalendar).getDay()
+                    }
+                }
+
+            val datePickerDialog = DatePickerDialog(context, listener, year, month, day)
+            datePickerDialog.show()
+        }
+
+        //데이트 피커 다이얼로그 생성성
+        binding.day.setOnClickListener { showDatePicker(this) }
+    }
+
+    private fun createTimePicker() {
+
+        //텍스트 설정
+        binding.deliveryTime.text = DeliverTime(deliveryCalendar).getTime()
+
+        fun showTimePicker(context: Context) {
+            val current = Calendar.getInstance()
+
+            val listener = TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->
+                val select = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, deliveryCalendar.get(Calendar.YEAR))
+                    set(Calendar.MONTH, deliveryCalendar.get(Calendar.MONTH))
+                    set(Calendar.DAY_OF_MONTH, deliveryCalendar.get(Calendar.DAY_OF_MONTH))
+                    set(Calendar.HOUR_OF_DAY, selectedHour)
+                    set(Calendar.MINUTE, selectedMinute)
+                }
+
+                if (select.before(current)) {
+                    Toast.makeText(context, "이전 시간은 선택하실 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    showTimePicker(context)  // 다시 타임 피커 다이얼로그를 띄웁니다.
+                } else {
+                    //텍스트 바꿔주기
+                    binding.deliveryTime.text = DeliverTime.getTime(selectedHour, selectedMinute)
+                    //calendar 등록
+                    deliveryCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                    deliveryCalendar.set(Calendar.MINUTE, selectedMinute)
+                }
+            }
+
+            val timePickerDialog =
+                TimePickerDialog(
+                    context,
+                    listener,
+                    deliveryCalendar.get(Calendar.HOUR_OF_DAY),
+                    deliveryCalendar.get(Calendar.MINUTE),
+                    DateFormat.is24HourFormat(this)
+                )
+            timePickerDialog.show()
+        }
+
+        // 클릭 리스너를 설정
+        binding.deliveryTime.setOnClickListener { showTimePicker(this) }
+    }
+
+    private fun setcategorySpinner() {
+        val items = ArrayList<String>()
+        for ((key, value) in categoryMap) {
+            items.add(key)
+        }
+        // 어댑터 생성
+        val adapter = ArrayAdapter(this, r.layout.simple_spinner_item, items)
+
+        // 드롭다운 목록 레이아웃 설정
+        adapter.setDropDownViewResource(r.layout.simple_spinner_dropdown_item)
+
+        // 카테고리에 어댑터 설정
+        binding.category.adapter = adapter
+    }
+
     private fun createActionBar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -99,7 +210,7 @@ class createActivity : AppCompatActivity() {
 
     //뒤로가기 설정
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
             }

@@ -1,6 +1,11 @@
 package com.tuk.shdelivery.Data
 
-class MatchRoomData(var title : String,var description : String, var category : Int,
-var storeName : String ,var count : Int, var time : Int) {
+import com.tuk.shdelivery.custom.DeliverTime
+import java.io.Serializable
+import java.util.*
+
+data class MatchRoomData(var category : String, var deliveryTime : Calendar, var description : String,
+                    var count : Int, var createTime : Calendar, var storeName : String) :
+    Serializable {
 
 }

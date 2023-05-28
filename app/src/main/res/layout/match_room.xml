@@ -6,12 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/line_bottom"
-    android:paddingTop="1dp"
-    android:paddingBottom="1dp"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp">
-
-
+    android:paddingTop="1dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="1dp">
 
 
     <LinearLayout
@@ -26,16 +24,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/title"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Title"
-            android:textColor="@color/white"
-            android:textSize="22dp"
-            android:textStyle="bold" />
+            android:layout_height="wrap_content">
+
+
+
+            <ImageView
+                android:id="@+id/tagImage"
+                android:layout_width="45dp"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:src="@drawable/zokval" />
+
+
+
+
+
+            <TextView
+                android:id="@+id/tag"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="@string/치킨"
+                android:textColor="@color/orangeClick"
+                android:textSize="22dp"
+                android:textStyle="bold" />
+
+
+            <TextView
+                android:gravity="right"
+                android:layout_weight="1"
+                android:id="@+id/deliveryTime"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="주문 40분 후"
+                android:textColor="@color/orangeClick"
+                android:textSize="22dp"
+                android:textStyle="bold"/>
+
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/description"
@@ -50,11 +80,13 @@
             android:id="@+id/linear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:layout_marginTop="3dp">
+            android:layout_marginTop="3dp"
+            android:gravity="center_vertical">
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
+
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -73,67 +105,47 @@
 
             <ImageView
                 android:layout_width="2dp"
+                android:layout_height="22dp"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/line_left"
-                android:layout_marginRight="8dp"
                 android:layout_marginLeft="8dp"
-                android:layout_height="22dp"/>
+                android:layout_marginRight="8dp"
+                android:background="@drawable/line_left" />
 
             <TextView
-                android:id="@+id/time"
+                android:id="@+id/createTime"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical"
-                android:text="1분 전"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="5/25 오후 5:30"
                 android:textSize="16dp" />
 
-
-
             <LinearLayout
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
                 <TextView
                     android:id="@+id/store"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="아웃닭 정왕점"
-                    android:maxLines="1"
                     android:ellipsize="end"
-                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:text="아웃닭 정왕점"
                     android:textColor="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
 
-                <ImageView
-                    android:id="@+id/tagImage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/zokval" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tag"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:textSize="16dp"
-                android:text="@string/치킨"
-           />
+
         </LinearLayout>
 
     </LinearLayout>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
