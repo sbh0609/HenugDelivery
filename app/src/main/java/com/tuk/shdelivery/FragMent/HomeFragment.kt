@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +26,7 @@ import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment() {
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
-    var adapter : CustomAdapter? = null
+    var adapter: CustomAdapter? = null
     var datalist = ArrayList<MatchRoomData>()
     val categoryMap = Data.category()
     var test = 2
@@ -52,6 +53,7 @@ class HomeFragment : Fragment() {
             binding.scrollUpButton.visibility = View.INVISIBLE
         }
     }
+
     fun createMatching(): Unit {
         ToastCustom.toast(requireContext(), "매칭방 액티비티 출력")
         var intent = Intent(activity, createActivity::class.java)
@@ -60,9 +62,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun createRecyclerView() {
+        
+
         //데이터를 불러온다.
         var matchDataList = loadData()
-
 
 
         //어댑터 생성
@@ -81,6 +84,18 @@ class HomeFragment : Fragment() {
     }
 
     private fun createScrollListener() {
+        binding.hint.setOnTouchListener { _, _ ->
+            binding.hint.visibility = View.GONE
+            true
+        }
+        binding.IconScroll.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                binding.hint.visibility = View.GONE
+            }
+        })
+
+
         binding.scrollUpButton.visibility = View.INVISIBLE
         binding.recycleView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var temp = 0
@@ -140,7 +155,7 @@ class HomeFragment : Fragment() {
         for (i in 1..1) {
             val calendar = Calendar.getInstance()
             val calendar2 = Calendar.getInstance()
-            calendar2.add(Calendar.MINUTE,i)
+            calendar2.add(Calendar.MINUTE, i)
             matchDataList.add(MatchRoomData("치킨", calendar2, "dumy~", i, calendar, "산기대학로 노랑통닭"))
         }
 
@@ -161,7 +176,7 @@ class HomeFragment : Fragment() {
         for (i in 1..test) {
             val calendar = Calendar.getInstance()
             val calendar2 = Calendar.getInstance()
-            calendar2.add(Calendar.MINUTE,i)
+            calendar2.add(Calendar.MINUTE, i)
             sample.add(
                 MatchRoomData(
                     "치킨",
@@ -193,7 +208,6 @@ class HomeFragment : Fragment() {
     }
 
 
-
     private fun createCategory() {
         var drawList = ArrayList<IconData>()
         for ((key, value) in categoryMap) {
@@ -212,7 +226,6 @@ class HomeFragment : Fragment() {
         )
 
     }
-
 
 
     //신경쓰지 않아도 되는 스크롤 뷰
@@ -276,7 +289,8 @@ class HomeFragment : Fragment() {
 
                     binding.toolbar.title = bd.TextView.text
                     ToastCustom.toast(context!!, "${bd.TextView.text} 메뉴 선택!")
-                    adapter?.listData = datalist?.filter { it.category == bd.TextView.text } as ArrayList<MatchRoomData>
+                    adapter?.listData =
+                        datalist?.filter { it.category == bd.TextView.text } as ArrayList<MatchRoomData>
                     adapter?.notifyDataSetChanged()
                 }
             }

@@ -43,8 +43,6 @@ class HomeActivity : AppCompatActivity() {
 
         //탭 리스너 달기
         setTabListener()
-
-//        createMatching()
     }
 
     private fun createFragMentList() {
