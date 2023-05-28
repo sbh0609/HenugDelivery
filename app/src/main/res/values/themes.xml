@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/orange</item>
         <item name="android:windowBackground">@color/backgroundColor</item>
         <item  name="android:colorPrimaryDark">@color/backgroundColor</item>
+        <item name="android:navigationBarColor">@color/backgroundColor</item>
     </style>
 
 </resources>

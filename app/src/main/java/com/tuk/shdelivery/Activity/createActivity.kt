@@ -57,7 +57,7 @@ class createActivity : AppCompatActivity() {
 
     private fun done() {
         val nowTime = Calendar.getInstance().apply {
-            set(Calendar.SECOND, 0)
+            set(Calendar.SECOND, 59)
         }
         deliveryCalendar.set(Calendar.SECOND, 0)
         if (binding.description.text.toString() == "") {
