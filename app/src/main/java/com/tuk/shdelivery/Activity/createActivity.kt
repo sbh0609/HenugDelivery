@@ -52,21 +52,34 @@ class createActivity : AppCompatActivity() {
         binding.cancle.setOnClickListener { finish() }
 
         //생성 버튼 클릭 리스너 등록
-        binding.done.setOnClickListener {
-            Calendar.getInstance()
-            val createData = MatchRoomData(
-                binding.category.selectedItem as String,
-                deliveryCalendar,
-                binding.description.text.toString(),
-                1,
-                Calendar.getInstance(),
-                binding.store.selectedItem as String
-            )
+        binding.done.setOnClickListener { done() }
+    }
 
-            intent.putExtra("createData", createData)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+    private fun done() {
+        val nowTime = Calendar.getInstance().apply {
+            set(Calendar.SECOND, 0)
         }
+        deliveryCalendar.set(Calendar.SECOND, 0)
+        if (binding.description.text.toString() == "") {
+            Toast.makeText(this, "내용을 입력하세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (nowTime >= deliveryCalendar) {
+            Toast.makeText(this, "현재 시간을 확인 하세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val createData = MatchRoomData(
+            binding.category.selectedItem as String,
+            deliveryCalendar,
+            binding.description.text.toString(),
+            1,
+            nowTime,
+            binding.store.selectedItem as String
+        )
+
+        intent.putExtra("createData", createData)
+        setResult(RESULT_OK, intent)
+        finish()
     }
 
     private fun setStoreSpinner() {
@@ -103,10 +116,14 @@ class createActivity : AppCompatActivity() {
     }
 
     private fun createaDatePicker() {
+        val calendar = Calendar.getInstance()
+        deliveryCalendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+        deliveryCalendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH))
+        deliveryCalendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH))
+
         //텍스트 바꿔준다.
         binding.day.text = DeliverTime(deliveryCalendar).getDay()
         fun showDatePicker(context: Context) {
-            val calendar = deliveryCalendar
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
@@ -144,12 +161,18 @@ class createActivity : AppCompatActivity() {
     }
 
     private fun createTimePicker() {
+        val current = Calendar.getInstance()
+
+        //deliveryCalerdar설정
+        deliveryCalendar.set(Calendar.HOUR_OF_DAY, current.get(Calendar.HOUR_OF_DAY))
+        deliveryCalendar.set(Calendar.MINUTE, current.get(Calendar.MINUTE))
+
 
         //텍스트 설정
         binding.deliveryTime.text = DeliverTime(deliveryCalendar).getTime()
 
         fun showTimePicker(context: Context) {
-            val current = Calendar.getInstance()
+
 
             val listener = TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->
                 val select = Calendar.getInstance().apply {
