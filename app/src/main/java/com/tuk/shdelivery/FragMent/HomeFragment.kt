@@ -2,6 +2,7 @@ package com.tuk.shdelivery.FragMent
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -62,7 +63,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun createRecyclerView() {
-        
+        binding.toolbar.title = "전체"
 
         //데이터를 불러온다.
         var matchDataList = loadData()
@@ -210,6 +211,7 @@ class HomeFragment : Fragment() {
 
     private fun createCategory() {
         var drawList = ArrayList<IconData>()
+        drawList.add(IconData("전체",R.drawable.icon_all))
         for ((key, value) in categoryMap) {
             drawList.add(IconData(key, value))
         }
@@ -290,13 +292,19 @@ class HomeFragment : Fragment() {
                     binding.toolbar.title = bd.TextView.text
                     ToastCustom.toast(context!!, "${bd.TextView.text} 메뉴 선택!")
                     adapter?.listData =
-                        datalist?.filter { it.category == bd.TextView.text } as ArrayList<MatchRoomData>
+                        if(bd.TextView.text != "전체")
+                            datalist?.filter { it.category == bd.TextView.text } as ArrayList<MatchRoomData>
+                        else
+                            datalist
                     adapter?.notifyDataSetChanged()
                 }
             }
 
             fun setData(data: IconData) {
                 bd.ImageView.setImageResource(data.drawableId)
+                if(data.name == "전체") {
+                    bd.TextView.visibility = View.INVISIBLE
+                }
                 bd.TextView.text = data.name
             }
 
