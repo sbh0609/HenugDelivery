@@ -32,7 +32,7 @@
         android:layout_margin="10dp"
         android:background="@drawable/custom_button_cancle"
         android:paddingLeft="15dp"
-        android:paddingTop="15dp"
+        android:paddingTop="5dp"
         android:paddingRight="15dp"
         android:paddingBottom="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,8 +41,8 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@drawable/vector_person"
             app:layout_constraintStart_toStartOf="@+id/linearLayout2"
             app:layout_constraintBottom_toTopOf="@id/linearLayout2"

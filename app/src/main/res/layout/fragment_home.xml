@@ -19,11 +19,14 @@
 
     <Button
         android:id="@+id/hint"
-        android:padding="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="15dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/custom_button_done"
-        android:text="스클롤 하여 메뉴를 설정하세요\n&lt;-------&gt;"
+        android:background="@drawable/vector_chaticon"
+        android:text="      스클롤 하여 메뉴를 설정하세요       \n&lt;-------&gt;"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/IconScroll"
         app:layout_constraintEnd_toEndOf="@+id/toolbar" />
