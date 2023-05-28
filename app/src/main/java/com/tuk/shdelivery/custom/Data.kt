@@ -1,17 +1,13 @@
 package com.tuk.shdelivery.custom
 
-import android.graphics.drawable.Icon
-import com.tuk.shdelivery.Data.IconData
 import com.tuk.shdelivery.R
-import kotlin.collections.Map
-import androidx.fragment.app.Fragment
 import java.util.SortedMap
 
 class Data {
    companion object{
       public fun category() : SortedMap<String, Int>{
          val map = sortedMapOf<String, Int>(
-            "족발/보쌈" to R.drawable.zokval,
+            "족발/보쌈" to R.drawable.icon_zokval,
             "찜/탕/찌개" to R.drawable.icon_tang,
             "돈까스/일식" to R.drawable.icon_dongas1sick,
             "피자" to  R.drawable.icon_pizza,

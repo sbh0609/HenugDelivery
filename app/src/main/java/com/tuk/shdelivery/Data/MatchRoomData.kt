@@ -1,6 +1,5 @@
 package com.tuk.shdelivery.Data
 
-import com.tuk.shdelivery.custom.DeliverTime
 import java.io.Serializable
 import java.util.*
 

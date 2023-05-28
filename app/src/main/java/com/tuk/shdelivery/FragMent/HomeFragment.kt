@@ -1,14 +1,11 @@
 package com.tuk.shdelivery.FragMent
 
-import android.app.Activity
 import android.content.Intent
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
-import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,9 +18,8 @@ import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
-import com.tuk.shdelivery.databinding.MatchRoomBinding
+import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
 import java.util.*
-import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment() {
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
@@ -233,7 +229,7 @@ class HomeFragment : Fragment() {
     //신경쓰지 않아도 되는 스크롤 뷰
     inner class CustomAdapter(var listData: ArrayList<MatchRoomData>) :
         RecyclerView.Adapter<CustomAdapter.Holder>() {
-        inner class Holder(var bd: MatchRoomBinding) :
+        inner class Holder(var bd: LayoutMatchRoomBinding) :
             RecyclerView.ViewHolder(bd.root) {
             init {
                 bd.root.setOnClickListener {
@@ -259,7 +255,7 @@ class HomeFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
             val b =
-                MatchRoomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                LayoutMatchRoomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             val holder = Holder(b)
 
             return holder

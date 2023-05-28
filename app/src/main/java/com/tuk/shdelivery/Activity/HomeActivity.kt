@@ -4,11 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.SearchView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
@@ -18,12 +17,12 @@ import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.ToastCustom
+import com.tuk.shdelivery.databinding.ActivityHomeBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
-import com.tuk.shdelivery.databinding.HomeBinding
 
 class HomeActivity : AppCompatActivity() {
     //바인딩 객체 생성
-    val binding by lazy { HomeBinding.inflate(layoutInflater) }
+    val binding by lazy { ActivityHomeBinding.inflate(layoutInflater) }
     val homeFragment by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var listFragment = ArrayList<Fragment>()
     var search : SearchView? = null
@@ -63,7 +62,7 @@ class HomeActivity : AppCompatActivity() {
         //탭메뉴에 들어갈 아이콘들
         var icons = arrayListOf<Drawable>()
 
-        for (i in listOf(R.drawable.home, R.drawable.chaticon, R.drawable.person)) {
+        for (i in listOf(R.drawable.vector_home, R.drawable.vector_chaticon, R.drawable.vector_person)) {
             icons.add((resources.getDrawable(i)))
         }
 

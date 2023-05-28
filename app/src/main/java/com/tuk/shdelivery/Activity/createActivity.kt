@@ -11,19 +11,18 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.Data.Companion.store
 import com.tuk.shdelivery.custom.DeliverTime
-import com.tuk.shdelivery.databinding.CreateBinding
+import com.tuk.shdelivery.databinding.ActivityCreateBinding
 import java.util.*
 import android.R as r
 
 class createActivity : AppCompatActivity() {
-    val binding by lazy { CreateBinding.inflate(layoutInflater) }
+    val binding by lazy { ActivityCreateBinding.inflate(layoutInflater) }
     val categoryMap = Data.category()
 
     var deliveryCalendar: Calendar = Calendar.getInstance()

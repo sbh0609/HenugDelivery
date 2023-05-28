@@ -1,18 +1,18 @@
 package com.tuk.shdelivery.Activity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.tuk.shdelivery.databinding.LoginBinding
+import androidx.appcompat.app.AppCompatActivity
+import com.tuk.shdelivery.databinding.ActivityLoginBinding
 
 
 class LoginActivity : AppCompatActivity() {
     // 바인딩 객체 생성
-    lateinit var bd: LoginBinding
+    lateinit var bd: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bd = LoginBinding.inflate(layoutInflater)
+        bd = ActivityLoginBinding.inflate(layoutInflater)
 
         setContentView(bd.root)
 

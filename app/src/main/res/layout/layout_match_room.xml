@@ -35,7 +35,7 @@
                 android:layout_width="45dp"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
-                android:src="@drawable/zokval" />
+                android:src="@drawable/icon_zokval" />
 
 
 
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/person" />
+                    android:src="@drawable/vector_person" />
             </LinearLayout>
 
             <TextView

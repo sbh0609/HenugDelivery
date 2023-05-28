@@ -1,13 +1,12 @@
 package com.tuk.shdelivery.Activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import com.tuk.shdelivery.R
-import com.tuk.shdelivery.databinding.SettingBinding
+import androidx.appcompat.app.AppCompatActivity
+import com.tuk.shdelivery.databinding.ActicitySettingBinding
 
 class settingActivity : AppCompatActivity() {
-    val binding by lazy { SettingBinding.inflate(layoutInflater) }
+    val binding by lazy { ActicitySettingBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
