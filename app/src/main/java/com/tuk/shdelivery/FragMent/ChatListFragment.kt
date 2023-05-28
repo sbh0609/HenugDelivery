@@ -11,11 +11,13 @@ import com.tuk.shdelivery.databinding.FragmentChatListBinding
 
 
 class ChatListFragment : Fragment() {
+
     val binding by lazy { FragmentChatListBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("fragment","oncreate")
-
+        binding.test.setOnClickListener {
+            binding.nochat.visibility = View.GONE
+        }
     }
 
     override fun onCreateView(
