@@ -18,15 +18,19 @@
 
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/nochat"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/test"
+            android:id="@+id/btn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="만약 매칭방에 입장한 상태라면 (버튼 클릭)"/>
+
+
 
         <TextView
             android:layout_marginTop="30dp"
@@ -42,20 +46,94 @@
             android:layout_width="match_parent"
             android:layout_weight="1"
             android:layout_height="0dp"
-            tools:srcCompat="@drawable/vector_nochat" />
+            android:adjustViewBounds="false"
+            android:src="@drawable/vector_nochat"/>
 
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <TextView
+        android:layout_height="match_parent">
+
+
+
+
+        <Button
+            android:id="@+id/test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="hello"
-            android:textSize="30dp"
-            android:textColor="@color/white"/>
-    </LinearLayout>
+            android:text="상대방 채팅 쳐보기"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/scrollView"
+            />
+
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/layoutInput"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/test">
+
+            <LinearLayout
+                android:id="@+id/chatLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            app:borderWidth="0dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/scrollDonwButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/backgroundClick"
+            android:clickable="true"
+            app:fabSize="mini"
+            app:layout_constraintBottom_toBottomOf="@+id/scrollView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:maxImageSize="40dp"
+            app:srcCompat="@drawable/vector_down" />
+
+        <LinearLayout
+            android:id="@+id/layoutInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/scrollView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <EditText
+                android:id="@+id/input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/custom_button_cancle"
+                android:inputType="text"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/send"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/custom_button_done"
+                android:visibility="gone"
+                android:text="보내기" />
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
