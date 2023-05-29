@@ -16,11 +16,11 @@ class UserDao {
     }
 
     //등록
-    fun add(user: User?): Task<Void>? {
+    fun addUser(user: User?): Task<Void>? {
         return userRef!!.push().setValue(user)
     }
     //조회
-    fun getUserList(user: User?): Task<DataSnapshot>? {
+    fun getUser(user: User?): Task<DataSnapshot>? {
         return userRef?.child(user!!.userId.toString())?.get()?.addOnSuccessListener {
             Log.i("Firebase", "value ${it.value}")
         }?.addOnFailureListener{
@@ -28,12 +28,74 @@ class UserDao {
         }
     }
     //삭제
-    fun del(user: User?): Task<Void>? {
+    fun delUser(user: User?): Task<Void>? {
         return userRef?.child(user!!.userId.toString())?.removeValue()
 
     }
     //수정
-    fun update(user: User?): Task<Void>? {
+    fun updateUser(user: User?): Task<Void>? {
         return userRef?.child(user!!.userId.toString())?.setValue(user)
+    }
+}
+
+class MatchDao {
+    private var matchRef: DatabaseReference? = null
+
+    init{
+        val db = FirebaseDatabase.getInstance()
+        matchRef = db.getReference("match")
+    }
+
+    //등록
+    fun addMatch(matchroom: MatchRoom?): Task<Void>? {
+        return matchRef!!.push().setValue(matchroom)
+    }
+    //조회
+    fun getMatch(matchroom: MatchRoom?): Task<DataSnapshot>? {
+        return matchRef?.child(matchroom!!.matchRoomId.toString())?.get()?.addOnSuccessListener {
+            Log.i("Firebase", "value ${it.value}")
+        }?.addOnFailureListener{
+            Log.e("Fail","error", it)
+        }
+    }
+    //삭제
+    fun delMatch(matchroom: MatchRoom?): Task<Void>? {
+        return matchRef?.child(matchroom!!.matchRoomId.toString())?.removeValue()
+
+    }
+    //수정
+    fun updateMatch(matchroom: MatchRoom?): Task<Void>? {
+        return matchRef?.child(matchroom!!.matchRoomId.toString())?.setValue(matchroom)
+    }
+}
+
+class ChatRoomDao {
+    private var chatRoomRef: DatabaseReference? = null
+
+    init{
+        val db = FirebaseDatabase.getInstance()
+        chatRoomRef = db.getReference("chatRoom")
+    }
+
+    //등록
+    fun addChatRoom(chatroom: ChatRoom?): Task<Void>? {
+        return chatRoomRef!!.push().setValue(chatroom)
+    }
+    //조회
+    fun getChatRoom(chatroom: ChatRoom?): Task<DataSnapshot>? {
+        return chatRoomRef?.child(chatroom!!.chatId.toString())?.get()?.addOnSuccessListener {
+            Log.i("Firebase", "value ${it.value}")
+        }?.addOnFailureListener{
+            Log.e("Fail","error", it)
+        }
+    }
+    //삭제
+    fun delChatRoom(chatroom: ChatRoom?): Task<Void>? {
+        return chatRoomRef?.child(chatroom!!.chatId.toString())?.removeValue()
+
+    }
+    //수정
+    fun updateChatRoom(chatroom: ChatRoom?): Task<Void>? {
+        return chatRoomRef?.child(chatroom!!.chatId.toString())?.setValue(chatroom)
     }
 }

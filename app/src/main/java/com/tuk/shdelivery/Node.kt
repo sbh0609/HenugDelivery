@@ -13,7 +13,7 @@ data class User(
 )
 
 
-data class Store(
+data class Store( //초기 init
     var storeName: String,
     var storeNum: String,
     var storeLocRoad: String,
@@ -36,7 +36,7 @@ data class ChatRoom(
     var orderAcceptNum: Int
 )
 
-data class Chat(
+data class Chat( //실시간으로 add 기능
     var userId: Long,
     var userName: String,
     var chat: String,
