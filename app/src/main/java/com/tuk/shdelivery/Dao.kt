@@ -21,7 +21,7 @@ class UserDao {
     }
     //조회
     fun getUserList(user: User?): Task<DataSnapshot>? {
-        return userRef?.child(user!!.userKey)?.get()?.addOnSuccessListener {
+        return userRef?.child(user!!.userId.toString())?.get()?.addOnSuccessListener {
             Log.i("Firebase", "value ${it.value}")
         }?.addOnFailureListener{
             Log.e("Fail","error", it)
@@ -29,11 +29,11 @@ class UserDao {
     }
     //삭제
     fun del(user: User?): Task<Void>? {
-        return userRef?.child(user!!.userKey)?.removeValue()
+        return userRef?.child(user!!.userId.toString())?.removeValue()
 
     }
     //수정
     fun update(user: User?): Task<Void>? {
-        return userRef?.child(user!!.userKey)?.setValue(user)
+        return userRef?.child(user!!.userId.toString())?.setValue(user)
     }
 }

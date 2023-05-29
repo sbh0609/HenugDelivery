@@ -1,12 +1,7 @@
 package com.tuk.shdelivery
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import com.google.firebase.database.FirebaseDatabase
 import com.tuk.shdelivery.databinding.ActivityMainBinding // import your view binding class
 
 

@@ -1,26 +1,44 @@
 package com.tuk.shdelivery
 
+import android.provider.ContactsContract.CommonDataKinds.Phone
+import java.sql.Time
+import java.util.Calendar
+import java.util.Timer
 
 data class User(
-    var userKey: String,
+    var userId: Long,
     var userName: String,
-    var userAge: String
-){
-    constructor(): this("","","")
-}
+    var participateMatchId: Long,
+    var userPoint: String,
+)
 
 
 data class Store(
-    var storeKey: String,
     var storeName: String,
     var storeNum: String,
     var storeLocRoad: String,
-){
-    constructor(): this("","","", "")
-}
+)
+
+data class MatchRoom(
+    var matchRoomId: Long,
+    var participatePeopleNum: Int,
+    var menu: String,
+    var orderTime: java.util.Calendar,
+    var matchCreateTime: java.util.Calendar,
+    var describe: String,
+    var storeName: String
+)
 
 data class ChatRoom(
-    var chatKey: String,
-){
-    constructor(): this("")
-}
+    var chatId: Long,
+    var participatePeopleId: List<Int>,
+    var participatePeopleNum: Int,
+    var orderAcceptNum: Int
+)
+
+data class Chat(
+    var userId: Long,
+    var userName: String,
+    var chat: String,
+    var chatTime: java.util.Calendar
+)
