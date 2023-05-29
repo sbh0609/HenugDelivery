@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.firebase.database.FirebaseDatabase
 import com.tuk.shdelivery.databinding.ActivityMainBinding // import your view binding class
-import com.tuk.shdelivery.databinding.DialogCreateChatroomBinding
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,65 +22,46 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.makeChat.setOnClickListener {
-            val dialogBinding = DialogCreateChatroomBinding.inflate(layoutInflater)
+        val dao = UserDao()
 
-            val dialogBuilder = AlertDialog.Builder(this)
-            dialogBuilder.setView(dialogBinding.root)
-                .setCancelable(false)
-                .setPositiveButton("Create") { dialog, _ ->
-                    val roomName = dialogBinding.editTextRoomName.text.toString()
-                    val foodType = dialogBinding.editTextFoodType.text.toString()
-                    val storeName = dialogBinding.editTextStoreName.text.toString()
-                    val time = dialogBinding.editTextTime.text.toString()
+        binding.btn1.setOnClickListener{
+            //key 값 카카오 고유 코드
+            val name = binding.edit1.text.toString()
+            val age = binding.edit2.text.toString()
 
-                    if (roomName.isNotEmpty()&&foodType.isNotEmpty() && storeName.isNotEmpty() && time.isNotEmpty()) {
-                        createChatroom(roomName,foodType, storeName, time)
-                    } else {
-                        Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                    }
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.cancel()
-                }
+            val user = User("", name, age)
 
-            val alert = dialogBuilder.create()
-            alert.setTitle("Create Chatroom")
-            alert.show()
+            dao.add(user)
         }
-        binding.listChatRoom.setOnClickListener {
-            val intent = Intent(this, ListRoomActivity::class.java)
-            startActivity(intent)
+
+        binding.btn2.setOnClickListener{
+            //key 값 카카오 고유 코드
+            val name = binding.edit1.text.toString()
+            val age = binding.edit2.text.toString()
+
+            val user = User("", name, age)
+
+            dao.getUserList(user)
         }
-    }
 
-    private fun createChatroom(roomName:String,foodType: String, storeName: String, time: String) {
-        // Create chatroom object
-        val chatroom = hashMapOf(
-            "roomName" to roomName,
-            "foodType" to foodType,
-            "storeName" to storeName,
-            "time" to time
-        )
+        binding.btn3.setOnClickListener{
+            //key 값 카카오 고유 코드
+            val name = binding.edit1.text.toString()
+            val age = binding.edit2.text.toString()
 
-        // Get a reference to the database
-        val database = FirebaseDatabase.getInstance().reference
+            val user = User("", name, age)
 
-        // Generate a new chatroom ID
-        val chatroomId = database.child("chatrooms").push().key
+            dao.del(user)
+        }
 
-        if (chatroomId != null) {
-            // Save the chatroom to the database
-            database.child("chatrooms").child(chatroomId).setValue(chatroom)
-                .addOnSuccessListener {
-                    // Chatroom was created successfully
-                    Toast.makeText(this, "Chatroom created", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    // An error occurred
-                    Toast.makeText(this, "Failed to create chatroom", Toast.LENGTH_SHORT).show()
-                }
+        binding.btn4.setOnClickListener{
+            //key 값 카카오 고유 코드
+            val name = binding.edit1.text.toString()
+            val age = binding.edit2.text.toString()
+
+            val user = User("", name, age)
+
+            dao.update(user)
         }
     }
 }
