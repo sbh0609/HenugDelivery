@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "525252999196",
-    "project_id": "siheung-delivery",
-    "storage_bucket": "siheung-delivery.appspot.com"
+    "project_number": "687243827147",
+    "project_id": "myshdelivery",
+    "storage_bucket": "myshdelivery.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:525252999196:android:a20d943ce3c16f544d07d9",
+        "mobilesdk_app_id": "1:687243827147:android:cd07176a36c5c6d710c84e",
         "android_client_info": {
           "package_name": "com.tuk.shdelivery"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "525252999196-gl0pa73t8n54go9cinqah1851e6cd6ei.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC77KMezjC_FhzhLRkLmVZx9N5aIUCekCI"
+          "current_key": "AIzaSyC0XG9w-zv91hBtxhH1XMvdYCO0idB92dw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "525252999196-gl0pa73t8n54go9cinqah1851e6cd6ei.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
