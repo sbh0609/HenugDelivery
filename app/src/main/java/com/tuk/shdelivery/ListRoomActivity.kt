@@ -38,7 +38,7 @@ class ListRoomActivity : AppCompatActivity() {
                 }
 
                 // Set the adapter
-                binding.recyclerview.adapter = ChatroomAdapter(chatrooms)
+                binding.recyclerview.adapter = ChatroomAdapter(chatrooms,this@ListRoomActivity)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
