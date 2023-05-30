@@ -34,7 +34,7 @@ class createActivity : AppCompatActivity() {
         Log.d("intent", intent.toString())
 
 
-        //액션바 설정
+        //액션바 설정/
         createActionBar()
 
         //스피너 선택 설정
