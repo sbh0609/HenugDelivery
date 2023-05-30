@@ -67,6 +67,8 @@ class MatchDao {
     fun updateMatch(matchroom: MatchRoom?): Task<Void>? {
         return matchRef?.child(matchroom!!.matchRoomId.toString())?.setValue(matchroom)
     }
+    //전체조회
+    fun
 }
 
 class ChatRoomDao {
@@ -97,5 +99,27 @@ class ChatRoomDao {
     //수정
     fun updateChatRoom(chatroom: ChatRoom?): Task<Void>? {
         return chatRoomRef?.child(chatroom!!.chatId.toString())?.setValue(chatroom)
+    }
+}
+
+class ChatDao {
+    private var chatRef: DatabaseReference? = null
+
+    init{
+        val db = FirebaseDatabase.getInstance()
+        chatRef = db.getReference("chat")
+    }
+
+    //등록
+    fun addChat(chatroom: ChatRoom?): Task<Void>? {
+        return chatRef!!.push().setValue(chatroom)
+    }
+    //조회
+    fun getChat(chat: Chat?): Task<DataSnapshot>? {
+        return chatRef?.child(chat!!.chatId.toString())?.get()?.addOnSuccessListener {
+            Log.i("Firebase", "value ${it.value}")
+        }?.addOnFailureListener{
+            Log.e("Fail","error", it)
+        }
     }
 }

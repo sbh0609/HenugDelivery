@@ -18,45 +18,5 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val dao = UserDao()
-
-        binding.btn1.setOnClickListener{
-            //key 값 카카오 고유 코드
-            val name = binding.edit1.text.toString()
-            val age = binding.edit2.text.toString()
-
-            val user = User("", name, age)
-
-            dao.add(user)
-        }
-
-        binding.btn2.setOnClickListener{
-            //key 값 카카오 고유 코드
-            val name = binding.edit1.text.toString()
-            val age = binding.edit2.text.toString()
-
-            val user = User("", name, age)
-
-            dao.getUserList(user)
-        }
-
-        binding.btn3.setOnClickListener{
-            //key 값 카카오 고유 코드
-            val name = binding.edit1.text.toString()
-            val age = binding.edit2.text.toString()
-
-            val user = User("", name, age)
-
-            dao.del(user)
-        }
-
-        binding.btn4.setOnClickListener{
-            //key 값 카카오 고유 코드
-            val name = binding.edit1.text.toString()
-            val age = binding.edit2.text.toString()
-
-            val user = User("", name, age)
-
-            dao.update(user)
-        }
     }
 }

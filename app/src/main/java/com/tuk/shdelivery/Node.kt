@@ -12,7 +12,6 @@ data class User(
     var userPoint: String,
 )
 
-
 data class Store( //초기 init
     var storeName: String,
     var storeNum: String,
@@ -39,6 +38,7 @@ data class ChatRoom(
 data class Chat( //실시간으로 add 기능
     var userId: Long,
     var userName: String,
+    var chatId: Long,
     var chat: String,
     var chatTime: java.util.Calendar
 )
