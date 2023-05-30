@@ -37,7 +37,7 @@ class createActivity : AppCompatActivity() {
         //액션바 설정/
         createActionBar()
 
-        //스피너 선택 설정
+        //스피너 선택 설정/
         setcategorySpinner()
         setStoreSpinner()
 
