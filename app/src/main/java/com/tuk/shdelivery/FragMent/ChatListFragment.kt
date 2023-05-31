@@ -10,8 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.FragmentChatListBinding
@@ -31,8 +33,7 @@ class ChatListFragment : Fragment() {
         binding.btn.setOnClickListener {
             if (binding.nochat.visibility == View.GONE) {
                 binding.nochat.visibility = View.VISIBLE
-            }
-            else if (binding.nochat.visibility == View.VISIBLE) {
+            } else if (binding.nochat.visibility == View.VISIBLE) {
                 binding.nochat.visibility = View.GONE
             }
         }
@@ -107,7 +108,7 @@ class ChatListFragment : Fragment() {
     private fun createNotMyChat() {
         val inflate = LayoutChatBinding.inflate(layoutInflater)
 
-        if (binding.chatLayout.childCount > 0) {
+        if (binding.chatLayout.childCount > 1) {
             val lastView =
                 binding.chatLayout.getChildAt(binding.chatLayout.childCount - 1) as ViewGroup
             //마지막이 올리려는 채팅과 이름이 같다면 프로필제거
@@ -130,7 +131,19 @@ class ChatListFragment : Fragment() {
             }
             //최하단보다  스크롤 하단 버튼을 활성화한다.
             else {
-                binding.scrollDonwButton.visibility = View.VISIBLE
+                Snackbar.make(
+                    binding.chatLayout,
+                    "${inflate.name.text} 님이 보내셨습니다.\n${inflate.text.text.toString()}",
+                    Snackbar.LENGTH_LONG
+                ).apply {
+                    val textView =
+                        view.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+                    setAction("아래로",{binding.scrollDonwButton.performClick()})
+                    view.background = resources.getDrawable(R.drawable.custom_button_done)
+                    anchorView = binding.input
+                    textView.textSize = 18f
+                }.show()
+                binding.scrollDonwButton.visibility = View.INVISIBLE
             }
         }
     }
