@@ -1,5 +1,6 @@
 package com.tuk.shdelivery.custom
 
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -9,21 +10,21 @@ class DeliverTime(var data: Calendar) {
         return getTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
     }
 
-    fun getCreateTime() : String{
+    fun getCreateTime(): String {
         // "MM/dd a h:mm" 패턴으로 날짜를 문자열로 변환
         //오늘인지 확인후 오늘이면 "오늘 오전 04:30"출력
         //아니면 MM/dd 만 출력
         val dateFormat =
-        if(isToday(data)){
-            SimpleDateFormat("오늘 a hh:mm", Locale.KOREA)
-        } else{
-            SimpleDateFormat("MM/dd", Locale.KOREA)
-        }
+            if (isToday(data)) {
+                SimpleDateFormat("오늘 a hh:mm", Locale.KOREA)
+            } else {
+                SimpleDateFormat("MM/dd", Locale.KOREA)
+            }
         dateFormat.calendar = data
         return dateFormat.format(data.time)
     }
 
-    fun getDay() : String{
+    fun getDay(): String {
         val dateFormat = SimpleDateFormat("YY/MM/dd (E)", Locale.KOREAN)
         return dateFormat.format(data.time)
     }
@@ -61,6 +62,23 @@ class DeliverTime(var data: Calendar) {
                 }
 
             return String.format("%s 후 주문", diffString)
+        }
+
+        /**
+         * "yy/MM/dd/HH/mm" => Calendar
+         * */
+        fun getCalendar(input: String): Calendar {
+            val format = SimpleDateFormat("yy/MM/dd/HH/mm", Locale.getDefault())
+            var a = Calendar.getInstance().apply {
+                time = format.parse(input)
+            }
+            return a
+        }
+
+        fun setCalendar(calendar: Calendar): String {
+            Log.d("format", "5")
+            val format = SimpleDateFormat("yy/MM/dd/HH/mm")
+            return format.format(calendar.time)
         }
     }
 

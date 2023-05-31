@@ -12,7 +12,8 @@
         android:theme="@style/Theme.Shdelivery"
         tools:targetApi="31">
         <activity
-            android:name=".MatchActivity"
+            android:name=".Activity.MatchActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".Activity.createActivity"

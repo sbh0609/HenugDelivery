@@ -31,9 +31,6 @@ class createActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        Log.d("intent", intent.toString())
-
-
         //액션바 설정
         createActionBar()
 

@@ -2,6 +2,7 @@ package com.tuk.shdelivery.FragMent
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -233,29 +234,41 @@ class HomeFragment : Fragment() {
         RecyclerView.Adapter<CustomAdapter.Holder>() {
         inner class Holder(var bd: LayoutMatchRoomBinding) :
             RecyclerView.ViewHolder(bd.root) {
-
             init {
                 bd.root.setOnClickListener {
                     var intent = Intent(activity,MatchActivity::class.java)
-
-                    intent.putExtra("NUM1",1)
-
-                    startActivity(intent)
-
+                    val data = MatchRoomData(
+                        bd.tag.text.toString(),
+                        DeliverTime.getCalendar(bd.goneDeliveryTime.text.toString()),
+                        bd.description.text.toString(),
+                        bd.count.text.toString().toInt(),
+                        DeliverTime.getCalendar(bd.goneCreateTime.text.toString()),
+                        bd.store.text.toString()
+                    )
+                    intent.putExtra("data",data)
+                    println(intent.getSerializableExtra("data").toString())
+                    activity?.startActivityForResult(intent,1)
                 }
             }
 
             fun setData(data: MatchRoomData) {
                 val diffMillis = data.deliveryTime.timeInMillis - data.createTime.timeInMillis
 
+
+                Log.d("format", "1")
+
                 bd.tag.text = "${data.category}"
                 bd.description.text = data.description
                 bd.count.text = data.count.toString()
                 bd.tagImage.setImageResource(categoryMap[data.category]!!)
                 bd.store.text = data.storeName
+                Log.d("format", "2")
                 bd.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
                 bd.createTime.text = DeliverTime(data.createTime).getCreateTime()
-                bd.goneCreateTime.text = data.createTime
+                Log.d("format", "3")
+                bd.goneCreateTime.text = DeliverTime.setCalendar(data.createTime)
+                bd.goneDeliveryTime.text = DeliverTime.setCalendar(data.deliveryTime)
+
             }
         }
 
@@ -337,10 +350,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    fun getCalendar(input : String) : Calendar{
-        val format = SimpleDateFormat("yy/MM/dd/HH/mm", Locale.getDefault())
-        val parse = format.parse(input)
-    }
 }
 
 

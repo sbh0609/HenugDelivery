@@ -29,7 +29,12 @@ class ChatListFragment : Fragment() {
 
         //변경해야함
         binding.btn.setOnClickListener {
-            binding.nochat.visibility = View.GONE
+            if (binding.nochat.visibility == View.GONE) {
+                binding.nochat.visibility = View.VISIBLE
+            }
+            else if (binding.nochat.visibility == View.VISIBLE) {
+                binding.nochat.visibility = View.GONE
+            }
         }
 
         //내챗아님 채팅 올림

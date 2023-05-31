@@ -106,6 +106,11 @@ class HomeActivity : AppCompatActivity() {
             fragment.adapter?.listData?.add(newCreateData)
             fragment.adapter?.notifyDataSetChanged()
         }
+        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
+            val fragment = listFragment.get(1) as ChatListFragment
+            fragment.binding.btn.performClick()
+            binding.tabLayout.getTabAt(1)!!.select()
+        }
 
         super.onActivityResult(requestCode, resultCode, data)
     }
