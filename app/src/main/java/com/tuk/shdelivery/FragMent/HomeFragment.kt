@@ -9,6 +9,7 @@ import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.tuk.shdelivery.Activity.MatchActivity
 import com.tuk.shdelivery.Activity.createActivity
 import com.tuk.shdelivery.Data.IconData
 import com.tuk.shdelivery.Data.MatchRoomData
@@ -19,6 +20,7 @@ import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
+import java.text.SimpleDateFormat
 import java.util.*
 
 class HomeFragment : Fragment() {
@@ -231,12 +233,15 @@ class HomeFragment : Fragment() {
         RecyclerView.Adapter<CustomAdapter.Holder>() {
         inner class Holder(var bd: LayoutMatchRoomBinding) :
             RecyclerView.ViewHolder(bd.root) {
+
             init {
                 bd.root.setOnClickListener {
-                    ToastCustom.toast(
-                        context!!,
-                        "${bd.tag.text} ${bd.description.text} 매칭방 입장!"
-                    )
+                    var intent = Intent(activity,MatchActivity::class.java)
+
+                    intent.putExtra("NUM1",1)
+
+                    startActivity(intent)
+
                 }
             }
 
@@ -250,6 +255,7 @@ class HomeFragment : Fragment() {
                 bd.store.text = data.storeName
                 bd.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
                 bd.createTime.text = DeliverTime(data.createTime).getCreateTime()
+                bd.goneCreateTime.text = data.createTime
             }
         }
 
@@ -329,6 +335,11 @@ class HomeFragment : Fragment() {
             holder.setData(data)
             //홀더는 받은 데이터를 화면에 출력한다.
         }
+    }
+
+    fun getCalendar(input : String) : Calendar{
+        val format = SimpleDateFormat("yy/MM/dd/HH/mm", Locale.getDefault())
+        val parse = format.parse(input)
     }
 }
 
