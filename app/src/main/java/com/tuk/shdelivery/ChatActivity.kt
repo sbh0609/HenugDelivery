@@ -12,7 +12,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
     private lateinit var chatroomId: String
     private lateinit var userId: String
-
+    private val handleData = HandleData()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
@@ -22,42 +22,13 @@ class ChatActivity : AppCompatActivity() {
         chatroomId = intent.getStringExtra("chatroomId") ?: ""
 
         binding.btnSend.setOnClickListener {
+            val messageContent = binding.etMessage.text.toString()
             val message =
                 Message(binding.etMessage.text.toString(), userId, System.currentTimeMillis())
-            sendMessageToFirebase(message, chatroomId)
+            handleData.sendMessageToFirebase(message, chatroomId)
+//            sendMessageToFirebase(message, chatroomId)
             binding.etMessage.text.clear()
         }
-
-//        fetchMessages()
-    }
-
-    private fun sendMessageToFirebase(message: Message, chatroomId: String) {
-        val database = FirebaseDatabase.getInstance().reference
-        database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message)
-    }
-
-    private fun fetchMessages() {
-        val database = FirebaseDatabase.getInstance()
-        val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
-
-        messagesRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val messages = mutableListOf<Message>()
-                for (messageSnapshot in dataSnapshot.children) {
-                    val message = messageSnapshot.getValue(Message::class.java)
-                    if (message != null) {
-                        messages.add(message)
-                    }
-                }
-                binding.rvMessages.layoutManager = LinearLayoutManager(this@ChatActivity)
-                binding.rvMessages.adapter = MessageAdapter(messages, userId) // Add userId here
-                binding.rvMessages.scrollToPosition(messages.size - 1)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Log error
-            }
-        })
     }
 
     private fun askForUserId() {
@@ -71,8 +42,12 @@ class ChatActivity : AppCompatActivity() {
             userId = inputField.text.toString()
             dialog.dismiss()
 
-            // Call fetchMessages() here after userId is set.
-            fetchMessages()
+            // Call fetchMessages here after userId is set.
+            handleData.fetchMessages(chatroomId) { messages ->
+                binding.rvMessages.layoutManager = LinearLayoutManager(this)
+                binding.rvMessages.adapter = MessageAdapter(messages, userId)
+                binding.rvMessages.scrollToPosition(messages.size - 1)
+            }
         }
 
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
@@ -84,7 +59,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
 }
-data class Message(var content: String="", var userId: String="", var timestamp: Long=0)
+
 
 
 

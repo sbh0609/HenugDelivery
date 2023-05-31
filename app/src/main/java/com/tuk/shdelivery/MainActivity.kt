@@ -14,7 +14,7 @@ import com.tuk.shdelivery.databinding.DialogCreateChatroomBinding
 class MainActivity : AppCompatActivity() {
     // Instantiate view binding class
     private lateinit var binding: ActivityMainBinding
-
+    private val handleData = HandleData()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -34,8 +34,15 @@ class MainActivity : AppCompatActivity() {
                     val storeName = dialogBinding.editTextStoreName.text.toString()
                     val time = dialogBinding.editTextTime.text.toString()
 
-                    if (roomName.isNotEmpty()&&foodType.isNotEmpty() && storeName.isNotEmpty() && time.isNotEmpty()) {
-                        createChatroom(roomName,foodType, storeName, time)
+                    if (roomName.isNotEmpty() && foodType.isNotEmpty() && storeName.isNotEmpty() && time.isNotEmpty()) {
+//                        createChatroom(roomName,foodType, storeName, time)
+                        val chatroom = Room(
+                            name = roomName,
+                            foodType = foodType,
+                            storeName = storeName,
+                            time = time
+                        )
+                        handleData.createChatroom(chatroom)
                     } else {
                         Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                     }
@@ -52,35 +59,6 @@ class MainActivity : AppCompatActivity() {
         binding.listChatRoom.setOnClickListener {
             val intent = Intent(this, ListRoomActivity::class.java)
             startActivity(intent)
-        }
-    }
-
-    private fun createChatroom(roomName:String,foodType: String, storeName: String, time: String) {
-        // Create chatroom object
-        val chatroom = hashMapOf(
-            "roomName" to roomName,
-            "foodType" to foodType,
-            "storeName" to storeName,
-            "time" to time
-        )
-
-        // Get a reference to the database
-        val database = FirebaseDatabase.getInstance().reference
-
-        // Generate a new chatroom ID
-        val chatroomId = database.child("chatrooms").push().key
-
-        if (chatroomId != null) {
-            // Save the chatroom to the database
-            database.child("chatrooms").child(chatroomId).setValue(chatroom)
-                .addOnSuccessListener {
-                    // Chatroom was created successfully
-                    Toast.makeText(this, "Chatroom created", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    // An error occurred
-                    Toast.makeText(this, "Failed to create chatroom", Toast.LENGTH_SHORT).show()
-                }
         }
     }
 }
