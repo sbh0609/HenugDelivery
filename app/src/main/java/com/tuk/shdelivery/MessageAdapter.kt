@@ -11,7 +11,7 @@ import com.tuk.shdelivery.databinding.MessageItemBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MessageAdapter(private val messages: List<Message>, private val currentUserId: String) : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() {
+class MessageAdapter(private val messages: MutableList<Message>, private val currentUserId: String) : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() {
     inner class MessageViewHolder(val binding: MessageItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {

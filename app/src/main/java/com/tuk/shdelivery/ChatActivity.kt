@@ -7,17 +7,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.*
 import com.tuk.shdelivery.databinding.ActivityChatBinding
-
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
     private lateinit var chatroomId: String
     private lateinit var userId: String
     private val handleData = HandleData()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        askForUserId() // 사용자 ID를 요청합니다.
+
+        askForUserId()
 
         chatroomId = intent.getStringExtra("chatroomId") ?: ""
 
@@ -26,11 +27,9 @@ class ChatActivity : AppCompatActivity() {
             val message =
                 Message(binding.etMessage.text.toString(), userId, System.currentTimeMillis())
             handleData.sendMessageToFirebase(message, chatroomId)
-//            sendMessageToFirebase(message, chatroomId)
             binding.etMessage.text.clear()
         }
     }
-
     private fun askForUserId() {
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder.setTitle("Enter your user ID:")
@@ -42,10 +41,20 @@ class ChatActivity : AppCompatActivity() {
             userId = inputField.text.toString()
             dialog.dismiss()
 
-            // Call fetchMessages here after userId is set.
-            handleData.fetchMessages(chatroomId) { messages ->
-                binding.rvMessages.layoutManager = LinearLayoutManager(this)
-                binding.rvMessages.adapter = MessageAdapter(messages, userId)
+            val messages = mutableListOf<Message>()
+            val adapter = MessageAdapter(messages, userId)
+            binding.rvMessages.layoutManager = LinearLayoutManager(this@ChatActivity)
+            binding.rvMessages.adapter = adapter
+
+            handleData.fetchMessages(chatroomId) { loadedMessages ->
+                messages.addAll(loadedMessages)
+                adapter.notifyDataSetChanged()
+                binding.rvMessages.scrollToPosition(messages.size - 1)
+            }
+
+            handleData.fetchNewMessage(chatroomId) { newMessage ->
+                messages.add(newMessage)
+                adapter.notifyItemInserted(messages.size - 1)
                 binding.rvMessages.scrollToPosition(messages.size - 1)
             }
         }
@@ -57,9 +66,4 @@ class ChatActivity : AppCompatActivity() {
         val dialog = dialogBuilder.create()
         dialog.show()
     }
-
 }
-
-
-
-

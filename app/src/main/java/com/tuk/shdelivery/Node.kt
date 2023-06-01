@@ -13,8 +13,9 @@ data class Message(
     var userId: String="",
     var timestamp: Long=0
 )
-//data class Message(
+
+//data class Message1(
 //    var userId: String? = null,
 //    var content: String? = null,
 //    var timestamp: Long = System.currentTimeMillis()
-//) 질문
+//)
