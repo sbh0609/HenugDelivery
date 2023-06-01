@@ -35,24 +35,25 @@ class HandleData{
      * 사용자가 메시지를 입력하면 sendMessageToFirebase에 저장된다.
      * 메시지 내역만 저장하면 되는 것이고 입력받은 메시지는 그냥 화면에 추가하면 된다.
      */
-    fun fetchMessages(chatroomId: String, callback: (MutableList<Message>) -> Unit) {
+    fun fetchMessages(chatroomId: String, callback: (List<Message>) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
 
-        messagesRef.addValueEventListener(object : ValueEventListener {
+        messagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val messages = mutableListOf<Message>()
-                for (messageSnapshot in dataSnapshot.children) {
-                    val message = messageSnapshot.getValue(Message::class.java)
+                val loadedMessages = mutableListOf<Message>()
+                for (snapshot in dataSnapshot.children) {
+                    val message = snapshot.getValue(Message::class.java)
                     if (message != null) {
-                        messages.add(message)
+                        loadedMessages.add(message)
                     }
                 }
-                callback(messages)
+                callback(loadedMessages)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Log error
+                // DB에서 읽는데 실패했을 경우
+                // 로그를 출력하거나 사용자에게 알림을 보냄
             }
         })
     }
@@ -74,6 +75,29 @@ class HandleData{
             override fun onCancelled(databaseError: DatabaseError) { }
 
             // 다른 메소드들은 필요에 따라 구현...
+        })
+    }
+    fun fetchChatrooms(callback: (List<Chatroom>) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val chatroomsRef = database.getReference("chatrooms")
+
+        chatroomsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val loadedChatrooms = mutableListOf<Chatroom>()
+                for (snapshot in dataSnapshot.children) {
+                    val chatroom = snapshot.getValue(Chatroom::class.java)
+                    if (chatroom != null) {
+                        chatroom.id = snapshot.key ?: ""
+                        loadedChatrooms.add(chatroom)
+                    }
+                }
+                callback(loadedChatrooms)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // DB에서 읽는데 실패했을 경우
+                // 로그를 출력하거나 사용자에게 알림을 보냄
+            }
         })
     }
 }
