@@ -5,7 +5,11 @@ import com.google.firebase.database.*
 
 class HandleData{
     private val database = FirebaseDatabase.getInstance().reference
-
+    /**
+     * input: room <Room 객체>(데이터 클래스의 room객체를 사용한다)
+     * output: void
+     * 새로운 채팅방을 생성하고 데이터베이스에 저장한다.
+     */
     fun createChatroom(room: Room) {
         // Generate a new chatroom ID
         val chatroomId = database.child("chatrooms").push().key
@@ -24,9 +28,22 @@ class HandleData{
         }
     }
 
+    /**
+     * input: message <Message 객체>, chatroomId <String>
+     *     사용자가 입력한 메시지, chatroomId는 카카오톡 고유 ID로 대체가능
+     * output: void
+     * 입력한 메시지를 데이터베이스에 저장한다.
+     */
     fun sendMessageToFirebase(message: Message, chatroomId: String) {
         database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message)
     }
+    /**
+     * input: chatroomId <String>, callback <(List<Message>) -> Unit> 마찬가지로
+     * 마찬가지로 chatroomId는 카카오톡 Id로 대체 메시지는 전체 메시지
+     * output: void
+     * 해당 채팅방의 모든 메시지를 불러온다.(채팅방 입장 시)
+     * 메시지는 callback 함수를 통해 반환된다.
+     */
 
     /**
      * fetchMessage는 채팅방에 입장할 때 지금까지의 채팅 내역을 전부 볼 수 있게 하는 코드이다.
@@ -57,6 +74,14 @@ class HandleData{
             }
         })
     }
+    /**
+     * input: chatroomId <String>, callback <(Message) -> Unit>
+     * chatroomId는 카카오톡 Id로 대체
+     * output: void
+     * 해당 채팅방의 새로운 메시지를 실시간으로 불러온다.
+     * 사용자가 입력한 메시지를 표시
+     * 메시지는 callback 함수를 통해 반환된다.
+     */
     fun fetchNewMessage(chatroomId: String, callback: (Message) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
@@ -77,6 +102,12 @@ class HandleData{
             // 다른 메소드들은 필요에 따라 구현...
         })
     }
+    /**
+     * input: callback <(List<Chatroom>) -> Unit>
+     * output: void
+     * 모든 채팅방을 불러온다.
+     * 채팅방 리스트는 callback 함수를 통해 반환된다.
+     */
     fun fetchChatrooms(callback: (List<Chatroom>) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val chatroomsRef = database.getReference("chatrooms")
