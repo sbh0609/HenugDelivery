@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/line_noripple_bottom"
             android:hint="충전할 포인트를 입력하세요"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:textSize="18dp" />

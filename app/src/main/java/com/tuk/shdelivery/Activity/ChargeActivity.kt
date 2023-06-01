@@ -3,6 +3,7 @@ package com.tuk.shdelivery.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.MenuItem
 import com.tuk.shdelivery.R
@@ -20,57 +21,26 @@ class ChargeActivity : AppCompatActivity() {
 
         //포인트 입력 설정
         binding.point.addTextChangedListener(object : TextWatcher {
+            private val decimalFormat = DecimalFormat("#,###")
+            private var result: String = ""
+
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                val userInput = s.toString().replace(",", "").replace("원", "")
-                var currentAmount = ""
-                if (currentAmount != userInput) {
-                    currentAmount = userInput
-
-                    val longval = currentAmount.toLongOrNull() ?: 0L
-                    val formattedString = NumberFormat.getNumberInstance(Locale.US).format(longval)
-
-                    // '원'을 추가합니다.
-                    val resultString = "$formattedString 원"
-
-                    // setting text after format to EditText
-                    binding.point.removeTextChangedListener(this)
-                    binding.point.setText(resultString)
-                    binding.point.setSelection(resultString.length - 1)
-                    binding.point.addTextChangedListener(this)
+            override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
+                if(!TextUtils.isEmpty(charSequence.toString()) && charSequence.toString() != result && charSequence.toString() != "원"){
+                    result = decimalFormat.format(charSequence.toString().replace("원","").replace(",","").toDouble())
+                    result += "원"
+                    binding.point.setText(result);
+                    binding.point.setSelection(result.length-1);
+                }
+                if(charSequence.toString() == "원"){
+                    result = ""
+                    binding.point.setText(result);
                 }
             }
 
-            override fun afterTextChanged(s: Editable) {
-                binding.point.removeTextChangedListener(this)
+            override fun afterTextChanged(s: Editable) {}
 
-                try {
-                    val originalString = s.toString()
-
-                    val longval: Long = if (originalString.contains(",")) {
-                        originalString.replace(",", "").replace("원", "").toLong()
-                    } else {
-                        originalString.replace("원", "").toLong()
-                    }
-
-                    val formatter = NumberFormat.getNumberInstance(Locale.US)
-                    var formattedString = formatter.format(longval)
-
-                    // '원'을 추가합니다.
-                    formattedString += "원"
-
-                    // setting text after format to EditText
-                    binding.point.setText(formattedString)
-                    binding.point.setSelection(binding.point.text.length)
-                } catch (nfe: NumberFormatException) {
-                    nfe.printStackTrace()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                binding.point.addTextChangedListener(this)
-            }
         })
 
         //액션바 설정
