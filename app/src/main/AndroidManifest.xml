@@ -12,9 +12,13 @@
         android:theme="@style/Theme.Shdelivery"
         tools:targetApi="31">
         <activity
-            android:name=".Activity.MatchActivity"
+            android:name=".Activity.ChargeActivity"
             android:screenOrientation="portrait"
             android:exported="false" />
+        <activity
+            android:name=".Activity.MatchActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.createActivity"
             android:exported="false"
