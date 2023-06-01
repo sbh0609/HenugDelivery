@@ -21,16 +21,17 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // 카톡에서 네이티브키 복사 후 붙혀넣기
         KakaoSdk.init(this, "네이티브키")
         bd = ActivityLoginBinding.inflate(layoutInflater)
 
-        //Log.d(TAG, "keyhash : ${Utility.getKeyHash(this)}")
-        // 이걸로 Logcat 가서 해시 코드 카톡에 올려주세요
+//        Log.d(TAG, "keyhash : ${Utility.getKeyHash(this)}")
+//         이걸로 Logcat 가서 해시 코드 카톡에 올려주세요
         setContentView(bd.root)
 
         bd.login.setOnClickListener {
+
             // 카카오톡 설치 확인
             if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
                 // 카카오톡 로그인
@@ -53,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
                     // 로그인 성공 부분
                     else if (token != null) {
                         Log.e(TAG, "로그인 성공 ${token.accessToken}")
-                        nextMainActivity()
+                        fetch_UserData()
                     }
                 }
             } else {
@@ -70,18 +71,28 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun fetch_UserData() {
+        UserApiClient.instance.me { user, error ->
+            if (error != null) {
+                Log.e(TAG, "사용자 정보 요청 실패 $error")
+            } else if (user != null) {
+                Log.e(TAG, "사용자 정보 요청 성공 : $user")
+                val intent = Intent(this, HomeActivity::class.java)
+                intent.putExtra("userName", user.kakaoAccount?.profile?.nickname)
+                intent.putExtra("userid",user.id.toString())
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
     // 이메일 로그인 콜백
     private val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
         if (error != null) {
             Log.e(TAG, "로그인 실패 $error")
         } else if (token != null) {
             Log.e(TAG, "로그인 성공 ${token.accessToken}")
-            nextMainActivity()
+            fetch_UserData()
         }
-    }
-
-    private fun nextMainActivity() {
-        startActivity(Intent(this, HomeActivity::class.java))
-        finish()
     }
 }

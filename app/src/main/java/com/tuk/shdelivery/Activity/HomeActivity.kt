@@ -28,11 +28,19 @@ class HomeActivity : AppCompatActivity() {
     var search : SearchView? = null
 
 
+
+
     private var backPressedTime: Long = 0
     private val backPressedInterval: Long = 2000 // 뒤로가기 버튼을 연타 했을때 꺼질 간격
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        val s = intent.getStringExtra("userName")
+        val s1 = intent.getStringExtra("userid")
+
+        Log.d("intent",s!!)
+        Log.d("intent",s1!!)
 
         //프래그먼트 설정
         createFragMentList()
