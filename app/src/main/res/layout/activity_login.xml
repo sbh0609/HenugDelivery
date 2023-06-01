@@ -33,10 +33,10 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/logout"
+        android:id="@+id/aboutLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
+        android:paddingTop="12dp"
         android:text="카카오 로그인이 어려우신가요?"
         android:textColor="#575757"
         android:gravity="center"/>
