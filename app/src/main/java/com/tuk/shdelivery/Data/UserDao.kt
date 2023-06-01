@@ -1,9 +1,11 @@
 package com.tuk.shdelivery
 
-import android.content.ContentValues
-import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.*
+import com.tuk.shdelivery.Data.User
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UserDao {
     private var userRef: DatabaseReference? = null
@@ -12,126 +14,53 @@ class UserDao {
         val db = FirebaseDatabase.getInstance()
         userRef = db.getReference("user")
     }
-
-    //등록
+    /**
+     * input: user <User 객체>
+     * output: void <Void>
+     * 카카오톡 userId,카카오톡 userName 을 작성하고, participateMatchId =0 userPoint =0 으로 들어간다
+     **/
     fun addUser(user: User?): Task<Void>? {
-        return userRef!!.push().setValue(user)
+        return userRef?.child(user?.userId.toString())?.setValue(user)
     }
-    //조회
-    fun getUser(user: User?): Task<DataSnapshot>? {
-        return userRef?.child(user!!.userId.toString())?.get()?.addOnSuccessListener{
-            Log.i("Firebase", "value ${it.value}")
-        }?.addOnFailureListener{
-            Log.e("Fail","error",it)
-        }
-    }
-    //삭제
-    fun delUser(user: User?): Task<Void>? {
-        return userRef?.child(user!!.userId.toString())?.removeValue()
+    /**
+     * input: userId <String>
+     * output: User <User 객체>
+     * userId를 넣으면 User객체를 리턴한다
+     **/
+    suspend fun getUser(userId: String): User? = withContext(Dispatchers.IO) {
+        val deferred = CompletableDeferred<User?>()
 
-    }
-    //수정
-    fun updateUser(user: User?): Task<Void>? {
-        return userRef?.child(user!!.userId.toString())?.setValue(user)
-    }
-}
-
-class MatchDao {
-    private var matchRef: DatabaseReference? = null
-
-    init{
-        val db = FirebaseDatabase.getInstance()
-        matchRef = db.getReference("match")
-    }
-
-    //등록
-    fun addMatch(matchroom: MatchRoom?): Task<Void>? {
-        return matchRef!!.push().setValue(matchroom)
-    }
-    //조회
-    fun getMatch(matchroom: MatchRoom?): Task<DataSnapshot>? {
-        return matchRef?.child(matchroom!!.matchRoomId.toString())?.get()?.addOnSuccessListener{
-            Log.i("Firebase", "value ${it.value}")
-        }?.addOnFailureListener{
-            Log.e("Fail","error",it)
-        }
-    }
-    //삭제
-    fun delMatch(matchroom: MatchRoom?): Task<Void>? {
-        return matchRef?.child(matchroom!!.matchRoomId.toString())?.removeValue()
-
-    }
-    //수정
-    fun updateMatch(matchroom: MatchRoom?): Task<Void>? {
-        return matchRef?.child(matchroom!!.matchRoomId.toString())?.setValue(matchroom)
-    }
-    //전체조회
-    fun getMatchList(matchroom: MatchRoom?) {
-        val matchListener = object : ValueEventListener {
+        userRef?.child(userId)?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                for ( x in dataSnapshot.children){
-                    // x.getValue() 를 하면 value[{userName=a, userAge=1, userKey=}] 이런식으로 나온다. x.getValue() -> arrayList
-                    Log.d("Tag", "value" + x.getValue())
+                if (dataSnapshot.exists()) {
+                    val user = dataSnapshot.getValue(User::class.java)
+                    deferred.complete(user)
+                } else {
+                    deferred.complete(null)
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                Log.w(ContentValues.TAG, "loadPost:onCancelled", databaseError.toException())
+                deferred.completeExceptionally(databaseError.toException())
             }
-        }
-        matchRef?.addValueEventListener(matchListener)
-    }
-}
+        })
 
-class ChatRoomDao {
-    private var chatRoomRef: DatabaseReference? = null
-
-    init{
-        val db = FirebaseDatabase.getInstance()
-        chatRoomRef = db.getReference("chatRoom")
+        deferred.await()
     }
-
-    //등록
-    fun addChatRoom(chatroom: ChatRoom?): Task<Void>? {
-        return chatRoomRef!!.push().setValue(chatroom)
+    /**
+     * input: userId <String>
+     * output: Void <Void>
+     * userId를 넣으면 해당 user를 삭제한다
+     **/
+    fun delUser(userId: String?): Task<Void>? {
+        return userRef?.child(userId.toString())?.removeValue()
     }
-    //조회
-    fun getChatRoom(chatroom: ChatRoom?): Task<DataSnapshot>? {
-        return chatRoomRef?.child(chatroom!!.chatId.toString())?.get()?.addOnSuccessListener{
-            Log.i("Firebase", "value ${it.value}")
-        }?.addOnFailureListener{
-            Log.e("Fail","error",it)
-        }
-    }
-    //삭제
-    fun delChatRoom(chatroom: ChatRoom?): Task<Void>? {
-        return chatRoomRef?.child(chatroom!!.chatId.toString())?.removeValue()
-
-    }
-    //수정
-    fun updateChatRoom(chatroom: ChatRoom?): Task<Void>? {
-        return chatRoomRef?.child(chatroom!!.chatId.toString())?.setValue(chatroom)
-    }
-}
-
-class ChatDao {
-    private var chatRef: DatabaseReference? = null
-
-    init{
-        val db = FirebaseDatabase.getInstance()
-        chatRef = db.getReference("chat")
-    }
-
-    //등록
-    fun addChat(chatroom: ChatRoom?): Task<Void>? {
-        return chatRef!!.push().setValue(chatroom)
-    }
-    //조회
-    fun getChat(chat: Chat?): Task<DataSnapshot>? {
-        return chatRef?.child(chat!!.chatId.toString())?.get()?.addOnSuccessListener{
-            Log.i("Firebase", "value ${it.value}")
-        }?.addOnFailureListener{
-            Log.e("Fail","error",it)
-        }
+    /**
+     * input: User <User 객체>
+     * output: Void <Void>
+     * User를 넣으면 해당 userId를 갖은 사용자의 정보를 수정한다
+     **/
+    fun updateUser(user: User?): Task<Void>? {
+        return userRef?.child(user!!.userId.toString())?.setValue(user)
     }
 }

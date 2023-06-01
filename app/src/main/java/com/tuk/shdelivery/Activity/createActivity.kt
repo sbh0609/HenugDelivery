@@ -1,21 +1,16 @@
 package com.tuk.shdelivery.Activity
 
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
-import android.util.Log
 import android.view.MenuItem
-import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.custom.Data
-import com.tuk.shdelivery.custom.Data.Companion.store
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.ActivityCreateBinding
 import java.util.*
@@ -36,8 +31,6 @@ class createActivity : AppCompatActivity() {
 
         //스피너 선택 설정/
         setcategorySpinner()
-        setStoreSpinner()
-
 
         //타임피커다이얼로그 생성
         createTimePicker()
@@ -66,50 +59,18 @@ class createActivity : AppCompatActivity() {
             return
         }
         val createData = MatchRoomData(
+            0,
             binding.category.selectedItem as String,
             deliveryCalendar,
             binding.description.text.toString(),
             1,
             nowTime,
-            binding.store.selectedItem as String
+            binding.store.text.toString()
         )
 
         intent.putExtra("createData", createData)
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    private fun setStoreSpinner() {
-        val items = ArrayList<String>()
-        for (value in store) {
-            items.add(value)
-        }
-        // 어댑터 생성
-        val adapter = ArrayAdapter(this, r.layout.simple_spinner_item, items)
-
-        // 드롭다운 목록 레이아웃 설정
-        adapter.setDropDownViewResource(r.layout.simple_spinner_dropdown_item)
-
-        // 카테고리에 어댑터 설정
-        binding.store.adapter = adapter
-
-        // 선택 이벤트 처리
-        binding.store.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long,
-            ) {
-                // 선택된 항목 처리
-                Log.d("spinner", items[position].toString())
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // 아무 항목도 선택되지 않았을 때 처리
-                Log.d("spinner", "nothing")
-            }
-        }
     }
 
     private fun createaDatePicker() {

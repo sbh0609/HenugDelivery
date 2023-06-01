@@ -43,8 +43,8 @@ class MatchActivity : AppCompatActivity() {
             SimpleDateFormat("MM/dd(E) a h시 mm분", Locale.KOREAN).format(data.createTime.time) + " 작성글"
         binding.description.text = data.description
         binding.storeName.text = data.storeName
-        binding.tag.text = data.category
-        binding.tagImage.setImageResource(Data.category()[data.category]!!)
+        binding.tag.text = data.menu
+        binding.tagImage.setImageResource(Data.category()[data.menu]!!)
         binding.count.text = data.count.toString() + "명"
     }
 

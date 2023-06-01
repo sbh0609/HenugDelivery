@@ -23,10 +23,5 @@ class Data {
          )
          return map
       }
-      public var store = arrayListOf(
-         "1",
-         "2",
-         "3"
-      )
    }
 }

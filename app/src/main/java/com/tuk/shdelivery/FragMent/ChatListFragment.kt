@@ -4,23 +4,18 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.view.size
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.FragmentChatListBinding
 import com.tuk.shdelivery.databinding.LayoutChatBinding
 import com.tuk.shdelivery.databinding.LayoutMychatBinding
-import org.w3c.dom.Text
-import java.util.Calendar
+import java.util.*
 
 
 class ChatListFragment : Fragment() {
@@ -89,7 +84,6 @@ class ChatListFragment : Fragment() {
     private fun createSendListener() {
         binding.send.setOnClickListener {
             val mychat = LayoutMychatBinding.inflate(layoutInflater)
-            Log.d("String", binding.input.text.toString())
             mychat.text.text = binding.input.text.toString()
             mychat.chatTime.text = DeliverTime(Calendar.getInstance()).getTime()
             binding.input.text.clear()
@@ -153,7 +147,6 @@ class ChatListFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
-        Log.d("fragment", "onView")
         return binding.root
     }
 }

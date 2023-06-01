@@ -80,17 +80,22 @@
                 android:paddingBottom="15dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="가게 >"
+                    android:text="주문 가게 >"
                     android:textColor="@color/white"
                     android:textSize="18dp"
                     android:textStyle="bold" />
 
-                <Spinner
+                <EditText
                     android:id="@+id/store"
+                    android:hint="가게를 입력하세요"
                     android:layout_width="0dp"
+                    android:background="@null"
+                    android:textColor="@color/white"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
 

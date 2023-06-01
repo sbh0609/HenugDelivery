@@ -76,7 +76,6 @@ class DeliverTime(var data: Calendar) {
         }
 
         fun setCalendar(calendar: Calendar): String {
-            Log.d("format", "5")
             val format = SimpleDateFormat("yy/MM/dd/HH/mm")
             return format.format(calendar.time)
         }

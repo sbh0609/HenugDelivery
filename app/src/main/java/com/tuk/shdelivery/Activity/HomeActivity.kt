@@ -12,22 +12,33 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.tuk.shdelivery.Data.MatchRoomData
+import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
 import com.tuk.shdelivery.R
+import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.ActivityHomeBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), CoroutineScope {
+
+    private var job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    var user: User? = null
+    val Udao = UserDao()
+
     //바인딩 객체 생성
     val binding by lazy { ActivityHomeBinding.inflate(layoutInflater) }
-    val homeFragment by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var listFragment = ArrayList<Fragment>()
-    var search : SearchView? = null
-
-
 
 
     private var backPressedTime: Long = 0
@@ -36,20 +47,46 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val s = intent.getStringExtra("userName")
-        val s1 = intent.getStringExtra("userid")
-
-        Log.d("intent",s!!)
-        Log.d("intent",s1!!)
-
         //프래그먼트 설정
         createFragMentList()
+
+        //유저 초기화
+        userInit()
 
         //탭 메뉴 넣기
         createTabMenu()
 
         //탭 리스너 달기
         setTabListener()
+    }
+
+    private fun userInit() {
+        val userid = intent.getStringExtra("userid")
+        user?.userId = userid!!
+        //유저 정보 확인
+        launch {
+            var result = Udao.getUser(userid!!)
+            //새로운 유저라면
+            if (result == null) {
+                val newUser = User(
+                    intent.getStringExtra("userid")!!,
+                    intent.getStringExtra("userName")!!,
+                    0,
+                    0
+                )
+                user = newUser
+                Udao.addUser(newUser)
+            }
+            //이미 있는 유저라면 User초기화, intent에 넣기
+            user = result
+
+            intent.putExtra("user", user)
+
+            //마이페이지 유저이름, 포인트 설정
+            val mypageFragment = listFragment.get(2) as MypageFragment
+            mypageFragment.binding.userName.text = user?.userName
+            mypageFragment.binding.point.text = user?.userPoint.toString() + "P"
+        }
     }
 
     private fun createFragMentList() {
@@ -70,7 +107,11 @@ class HomeActivity : AppCompatActivity() {
         //탭메뉴에 들어갈 아이콘들
         var icons = arrayListOf<Drawable>()
 
-        for (i in listOf(R.drawable.vector_home, R.drawable.vector_chaticon, R.drawable.vector_person)) {
+        for (i in listOf(
+            R.drawable.vector_home,
+            R.drawable.vector_chaticon,
+            R.drawable.vector_person
+        )) {
             icons.add((resources.getDrawable(i)))
         }
 
@@ -80,7 +121,10 @@ class HomeActivity : AppCompatActivity() {
             newTab.setIcon(icons.get(i))
             binding.tabLayout.addTab(newTab)
         }
-        binding.tabLayout.getTabAt(0)?.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
+        binding.tabLayout.getTabAt(0)?.icon?.setColorFilter(
+            getColor(R.color.orange),
+            PorterDuff.Mode.SRC_IN
+        )
 
     }
 
@@ -89,13 +133,13 @@ class HomeActivity : AppCompatActivity() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
                 transaction.show(listFragment.get(tab?.position!!)).commit()
-                tab?.icon?.setColorFilter(getColor(R.color.orange),PorterDuff.Mode.SRC_IN)
+                tab?.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
                 transaction.hide(listFragment.get(tab?.position!!)).commit()
-                tab?.icon?.setColorFilter(getColor(R.color.white),PorterDuff.Mode.SRC_IN)
+                tab?.icon?.setColorFilter(getColor(R.color.white), PorterDuff.Mode.SRC_IN)
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -104,18 +148,19 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d("intent",data.toString())
-        Log.d("intent",resultCode.toString())
-        Log.d("intent",requestCode.toString())
-        if(requestCode == 0 && resultCode == Activity.RESULT_OK){
-            Log.d("intent",data.toString())
+
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
             var newCreateData = data?.getSerializableExtra("createData") as MatchRoomData
+
             val fragment = listFragment.get(0) as HomeFragment
+
             fragment.adapter?.listData?.add(newCreateData)
             fragment.adapter?.notifyDataSetChanged()
         }
-        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+
             val fragment = listFragment.get(1) as ChatListFragment
+
             fragment.binding.btn.performClick()
             binding.tabLayout.getTabAt(1)!!.select()
         }
@@ -124,18 +169,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (search == null) {
-            search = binding.viewPager.get(0).findViewById(R.id.searchIcon) as SearchView
-        }
 
-        //만약 입력상자가 켜져 있다면
-        if (!search!!.isIconified) {
-            search!!.clearFocus()
-            search!!.isIconified = true
-            search!!.isIconified = true
-            //포커스 해제후 리턴
-            return
-        }
         val position = binding.tabLayout.selectedTabPosition
         if (position == 0) {
             val currentTime = System.currentTimeMillis()

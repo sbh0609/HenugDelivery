@@ -2,11 +2,9 @@ package com.tuk.shdelivery.FragMent
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,10 +19,10 @@ import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
-import java.text.SimpleDateFormat
 import java.util.*
 
 class HomeFragment : Fragment() {
+    val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var adapter: CustomAdapter? = null
     var datalist = ArrayList<MatchRoomData>()
@@ -38,9 +36,6 @@ class HomeFragment : Fragment() {
 
         //리사이클러뷰 설정
         createRecyclerView()
-
-        //search 리스너 달기
-        createSearchListener()
 
         //매칭방 생성 버튼 리스너 달기
         binding.createMatching.setOnClickListener { createMatching() }
@@ -56,9 +51,8 @@ class HomeFragment : Fragment() {
 
     fun createMatching(): Unit {
         ToastCustom.toast(requireContext(), "매칭방 액티비티 출력")
-        var intent = Intent(activity, createActivity::class.java)
-
-        activity?.startActivityForResult(intent, 0)
+        intent.setClass(requireContext(), createActivity::class.java)
+        requireActivity().startActivityForResult(intent, 0)
     }
 
     private fun createRecyclerView() {
@@ -88,7 +82,7 @@ class HomeFragment : Fragment() {
             binding.hint.visibility = View.GONE
             true
         }
-        binding.IconScroll.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+        binding.IconScroll.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 binding.hint.visibility = View.GONE
@@ -120,23 +114,6 @@ class HomeFragment : Fragment() {
         })
     }
 
-    /**서치 리스너 달기*/
-    private fun createSearchListener() {
-        val search = binding.toolbar.menu.findItem(R.id.searchIcon).actionView as SearchView
-        search.maxWidth = Int.MAX_VALUE
-        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                ToastCustom.toast(activity!!, "$query 검색!")
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                // 검색어가 변경될 때마다 호출됨
-                return true
-            }
-        })
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -149,14 +126,16 @@ class HomeFragment : Fragment() {
         var matchDataList = ArrayList<MatchRoomData>()
 
         /**
-         * 여기에 DB데이터 가져오는 코드
+         * !!!여기에 DB데이터 가져오는 코드
+         * matchDataList 를 반환하면 됨
          * */
+
 
         for (i in 1..1) {
             val calendar = Calendar.getInstance()
             val calendar2 = Calendar.getInstance()
             calendar2.add(Calendar.MINUTE, i)
-            matchDataList.add(MatchRoomData("치킨", calendar2, "dumy~", i, calendar, "산기대학로 노랑통닭"))
+            matchDataList.add(MatchRoomData(0, "치킨", calendar2, "dumy~", i, calendar, "산기대학로 노랑통닭"))
         }
 
         ToastCustom.toast(requireActivity(), "DB에서 매칭방 데이터 불러옴")
@@ -166,19 +145,20 @@ class HomeFragment : Fragment() {
 
     /**새로고침 함수*/
     public fun reFresh(): Unit {
-        //데이터를 불러온다.
-
         adapter?.listData?.clear()
 
         val sample = loadData()
 
-
+        /**
+         * !!!여기도 refresh부분 수정해야함
+         */
         for (i in 1..test) {
             val calendar = Calendar.getInstance()
             val calendar2 = Calendar.getInstance()
             calendar2.add(Calendar.MINUTE, i)
             sample.add(
                 MatchRoomData(
+                    0,
                     "치킨",
                     calendar2,
                     "dumy~",
@@ -210,7 +190,7 @@ class HomeFragment : Fragment() {
 
     private fun createCategory() {
         var drawList = ArrayList<IconData>()
-        drawList.add(IconData("전체",R.drawable.icon_all))
+        drawList.add(IconData("전체", R.drawable.icon_all))
         for ((key, value) in categoryMap) {
             drawList.add(IconData(key, value))
         }
@@ -236,8 +216,9 @@ class HomeFragment : Fragment() {
             RecyclerView.ViewHolder(bd.root) {
             init {
                 bd.root.setOnClickListener {
-                    var intent = Intent(activity,MatchActivity::class.java)
+                    var intent = Intent(activity, MatchActivity::class.java)
                     val data = MatchRoomData(
+                        0,
                         bd.tag.text.toString(),
                         DeliverTime.getCalendar(bd.goneDeliveryTime.text.toString()),
                         bd.description.text.toString(),
@@ -245,27 +226,22 @@ class HomeFragment : Fragment() {
                         DeliverTime.getCalendar(bd.goneCreateTime.text.toString()),
                         bd.store.text.toString()
                     )
-                    intent.putExtra("data",data)
+                    intent.putExtra("data", data)
                     println(intent.getSerializableExtra("data").toString())
-                    activity?.startActivityForResult(intent,1)
+                    activity?.startActivityForResult(intent, 1)
                 }
             }
 
             fun setData(data: MatchRoomData) {
                 val diffMillis = data.deliveryTime.timeInMillis - data.createTime.timeInMillis
 
-
-                Log.d("format", "1")
-
-                bd.tag.text = "${data.category}"
+                bd.tag.text = "${data.menu}"
                 bd.description.text = data.description
                 bd.count.text = data.count.toString()
-                bd.tagImage.setImageResource(categoryMap[data.category]!!)
+                bd.tagImage.setImageResource(categoryMap[data.menu]!!)
                 bd.store.text = data.storeName
-                Log.d("format", "2")
                 bd.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
                 bd.createTime.text = DeliverTime(data.createTime).getCreateTime()
-                Log.d("format", "3")
                 bd.goneCreateTime.text = DeliverTime.setCalendar(data.createTime)
                 bd.goneDeliveryTime.text = DeliverTime.setCalendar(data.deliveryTime)
 
@@ -307,8 +283,8 @@ class HomeFragment : Fragment() {
                     binding.toolbar.title = bd.TextView.text
                     ToastCustom.toast(context!!, "${bd.TextView.text} 메뉴 선택!")
                     adapter?.listData =
-                        if(bd.TextView.text != "전체")
-                            datalist?.filter { it.category == bd.TextView.text } as ArrayList<MatchRoomData>
+                        if (bd.TextView.text != "전체")
+                            datalist?.filter { it.menu == bd.TextView.text } as ArrayList<MatchRoomData>
                         else
                             datalist
                     adapter?.notifyDataSetChanged()
@@ -317,7 +293,7 @@ class HomeFragment : Fragment() {
 
             fun setData(data: IconData) {
                 bd.ImageView.setImageResource(data.drawableId)
-                if(data.name == "전체") {
+                if (data.name == "전체") {
                     bd.TextView.visibility = View.INVISIBLE
                 }
                 bd.TextView.text = data.name

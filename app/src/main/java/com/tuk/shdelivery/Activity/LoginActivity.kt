@@ -27,8 +27,6 @@ class LoginActivity : AppCompatActivity() {
 
         // 카톡에서 네이티브키 복사 후 붙혀넣기
         KakaoSdk.init(this, "네이티브키")
-        bd = ActivityLoginBinding.inflate(layoutInflater)
-
         //        Log.d(TAG, "keyhash : ${Utility.getKeyHash(this)}")
         //         이걸로 Logcat 가서 해시 코드 카톡에 올려주세요
         setContentView(bd.root)
