@@ -12,7 +12,7 @@ class HandleData{
      */
     fun createMatchingroom(room: MatchRoomData) {
         // Generate a new chatroom ID
-        val chatroomId = database.child("chatrooms").push().key
+        val chatroomId = database.child(room.id.toString()).setValue(room)
 
         chatroomId?.let {
             // Save the chatroom to the database
