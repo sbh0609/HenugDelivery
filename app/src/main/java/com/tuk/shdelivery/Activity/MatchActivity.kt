@@ -31,7 +31,7 @@ class MatchActivity : AppCompatActivity() {
         //매칭방 입장
         binding.done.setOnClickListener {
             //만약 이미 매칭방이 있는 상태라면 안된다.
-            if((intent.getSerializableExtra("user") as User).participateMatchId == ""){
+            if((intent.getSerializableExtra("user") as User).participateMatchId != ""){
                 Toast.makeText(applicationContext,"매칭방에 이미 입장중 입니다.",Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
