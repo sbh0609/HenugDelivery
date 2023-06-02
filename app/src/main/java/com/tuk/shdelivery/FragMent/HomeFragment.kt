@@ -21,15 +21,12 @@ import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
-class HomeFragment() : Fragment() , CoroutineScope {
+class HomeFragment() : Fragment(), CoroutineScope {
     private var job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -73,12 +70,18 @@ class HomeFragment() : Fragment() , CoroutineScope {
         var matchDao = MatchDao()
 
         launch {
-            adapter = CustomAdapter(loadData())
+            val lst = async { loadData() }.await()
+
+            Log.d("lst", lst.toString())
+
+            adapter = CustomAdapter(lst)
 
             binding.recycleView.adapter = adapter
 
             //레이아웃 매니져 설정
             binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
+
+            binding.recycleView.adapter!!.notifyDataSetChanged()
         }
         //스크롤 리스너 설정
         createScrollListener()
@@ -129,7 +132,9 @@ class HomeFragment() : Fragment() , CoroutineScope {
     }
 
     /**DB에서 데이터 불러오는 함수*/
-    suspend fun loadData(): ArrayList<MatchRoomData> {
+    suspend fun loadData(): ArrayList<MatchRoomData> = withContext(Dispatchers.IO) {
+        val deferred = CompletableDeferred<ArrayList<MatchRoomData>>()
+
         adapter?.listData?.clear()
 
         var matchDao = MatchDao()
@@ -139,16 +144,18 @@ class HomeFragment() : Fragment() , CoroutineScope {
 
             //백업
             datalist = result
+
+            deferred.complete(result)
         }
-        return result
+        deferred.await()
     }
 
     /**새로고침 함수*/
-    public fun reFresh(): Unit {
+    fun reFresh(): Unit {
         adapter?.listData?.clear()
 
         launch {
-             val loadData = loadData()
+            val loadData = loadData()
             //!!여기도 refresh부분
             for (data in loadData) {
                 adapter?.listData?.add(data)
@@ -198,10 +205,10 @@ class HomeFragment() : Fragment() , CoroutineScope {
                     val data = MatchRoomData(
                         bd.matchId.text.toString(),
                         bd.tag.text.toString(),
-                        DeliverTime.getCalendar(bd.goneDeliveryTime.text.toString()),
+                        DeliverTime.getCalendar(bd.goneDeliveryTime.text.toString()).timeInMillis,
                         bd.description.text.toString(),
                         bd.count.text.toString().toInt(),
-                        DeliverTime.getCalendar(bd.goneCreateTime.text.toString()),
+                        DeliverTime.getCalendar(bd.goneCreateTime.text.toString()).timeInMillis,
                         bd.store.text.toString()
                     )
                     intent.putExtra("selectMatchData", data)
@@ -210,7 +217,7 @@ class HomeFragment() : Fragment() , CoroutineScope {
             }
 
             fun setData(data: MatchRoomData) {
-                val diffMillis = data.deliveryTime.timeInMillis - data.createTime.timeInMillis
+                val diffMillis = data.deliveryTime - data.createTime
 
                 bd.tag.text = "${data.menu}"
                 bd.description.text = data.description
@@ -218,10 +225,12 @@ class HomeFragment() : Fragment() , CoroutineScope {
                 bd.tagImage.setImageResource(categoryMap[data.menu]!!)
                 bd.store.text = data.storeName
                 bd.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
-                bd.createTime.text = DeliverTime(data.createTime).getCreateTime()
-                bd.goneCreateTime.text = DeliverTime.setCalendar(data.createTime)
-                bd.goneDeliveryTime.text = DeliverTime.setCalendar(data.deliveryTime)
-
+                bd.createTime.text = DeliverTime(
+                    Calendar.getInstance().apply { timeInMillis = data.createTime }).getCreateTime()
+                bd.goneCreateTime.text = DeliverTime.setCalendar(
+                    Calendar.getInstance().apply { timeInMillis = data.createTime })
+                bd.goneDeliveryTime.text = DeliverTime.setCalendar(
+                    Calendar.getInstance().apply { timeInMillis = data.deliveryTime })
             }
         }
 

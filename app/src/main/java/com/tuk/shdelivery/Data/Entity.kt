@@ -4,13 +4,13 @@ import java.io.Serializable
 import java.util.*
 
 data class MatchRoomData(
-    var id: String,
-    var menu: String,
-    var deliveryTime: Calendar = Calendar.getInstance(),
+    var id: String= "",
+    var menu: String = "",
+    var deliveryTime: Long = Calendar.getInstance().timeInMillis,
     var description: String = "",
-    var count: Int,
-    var createTime: Calendar = Calendar.getInstance(),
-    var storeName: String,
+    var count: Int = 0,
+    var createTime: Long = Calendar.getInstance().timeInMillis,
+    var storeName: String = "",
 ) : Serializable
 
 data class User(

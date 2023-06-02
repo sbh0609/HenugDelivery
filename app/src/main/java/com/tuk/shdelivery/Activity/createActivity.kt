@@ -22,7 +22,7 @@ class createActivity : AppCompatActivity() {
     val binding by lazy { ActivityCreateBinding.inflate(layoutInflater) }
     val categoryMap = Data.category()
 
-    var deliveryCalendar: Calendar = Calendar.getInstance()
+    var deliveryCalendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,10 +66,10 @@ class createActivity : AppCompatActivity() {
         val createData = MatchRoomData(
             (intent.getSerializableExtra("user") as User).userId,
             binding.category.selectedItem as String,
-            deliveryCalendar,
+            deliveryCalendar.timeInMillis,
             binding.description.text.toString(),
             1,
-            nowTime,
+            nowTime.timeInMillis,
             binding.store.text.toString()
         )
 

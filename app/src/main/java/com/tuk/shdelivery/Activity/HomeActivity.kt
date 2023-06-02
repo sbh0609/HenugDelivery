@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.tuk.shdelivery.Data.MatchRoomData
+import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
@@ -123,7 +124,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         }
         //매칭방을 입장한 뒤라면
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-
+            ///!!!매칭방에 참여중 표시
             val fragment = listFragment.get(1) as ChatListFragment
 
             fragment.binding.view.performClick()

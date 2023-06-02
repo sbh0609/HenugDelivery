@@ -27,108 +27,132 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:padding="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/custom_button_cancle"
-        android:paddingLeft="15dp"
-        android:paddingTop="5dp"
-        android:paddingRight="15dp"
-        android:paddingBottom="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" >
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/vector_person"
-            app:layout_constraintStart_toStartOf="@+id/linearLayout2"
-            app:layout_constraintBottom_toTopOf="@id/linearLayout2"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:gravity="center"
-            android:id="@+id/userName"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:text="이원찬"
-            android:textSize="18dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/imageView"
-            app:layout_constraintBottom_toTopOf="@id/linearLayout2"
-            />
-
-        <TextView
-            android:gravity="center"
-            android:id="@+id/point"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:text="5,000 P"
-            android:textSize="18dp"
-            app:layout_constraintBottom_toTopOf="@id/linearLayout2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-        <LinearLayout
-            android:id="@+id/linearLayout2"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/custom_button_cancle"
+            android:paddingLeft="15dp"
+            android:paddingTop="5dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageView">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <Button
-                android:layout_marginRight="7.5dp"
-                android:id="@+id/Qna"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custom_button_cancle"
-                android:text="문의 사항"
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/vector_person"
+                app:layout_constraintBottom_toTopOf="@id/linearLayout2"
+                app:layout_constraintStart_toStartOf="@+id/linearLayout2"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:text="이원찬"
+                android:textColor="@color/white"
                 android:textSize="18dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/linearLayout2"
+                app:layout_constraintStart_toEndOf="@id/imageView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/point"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:text="5,000 P"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/linearLayout2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
-                android:id="@+id/charge"
-                android:layout_marginStart="7.5dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/custom_button_done"
-                android:orientation="horizontal"
-                android:layout_height="match_parent">
-                <TextView
-                    android:gravity="right|center_vertical"
-                    android:paddingRight="10dp"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"
-                    android:text="+"
-                    android:textSize="30dp" />
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imageView">
 
-                <TextView
-                    android:gravity="left|center_vertical"
+                <Button
+                    android:id="@+id/Qna"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="7.5dp"
                     android:layout_weight="1"
+                    android:background="@drawable/custom_button_cancle"
+                    android:text="문의 사항"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/charge"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:text="충전"
-                    android:textSize="18dp" />
+                    android:layout_marginStart="7.5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_button_done"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:paddingRight="10dp"
+                        android:text="+"
+                        android:textColor="@color/white"
+                        android:textSize="30dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="left|center_vertical"
+                        android:text="충전"
+                        android:textColor="@color/white"
+                        android:textSize="18dp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/participateMatchRoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+
+            <TextView
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="참여중인 매칭방" />
+
         </LinearLayout>
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
     </ScrollView>
