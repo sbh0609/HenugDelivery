@@ -14,10 +14,20 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.common.model.KakaoSdkError
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
+import com.tuk.shdelivery.Data.User
+import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.databinding.ActivityLoginBinding
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), CoroutineScope {
+    private var job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    val Udao = UserDao()
+
     // 바인딩 객체 생성
     // 카톡에서 네이티브키 복사 후 붙혀넣기
 
@@ -100,10 +110,25 @@ class LoginActivity : AppCompatActivity() {
             } else if (user != null) {
                 Log.e(TAG, "사용자 정보 요청 성공 : $user")
                 val intent = Intent(this, HomeActivity::class.java)
-                intent.putExtra("userName", user.kakaoAccount?.profile?.nickname)
-                intent.putExtra("userid", user.id.toString())
-                startActivity(intent)
-                finish()
+
+                launch {
+                    var result = async { Udao.getUser(user.id.toString()) }.await()
+
+                    //새로운 유저라면
+                    if (result == null) {
+                        val newUser = User(
+                            userId = user.id.toString(),
+                            userName = user.kakaoAccount?.profile?.nickname!!,
+                        )
+                        intent.putExtra("user", newUser)
+                        async { Udao.addUser(newUser) }.await()
+                    } else {
+                        //이미 있는 유저라면 intent에 넣기
+                        intent.putExtra("user", result)
+                    }
+                    startActivity(intent)
+                    finish()
+                }
             }
         }
     }

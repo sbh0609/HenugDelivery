@@ -5,14 +5,10 @@ import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
-import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import com.tuk.shdelivery.Data.MatchRoomData
-import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
@@ -20,12 +16,10 @@ import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.ActivityHomeBinding
-import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 class HomeActivity : AppCompatActivity(), CoroutineScope {
 
@@ -33,7 +27,6 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    var user: User? = null
     val Udao = UserDao()
 
     //바인딩 객체 생성
@@ -50,9 +43,6 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         //프래그먼트 설정
         createFragMentList()
 
-        //유저 초기화
-        userInit()
-
         //탭 메뉴 넣기
         createTabMenu()
 
@@ -60,34 +50,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         setTabListener()
     }
 
-    private fun userInit() {
-        val userid = intent.getStringExtra("userid")
-        user?.userId = userid!!
-        //유저 정보 확인
-        launch {
-            var result = Udao.getUser(userid!!)
-            //새로운 유저라면
-            if (result == null) {
-                val newUser = User(
-                    intent.getStringExtra("userid")!!,
-                    intent.getStringExtra("userName")!!,
-                    0,
-                    0
-                )
-                user = newUser
-                Udao.addUser(newUser)
-            }
-            //이미 있는 유저라면 User초기화, intent에 넣기
-            user = result
 
-            intent.putExtra("user", user)
-
-            //마이페이지 유저이름, 포인트 설정
-            val mypageFragment = listFragment.get(2) as MypageFragment
-            mypageFragment.binding.userName.text = user?.userName
-            mypageFragment.binding.point.text = user?.userPoint.toString() + "P"
-        }
-    }
 
     private fun createFragMentList() {
         arrayOf(HomeFragment(), ChatListFragment(), MypageFragment()).map {
@@ -149,6 +112,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
+        //create데이터가 왔다면
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
             var newCreateData = data?.getSerializableExtra("createData") as MatchRoomData
 
@@ -157,11 +121,12 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             fragment.adapter?.listData?.add(newCreateData)
             fragment.adapter?.notifyDataSetChanged()
         }
+        //매칭방을 입장한 뒤라면
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
 
             val fragment = listFragment.get(1) as ChatListFragment
 
-            fragment.binding.btn.performClick()
+            fragment.binding.view.performClick()
             binding.tabLayout.getTabAt(1)!!.select()
         }
 

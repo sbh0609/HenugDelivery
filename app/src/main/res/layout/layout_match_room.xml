@@ -26,6 +26,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/matchId"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            tools:ignore="MissingConstraints" />
+
+        <TextView
             android:id="@+id/gone_createTime"
             android:layout_width="0dp"
             android:layout_height="0dp"

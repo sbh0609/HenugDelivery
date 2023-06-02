@@ -11,4 +11,5 @@
     <color name="orangeClick">#FF9760</color>
     <color name="backgroundColor">#222425</color>
     <color name="backgroundClick">#525659</color>
+    <color name="red">#F60707</color>
 </resources>

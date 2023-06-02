@@ -1,7 +1,7 @@
 package com.tuk.shdelivery.FragMent
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tuk.shdelivery.Activity.MatchActivity
 import com.tuk.shdelivery.Activity.createActivity
 import com.tuk.shdelivery.Data.IconData
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
+import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
@@ -19,15 +21,18 @@ import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 
-class HomeFragment : Fragment() {
+class HomeFragment(override val coroutineContext: CoroutineContext) : Fragment() , CoroutineScope {
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var adapter: CustomAdapter? = null
     var datalist = ArrayList<MatchRoomData>()
     val categoryMap = Data.category()
-    var test = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,22 +62,17 @@ class HomeFragment : Fragment() {
 
     private fun createRecyclerView() {
         binding.toolbar.title = "전체"
-
         //데이터를 불러온다.
-        var matchDataList = loadData()
+        var matchDao = MatchDao()
 
+        launch {
+            adapter = CustomAdapter(loadData())
 
-        //어댑터 생성
-        adapter = CustomAdapter(matchDataList)
+            binding.recycleView.adapter = adapter
 
-        binding.recycleView.adapter = adapter
-
-        //백업
-        datalist = adapter?.listData!!
-
-        //레이아웃 매니져 설정
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
+            //레이아웃 매니져 설정
+            binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
+        }
         //스크롤 리스너 설정
         createScrollListener()
     }
@@ -122,69 +122,43 @@ class HomeFragment : Fragment() {
     }
 
     /**DB에서 데이터 불러오는 함수*/
-    fun loadData(): ArrayList<MatchRoomData> {
-        var matchDataList = ArrayList<MatchRoomData>()
+    suspend fun loadData(): ArrayList<MatchRoomData> {
+        var matchDao = MatchDao()
+        var result = ArrayList<MatchRoomData>()
+        matchDao.fetchChatrooms {
+            result = it as ArrayList<MatchRoomData>
 
-        /**
-         * !!!여기에 DB데이터 가져오는 코드
-         * matchDataList 를 반환하면 됨
-         * */
-
-
-        for (i in 1..1) {
-            val calendar = Calendar.getInstance()
-            val calendar2 = Calendar.getInstance()
-            calendar2.add(Calendar.MINUTE, i)
-            matchDataList.add(MatchRoomData(0, "치킨", calendar2, "dumy~", i, calendar, "산기대학로 노랑통닭"))
+            //백업
+            datalist = result
         }
-
-        ToastCustom.toast(requireActivity(), "DB에서 매칭방 데이터 불러옴")
-
-        return matchDataList
+        return result
     }
 
     /**새로고침 함수*/
     public fun reFresh(): Unit {
         adapter?.listData?.clear()
 
-        val sample = loadData()
+        var matchDao = MatchDao()
 
-        /**
-         * !!!여기도 refresh부분 수정해야함
-         */
-        for (i in 1..test) {
-            val calendar = Calendar.getInstance()
-            val calendar2 = Calendar.getInstance()
-            calendar2.add(Calendar.MINUTE, i)
-            sample.add(
-                MatchRoomData(
-                    0,
-                    "치킨",
-                    calendar2,
-                    "dumy~",
-                    i,
-                    calendar,
-                    "산기대학로 노랑통닭"
-                )
-            )
+        matchDao.fetchChatrooms {
+
+
+            //!!!여기도 refresh부분
+            for (data in it) {
+                adapter?.listData?.add(data)
+            }
+
+            adapter?.notifyDataSetChanged()
+
+            //백업
+            datalist = adapter?.listData!!
+
+            ToastCustom.toast(requireActivity(), "새로고침 완료")
+
+            binding.scrollUpButton.visibility = View.INVISIBLE
+
+            binding.swiper.isRefreshing = false
         }
-
-        test = test + 1
-
-        for (data in sample) {
-            adapter?.listData?.add(data)
-        }
-
-        adapter?.notifyDataSetChanged()
-
-        //백업
-        datalist = adapter?.listData!!
-
-        ToastCustom.toast(requireActivity(), "새로고침 완료!!")
-
-        binding.scrollUpButton.visibility = View.INVISIBLE
-
-        binding.swiper.isRefreshing = false
     }
 
 
@@ -216,9 +190,10 @@ class HomeFragment : Fragment() {
             RecyclerView.ViewHolder(bd.root) {
             init {
                 bd.root.setOnClickListener {
-                    var intent = Intent(activity, MatchActivity::class.java)
+                    //!!! 여기도 수정 id, data라는 key값?
+                    intent.setClass(requireContext(), MatchActivity::class.java)
                     val data = MatchRoomData(
-                        0,
+                        bd.matchId.text.toString(),
                         bd.tag.text.toString(),
                         DeliverTime.getCalendar(bd.goneDeliveryTime.text.toString()),
                         bd.description.text.toString(),
@@ -226,8 +201,7 @@ class HomeFragment : Fragment() {
                         DeliverTime.getCalendar(bd.goneCreateTime.text.toString()),
                         bd.store.text.toString()
                     )
-                    intent.putExtra("data", data)
-                    println(intent.getSerializableExtra("data").toString())
+                    intent.putExtra("selectMatchData", data)
                     activity?.startActivityForResult(intent, 1)
                 }
             }

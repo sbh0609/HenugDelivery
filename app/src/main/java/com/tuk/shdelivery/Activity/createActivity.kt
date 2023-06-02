@@ -9,7 +9,9 @@ import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
+import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.ActivityCreateBinding
@@ -46,6 +48,7 @@ class createActivity : AppCompatActivity() {
     }
 
     private fun done() {
+
         val nowTime = Calendar.getInstance().apply {
             set(Calendar.SECOND, 59)
         }
@@ -58,8 +61,10 @@ class createActivity : AppCompatActivity() {
             Toast.makeText(this, "현재 시간을 확인 하세요", Toast.LENGTH_SHORT).show()
             return
         }
+
+
         val createData = MatchRoomData(
-            0,
+            (intent.getSerializableExtra("user") as User).userId,
             binding.category.selectedItem as String,
             deliveryCalendar,
             binding.description.text.toString(),
@@ -68,9 +73,13 @@ class createActivity : AppCompatActivity() {
             binding.store.text.toString()
         )
 
-        intent.putExtra("createData", createData)
-        setResult(RESULT_OK, intent)
-        finish()
+        var matchdao = MatchDao()
+        matchdao.createMatchingroom(createData){
+            intent.putExtra("createData", createData)
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+        //!!! createMatchRoom 기능사용!!
     }
 
     private fun createaDatePicker() {

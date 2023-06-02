@@ -7,45 +7,117 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import com.tuk.shdelivery.Activity.HomeActivity
+import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.FragmentChatListBinding
 import com.tuk.shdelivery.databinding.LayoutChatBinding
 import com.tuk.shdelivery.databinding.LayoutMychatBinding
+import com.tuk.shdelivery.databinding.LayoutOrderacceptBinding
 import java.util.*
 
 
 class ChatListFragment : Fragment() {
 
+    val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentChatListBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //변경해야함
-        binding.btn.setOnClickListener {
-            if (binding.nochat.visibility == View.GONE) {
-                binding.nochat.visibility = View.VISIBLE
-            } else if (binding.nochat.visibility == View.VISIBLE) {
-                binding.nochat.visibility = View.GONE
+        //채팅참여중이면 보임 나가면 안보임.
+        chatRoomView()
+
+        //주문 수락 버튼 리스너
+        binding.orderAccept.setOnClickListener {
+            var acceptText = LayoutOrderacceptBinding.inflate(layoutInflater)
+            //!!! 주문 수락 기능
+            if(binding.orderAccept.text.toString() == "주문 수락"){
+                //보유포인트보다 많이 입력하면 토스트 띄우기
+                val userPoint = (intent.getSerializableExtra("user") as User).userPoint
+                if(userPoint < binding.inputPoint.text.toString().toInt() && userPoint == 0L){
+                    Toast.makeText(requireContext(), "보유 포인트보다 많이 적을 수 없습니다.",Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                binding.inputPoint.isEnabled = false
+                binding.orderAccept.text = "주문 취소"
+
+                //accpet인원 올리기
+                binding.orderAcceptNum.text = (binding.orderAcceptNum.text.toString().toInt() + 1).toString()
+                //주문 수락 레이아웃 올리기
+                acceptText.name.text = (intent.getSerializableExtra("user") as User).userName
+                acceptText.text.text = "님이 ${binding.inputPoint.text}P 만큼 주문수락 하였습니다."
+                acceptText.text.setTextColor(resources.getColor(R.color.orangeClick))
+                acceptText.name.setTextColor(resources.getColor(R.color.orangeClick))
+            } else{
+                binding.inputPoint.isEnabled = true
+                binding.orderAccept.text = "주문 수락"
+
+                //accpet인원 내리기
+                binding.orderAcceptNum.text = (binding.orderAcceptNum.text.toString().toInt() - 1).toString()
+                //주문 취소 레이아웃 올리기
+                acceptText.name.text = (intent.getSerializableExtra("user") as User).userName
+                acceptText.text.text = "님이 취소 하였습니다."
+                acceptText.text.setTextColor(resources.getColor(R.color.red))
+                acceptText.name.setTextColor(resources.getColor(R.color.red))
             }
+            binding.chatLayout.addView(acceptText.root)
         }
 
-        //내챗아님 채팅 올림
-        binding.test.setOnClickListener {
+        //!!! 내챗아님 채팅 올림
+        binding.createNotMychat.setOnClickListener {
             createNotMyChat()
         }
 
+        //!!!채팅창 클리어 버튼 설정
+        binding.clearChat.setOnClickListener {
+            while(binding.chatLayout.childCount > 1) {
+                binding.chatLayout.removeViewAt(1)
+            }
+        }
+
+        //!!!매칭방 나가기 버튼 설정
+        binding.exit.setOnClickListener {
+            binding.clearChat.performClick()
+            binding.view.performClick()
+        }
+
         //보내기 버튼 활성, 비활성화
-        sendButtonSetting()
+        sendButtonSetting(binding.input, binding.send)
+
+        //주문수락 버튼 활성, 비활성화
+        sendButtonSetting(binding.inputPoint, binding.orderAccept)
 
         //메세지 보내기 리스너
         createSendListener()
 
         //다운 스크롤 버튼 리스너
         createDownScrollButtonListener()
+    }
+
+    private fun chatRoomView() {
+        val user = intent.getSerializableExtra("user") as User
+        //참여중인 채팅방이 없을 때 채팅창 안보이게
+        if(user.participateMatchId == ""){
+            binding.nochat.visibility = View.VISIBLE
+        }
+        //있으면 보이게
+        else{
+            binding.nochat.visibility = View.GONE
+        }
+        binding.view.setOnClickListener {
+            if (binding.nochat.visibility == View.GONE) {
+                binding.nochat.visibility = View.VISIBLE
+            } else if (binding.nochat.visibility == View.VISIBLE) {
+                binding.nochat.visibility = View.GONE
+            }
+        }
     }
 
     private fun createDownScrollButtonListener() {
@@ -63,8 +135,8 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    private fun sendButtonSetting() {
-        binding.input.addTextChangedListener(object : TextWatcher {
+    private fun sendButtonSetting(edit : EditText, btn : Button) {
+        edit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
                 // 텍스트가 변경되기 전에 호출됩니다.
             }
@@ -76,13 +148,15 @@ class ChatListFragment : Fragment() {
             override fun afterTextChanged(s: Editable) {
                 // 텍스트가 변경된 후에 호출됩니다.
                 // 이 시점에서 EditText에 있는 텍스트를 확인합니다.
-                binding.send.visibility = if (s.isNotEmpty()) View.VISIBLE else View.GONE
+                btn.visibility = if (s.isNotEmpty()) View.VISIBLE else View.GONE
             }
         })
     }
 
     private fun createSendListener() {
+
         binding.send.setOnClickListener {
+            //!!!내가 친 채팅 보내기 기능
             val mychat = LayoutMychatBinding.inflate(layoutInflater)
             mychat.text.text = binding.input.text.toString()
             mychat.chatTime.text = DeliverTime(Calendar.getInstance()).getTime()

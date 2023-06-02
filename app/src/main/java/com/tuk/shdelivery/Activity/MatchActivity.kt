@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MatchActivity : AppCompatActivity() {
-
     val binding by lazy { ActivityMatchBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +35,7 @@ class MatchActivity : AppCompatActivity() {
     }
 
     private fun setText() {
-        val data = intent.getSerializableExtra("data") as MatchRoomData
+        val data = intent.getSerializableExtra("selectMatchData") as MatchRoomData
         binding.deliveryTime.text =
             SimpleDateFormat("MM/dd(E) a K : mm", Locale.KOREAN).format(data.deliveryTime.time)
         binding.toolbar.subtitle =
