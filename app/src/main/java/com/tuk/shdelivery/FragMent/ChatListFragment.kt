@@ -38,29 +38,29 @@ class ChatListFragment : Fragment() {
 
         //채팅방 생성시 리스너 달기
         matchId =  (intent.getSerializableExtra("user") as User).participateMatchId
-//        Log.d("UserMatchId",matchId.toString())
-//        matchDao.fetchMessages(matchId){
-//            for(i in it){
-//                //내채팅이면
-//                if(i.userId == (intent.getSerializableExtra("user") as User).userId){
-//                    var infalte = LayoutMychatBinding.inflate(layoutInflater)
-//                    infalte.userId.text = i.userId
-//                    infalte.userName.text = i.userName
-//                    infalte.chat.text = i.chat
-//                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
-//                    binding.chatLayout.addView(infalte.root)
-//                }
-//                //다른사람이 쓴 채팅이면
-//                else{
-//                    var infalte = LayoutChatBinding.inflate(layoutInflater)
-//                    infalte.userId.text = i.userId
-//                    infalte.userName.text = i.userName
-//                    infalte.chat.text = i.chat
-//                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
-//                    binding.chatLayout.addView(infalte.root)
-//                }
-//            }
-//        }
+        Log.d("UserMatchId",matchId.toString())
+        matchDao.fetchMessages(matchId){
+            for(i in it){
+                //내채팅이면
+                if(i.userId == (intent.getSerializableExtra("user") as User).userId){
+                    var infalte = LayoutMychatBinding.inflate(layoutInflater)
+                    infalte.userId.text = i.userId
+                    infalte.userName.text = i.userName
+                    infalte.chat.text = i.chat
+                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
+                    binding.chatLayout.addView(infalte.root)
+                }
+                //다른사람이 쓴 채팅이면
+                else{
+                    var infalte = LayoutChatBinding.inflate(layoutInflater)
+                    infalte.userId.text = i.userId
+                    infalte.userName.text = i.userName
+                    infalte.chat.text = i.chat
+                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
+                    binding.chatLayout.addView(infalte.root)
+                }
+            }
+        }
         matchDao.fetchNewMessage(matchId){
             //내가 친 채팅이면 안나오게
             if(it.userId != (intent.getSerializableExtra("user") as User).userId){
