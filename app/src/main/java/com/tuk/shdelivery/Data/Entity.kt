@@ -32,6 +32,6 @@ data class Chat(
     var userId: String = "",
     var userName: String = "",
     var chat: String = "",
-    var chatTime: Calendar = Calendar.getInstance(),
+    var chatTime: Long = Calendar.getInstance().timeInMillis,
 ) : Serializable
 

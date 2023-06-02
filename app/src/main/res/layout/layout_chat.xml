@@ -9,6 +9,11 @@
         android:id="@+id/profile"
         android:layout_width="wrap_content"
         android:layout_height="match_parent">
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/userId"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
 
         <ImageView
             android:layout_width="wrap_content"
@@ -16,7 +21,7 @@
             android:src="@drawable/vector_person"/>
 
         <TextView
-            android:id="@+id/name"
+            android:id="@+id/userName"
             android:gravity="center"
             android:text="A"
             android:layout_width="wrap_content"
@@ -36,7 +41,7 @@
                 android:padding="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/custom_button_cancle"
-                android:id="@+id/text"
+                android:id="@+id/chat"
                 android:textColor="@color/white"
                 android:maxWidth="230dp"
                 android:layout_width="wrap_content"

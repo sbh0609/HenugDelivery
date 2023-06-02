@@ -14,6 +14,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.Activity.HomeActivity
+import com.tuk.shdelivery.Data.Chat
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.DeliverTime
@@ -28,8 +30,48 @@ class ChatListFragment : Fragment() {
 
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentChatListBinding.inflate(layoutInflater) }
+    val matchDao = MatchDao()
+    lateinit var matchId :String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //채팅방 생성시 리스너 달기
+        matchId =  (intent.getSerializableExtra("user") as User).participateMatchId
+//        Log.d("UserMatchId",matchId.toString())
+//        matchDao.fetchMessages(matchId){
+//            for(i in it){
+//                //내채팅이면
+//                if(i.userId == (intent.getSerializableExtra("user") as User).userId){
+//                    var infalte = LayoutMychatBinding.inflate(layoutInflater)
+//                    infalte.userId.text = i.userId
+//                    infalte.userName.text = i.userName
+//                    infalte.chat.text = i.chat
+//                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
+//                    binding.chatLayout.addView(infalte.root)
+//                }
+//                //다른사람이 쓴 채팅이면
+//                else{
+//                    var infalte = LayoutChatBinding.inflate(layoutInflater)
+//                    infalte.userId.text = i.userId
+//                    infalte.userName.text = i.userName
+//                    infalte.chat.text = i.chat
+//                    infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = i.chatTime }).getTime()
+//                    binding.chatLayout.addView(infalte.root)
+//                }
+//            }
+//        }
+        matchDao.fetchNewMessage(matchId){
+            //내가 친 채팅이면 안나오게
+            if(it.userId != (intent.getSerializableExtra("user") as User).userId){
+                var infalte = LayoutChatBinding.inflate(layoutInflater)
+                infalte.userId.text = it.userId
+                infalte.userName.text = it.userName
+                infalte.chat.text = it.chat
+                infalte.chatTime.text = DeliverTime(Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
+                binding.chatLayout.addView(infalte.root)
+            }
+        }
 
         //채팅참여중이면 보임 나가면 안보임.
         chatRoomView()
@@ -151,6 +193,8 @@ class ChatListFragment : Fragment() {
                 btn.visibility = if (s.isNotEmpty()) View.VISIBLE else View.GONE
             }
         })
+
+
     }
 
     private fun createSendListener() {
@@ -158,8 +202,17 @@ class ChatListFragment : Fragment() {
         binding.send.setOnClickListener {
             //!!!내가 친 채팅 보내기 기능
             val mychat = LayoutMychatBinding.inflate(layoutInflater)
-            mychat.text.text = binding.input.text.toString()
             mychat.chatTime.text = DeliverTime(Calendar.getInstance()).getTime()
+            val chat = Chat(
+                (intent.getSerializableExtra("user") as User).userId,
+                (intent.getSerializableExtra("user") as User).userName,
+                binding.input.text.toString(),
+                Calendar.getInstance().timeInMillis
+            )
+            matchDao.sendMessageToFirebase(chat, matchId)
+
+
+            mychat.chat.text = binding.input.text.toString()
             binding.input.text.clear()
 
             binding.chatLayout.addView(mychat.root)
@@ -180,7 +233,7 @@ class ChatListFragment : Fragment() {
             val lastView =
                 binding.chatLayout.getChildAt(binding.chatLayout.childCount - 1) as ViewGroup
             //마지막이 올리려는 채팅과 이름이 같다면 프로필제거
-            if (lastView.findViewById<TextView>(R.id.name).text == inflate.name.text) {
+            if (lastView.findViewById<TextView>(R.id.name).text == inflate.userName.text) {
                 inflate.profile.visibility = View.GONE
             }
         }
@@ -201,7 +254,7 @@ class ChatListFragment : Fragment() {
             else {
                 Snackbar.make(
                     binding.chatLayout,
-                    "${inflate.name.text} 님이 보내셨습니다.\n${inflate.text.text.toString()}",
+                    "${inflate.userName.text} 님이 보내셨습니다.\n${inflate.chat.text.toString()}",
                     Snackbar.LENGTH_LONG
                 ).apply {
                     val textView =

@@ -12,11 +12,11 @@ class MatchDao{
      */
     fun createMatchingroom(room: MatchRoomData, callback: () -> Unit) {
         // Generate a new chatroom ID
-        val chatroomId = database.child("chatrooms").push().key
+        val chatroomId = database.child(room.id.toString()).setValue(room)
 
         chatroomId?.let {
             // Save the chatroom to the database
-            database.child("chatrooms").child(it).setValue(room)
+            database.child("chatrooms").child(room.id).setValue(room)
                 .addOnSuccessListener {
                     // Chatroom was created successfully
                     callback()

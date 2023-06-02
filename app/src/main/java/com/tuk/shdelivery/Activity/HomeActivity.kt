@@ -124,7 +124,11 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         }
         //매칭방을 입장한 뒤라면
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            ///!!!매칭방에 참여중 표시
+            val mypage = listFragment.get(2) as MypageFragment
+            //!!!참여중인 매칭방 id로 매칭방 가져온다음 매칭방에 참여중 표시
+            (intent.getSerializableExtra("user") as User).participateMatchId
+
+
             val fragment = listFragment.get(1) as ChatListFragment
 
             fragment.binding.view.performClick()
