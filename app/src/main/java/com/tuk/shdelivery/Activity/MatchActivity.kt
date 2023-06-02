@@ -3,9 +3,11 @@ package com.tuk.shdelivery.Activity
 import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
+import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.ActivityMatchBinding
@@ -14,7 +16,7 @@ import java.util.*
 
 class MatchActivity : AppCompatActivity() {
     val binding by lazy { ActivityMatchBinding.inflate(layoutInflater) }
-
+    val userDao = UserDao()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -30,13 +32,19 @@ class MatchActivity : AppCompatActivity() {
         }
         //매칭방 입장
         binding.done.setOnClickListener {
-            //만약 이미 매칭방이 있는 상태라면 안된다.
-            if((intent.getSerializableExtra("user") as User).participateMatchId != ""){
+            var user = intent.getSerializableExtra("user") as User
+            //매칭방이 없어야 가능
+            if(user.participateMatchId == ""){
+                user.participateMatchId = (intent.getSerializableExtra("selectMatchData") as MatchRoomData).id
+                intent.putExtra("user",user)
+                userDao.updateUser(user){
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
+            } else{
+                Log.d("MatchId", user.toString())
                 Toast.makeText(applicationContext,"매칭방에 이미 입장중 입니다.",Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
             }
-            setResult(Activity.RESULT_OK, intent)
-            finish()
         }
 
     }

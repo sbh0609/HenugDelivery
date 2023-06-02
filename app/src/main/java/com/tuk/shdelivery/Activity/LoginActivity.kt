@@ -110,10 +110,8 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
             } else if (user != null) {
                 Log.e(TAG, "사용자 정보 요청 성공 : $user")
                 val intent = Intent(this, HomeActivity::class.java)
-
-                launch {
-                    var result = async { Udao.getUser(user.id.toString()) }.await()
-
+                Udao.getUser(user.id.toString()){
+                    var result = it
                     //새로운 유저라면
                     if (result == null) {
                         val newUser = User(
@@ -121,7 +119,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                             userName = user.kakaoAccount?.profile?.nickname!!,
                         )
                         intent.putExtra("user", newUser)
-                        async { Udao.addUser(newUser) }.await()
+                        Udao.addUser(newUser)
                     } else {
                         //이미 있는 유저라면 intent에 넣기
                         intent.putExtra("user", result)

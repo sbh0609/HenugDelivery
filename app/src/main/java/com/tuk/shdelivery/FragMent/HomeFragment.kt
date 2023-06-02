@@ -219,6 +219,7 @@ class HomeFragment() : Fragment(), CoroutineScope {
             fun setData(data: MatchRoomData) {
                 val diffMillis = data.deliveryTime - data.createTime
 
+                bd.matchId.text = data.id
                 bd.tag.text = "${data.menu}"
                 bd.description.text = data.description
                 bd.count.text = data.count.toString()

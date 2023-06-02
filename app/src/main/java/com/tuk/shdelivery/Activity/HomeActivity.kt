@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
@@ -111,11 +112,11 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         })
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, fetchIntent: Intent?) {
 
         //create데이터가 왔다면
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
-            var newCreateData = data?.getSerializableExtra("createData") as MatchRoomData
+            var newCreateData = fetchIntent?.getSerializableExtra("createData") as MatchRoomData
 
             val fragment = listFragment.get(0) as HomeFragment
 
@@ -125,17 +126,21 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         //매칭방을 입장한 뒤라면
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val mypage = listFragment.get(2) as MypageFragment
-            //!!!참여중인 매칭방 id로 매칭방 가져온다음 매칭방에 참여중 표시
-            (intent.getSerializableExtra("user") as User).participateMatchId
-
-
+            //!!참여중인 매칭방 id로 매칭방 가져온다음 매칭방에 참여중 표시
+            val user = fetchIntent?.getSerializableExtra("user") as User
             val fragment = listFragment.get(1) as ChatListFragment
 
+            intent.putExtra("user", user)
+
+            fragment.addNewMessageListener(user.participateMatchId)
+            fragment.fetchAllMessages(user.participateMatchId)
+
             fragment.binding.view.performClick()
+            fragment.binding.exit.isEnabled = true
             binding.tabLayout.getTabAt(1)!!.select()
         }
 
-        super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, intent)
     }
 
     override fun onBackPressed() {
