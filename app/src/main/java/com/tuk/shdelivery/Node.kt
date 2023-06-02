@@ -8,7 +8,7 @@ data class MatchRoomData(
     var time: String? = null
 )
 
-data class Message(
+data class Chat(
     var content: String="",
     var userId: String="",
     var timestamp: Long=0

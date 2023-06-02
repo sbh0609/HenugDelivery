@@ -34,7 +34,7 @@ class HandleData{
      * output: void
      * 입력한 메시지를 데이터베이스에 저장한다.
      */
-    fun sendMessageToFirebase(message: Message, chatroomId: String) {
+    fun sendMessageToFirebase(message: Chat, chatroomId: String) {
         database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message)
     }
     /**
@@ -52,15 +52,15 @@ class HandleData{
      * 사용자가 메시지를 입력하면 sendMessageToFirebase에 저장된다.
      * 메시지 내역만 저장하면 되는 것이고 입력받은 메시지는 그냥 화면에 추가하면 된다.
      */
-    fun fetchMessages(chatroomId: String, callback: (List<Message>) -> Unit) {
+    fun fetchMessages(chatroomId: String, callback: (List<Chat>) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
 
         messagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val loadedMessages = mutableListOf<Message>()
+                val loadedMessages = mutableListOf<Chat>()
                 for (snapshot in dataSnapshot.children) {
-                    val message = snapshot.getValue(Message::class.java)
+                    val message = snapshot.getValue(Chat::class.java)
                     if (message != null) {
                         loadedMessages.add(message)
                     }
@@ -82,13 +82,13 @@ class HandleData{
      * 사용자가 입력한 메시지를 표시
      * 메시지는 callback 함수를 통해 반환된다.
      */
-    fun fetchNewMessage(chatroomId: String, callback: (Message) -> Unit) {
+    fun fetchNewMessage(chatroomId: String, callback: (Chat) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
 
         messagesRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                val message = snapshot.getValue(Message::class.java)
+                val message = snapshot.getValue(Chat::class.java)
                 if (message != null) {
                     callback(message)
                 }

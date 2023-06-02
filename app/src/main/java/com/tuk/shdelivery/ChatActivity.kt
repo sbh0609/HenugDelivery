@@ -25,7 +25,7 @@ class ChatActivity : AppCompatActivity() {
         binding.btnSend.setOnClickListener {
             val messageContent = binding.etMessage.text.toString()
             val message =
-                Message(binding.etMessage.text.toString(), userId, System.currentTimeMillis())
+                Chat(binding.etMessage.text.toString(), userId, System.currentTimeMillis())
             handleData.sendMessageToFirebase(message, chatroomId)
             binding.etMessage.text.clear()
         }
@@ -41,7 +41,7 @@ class ChatActivity : AppCompatActivity() {
             userId = inputField.text.toString()
             dialog.dismiss()
 
-            val messages = mutableListOf<Message>()
+            val messages = mutableListOf<Chat>()
             val adapter = MessageAdapter(messages, userId)
             binding.rvMessages.layoutManager = LinearLayoutManager(this@ChatActivity)
             binding.rvMessages.adapter = adapter
