@@ -22,12 +22,19 @@ import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
-class HomeFragment(override val coroutineContext: CoroutineContext) : Fragment() , CoroutineScope {
+class HomeFragment() : Fragment() , CoroutineScope {
+    private var job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
     var adapter: CustomAdapter? = null
@@ -123,6 +130,8 @@ class HomeFragment(override val coroutineContext: CoroutineContext) : Fragment()
 
     /**DB에서 데이터 불러오는 함수*/
     suspend fun loadData(): ArrayList<MatchRoomData> {
+        adapter?.listData?.clear()
+
         var matchDao = MatchDao()
         var result = ArrayList<MatchRoomData>()
         matchDao.fetchChatrooms {
@@ -138,20 +147,14 @@ class HomeFragment(override val coroutineContext: CoroutineContext) : Fragment()
     public fun reFresh(): Unit {
         adapter?.listData?.clear()
 
-        var matchDao = MatchDao()
-
-        matchDao.fetchChatrooms {
-
-
-            //!!!여기도 refresh부분
-            for (data in it) {
+        launch {
+             val loadData = loadData()
+            //!!여기도 refresh부분
+            for (data in loadData) {
                 adapter?.listData?.add(data)
             }
 
             adapter?.notifyDataSetChanged()
-
-            //백업
-            datalist = adapter?.listData!!
 
             ToastCustom.toast(requireActivity(), "새로고침 완료")
 
