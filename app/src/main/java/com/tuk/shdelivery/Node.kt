@@ -1,6 +1,6 @@
 package com.tuk.shdelivery
 
-data class Room(
+data class MatchRoomData(
     var id: String? = null,
     var name: String? = null,
     var foodType: String? = null,

@@ -10,7 +10,7 @@ class HandleData{
      * output: void
      * 새로운 채팅방을 생성하고 데이터베이스에 저장한다.
      */
-    fun createChatroom(room: Room) {
+    fun createMatchingroom(room: MatchRoomData) {
         // Generate a new chatroom ID
         val chatroomId = database.child("chatrooms").push().key
 
@@ -108,15 +108,15 @@ class HandleData{
      * 모든 채팅방을 불러온다.
      * 채팅방 리스트는 callback 함수를 통해 반환된다.
      */
-    fun fetchChatrooms(callback: (List<Chatroom>) -> Unit) {
+    fun fetchChatrooms(callback: (List<MatchRoomData>) -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val chatroomsRef = database.getReference("chatrooms")
 
         chatroomsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val loadedChatrooms = mutableListOf<Chatroom>()
+                val loadedChatrooms = mutableListOf<MatchRoomData>()
                 for (snapshot in dataSnapshot.children) {
-                    val chatroom = snapshot.getValue(Chatroom::class.java)
+                    val chatroom = snapshot.getValue(MatchRoomData::class.java)
                     if (chatroom != null) {
                         chatroom.id = snapshot.key ?: ""
                         loadedChatrooms.add(chatroom)

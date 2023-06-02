@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.tuk.shdelivery.databinding.ChatroomItemBinding
 
-class ChatroomAdapter(private val chatrooms: List<Chatroom>, private val context: Context) :
+class ChatroomAdapter(private val chatrooms: List<MatchRoomData>, private val context: Context) :
     RecyclerView.Adapter<ChatroomAdapter.ChatroomViewHolder>() {
 
     inner class ChatroomViewHolder(val binding: ChatroomItemBinding) : RecyclerView.ViewHolder(binding.root)
@@ -31,4 +31,4 @@ class ChatroomAdapter(private val chatrooms: List<Chatroom>, private val context
 
 
 
-data class Chatroom(var id: String="", var storeName: String="", var foodType: String="", var time: String="")
+//data class Chatroom(var id: String="", var storeName: String="", var foodType: String="", var time: String="")

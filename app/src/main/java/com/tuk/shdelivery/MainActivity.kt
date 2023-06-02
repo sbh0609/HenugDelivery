@@ -36,13 +36,13 @@ class MainActivity : AppCompatActivity() {
 
                     if (roomName.isNotEmpty() && foodType.isNotEmpty() && storeName.isNotEmpty() && time.isNotEmpty()) {
 //                        createChatroom(roomName,foodType, storeName, time)
-                        val chatroom = Room(
+                        val chatroom = MatchRoomData(
                             name = roomName,
                             foodType = foodType,
                             storeName = storeName,
                             time = time
                         )
-                        handleData.createChatroom(chatroom)
+                        handleData.createMatchingroom(chatroom)
                     } else {
                         Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                     }
