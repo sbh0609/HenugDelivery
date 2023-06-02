@@ -59,9 +59,14 @@ class HomeFragment() : Fragment(), CoroutineScope {
     }
 
     fun createMatching(): Unit {
-        ToastCustom.toast(requireContext(), "매칭방 액티비티 출력")
-        intent.setClass(requireContext(), createActivity::class.java)
-        requireActivity().startActivityForResult(intent, 0)
+        //참여중인 매칭방이 없어야 만들수 있다.
+        if((intent.getSerializableExtra("user") as User).participateMatchId == ""){
+            intent.setClass(requireContext(), createActivity::class.java)
+            requireActivity().startActivityForResult(intent, 0)
+        }
+        else{
+            ToastCustom.toast(requireContext(), "참여중인 매칭방이 있습니다.")
+        }
     }
 
     private fun createRecyclerView() {
