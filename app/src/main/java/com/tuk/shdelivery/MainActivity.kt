@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope  {
             var userId: String = "6"
             var userName: String = "f"
 
-            var ex = User(userId, userName, 0, 0)
+            var ex = User(userId, userName, "", 0, 0)
 
             dao.addUser(ex)
         }
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope  {
         binding.btn4.setOnClickListener{
             var userId: String = "4"
             var userName: String = "d"
-            var participateMatchId: Long =0
+            var participateMatchId: String ="321"
             var userPoint: Long = 50
 
             var ex = User(userId, userName, participateMatchId, userPoint)

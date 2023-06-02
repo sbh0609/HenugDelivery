@@ -1,37 +1,35 @@
 package com.tuk.shdelivery
 
 import android.provider.ContactsContract.CommonDataKinds.Phone
+import java.io.Serializable
 import java.sql.Time
 import java.util.Calendar
 import java.util.Timer
-
-data class User(
-    var userId: String,
-    var userName: String,
-    var participateMatchId: Long,
-    var userPoint: Long,
-){
-    constructor(): this("","",0,0)
-}
-data class MatchRoom(
-    var matchRoomId: Long,
-    var participatePeopleNum: Int,
+data class MatchRoomData(
+    var id: String,
     var menu: String,
-    var orderTime: java.util.Calendar,
-    var matchCreateTime: java.util.Calendar,
-    var describe: String,
-    var storeName: String
-)
+    var deliveryTime: Calendar = Calendar.getInstance(),
+    var description: String = "",
+    var count: Int,
+    var createTime: Calendar = Calendar.getInstance(),
+    var storeName: String,
+) : Serializable
+data class User(
+    var userId: String = "",
+    var userName: String = "",
+    var participateMatchId : String = "",
+    var userPoint: Long = 0L,
+    var matchPoint : Long = 0L
+) : Serializable
 data class ChatRoom(
-    var chatId: Long,
-    var participatePeopleId: List<Int>,
-    var participatePeopleNum: Int,
-    var orderAcceptNum: Int
-)
-data class Chat( //실시간으로 add 기능
-    var userId: Long,
-    var userName: String,
-    var chatId: Long,
-    var chat: String,
-    var chatTime: java.util.Calendar
-)
+    var chatId: String = "",
+    var participatePeopleId: List<String> = ArrayList<String>(),
+    var orderAcceptNum: Int = 0,
+    var orderPoint : Int = 0,
+) : Serializable
+data class Chat(
+    var userId: String = "",
+    var userName: String = "",
+    var chat: String = "",
+    var chatTime: Calendar = Calendar.getInstance(),
+) : Serializable
