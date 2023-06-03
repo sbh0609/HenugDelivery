@@ -79,7 +79,7 @@ class createActivity : AppCompatActivity() {
             setResult(RESULT_OK, intent)
             finish()
         }
-        //!!! createMatchRoom 기능사용!!
+        //!! createMatchRoom 기능사용!!
     }
 
     private fun createaDatePicker() {

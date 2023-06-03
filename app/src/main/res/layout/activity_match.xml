@@ -117,7 +117,7 @@
                     <TextView
                         android:id="@+id/storeName"
                         android:gravity="center"
-                        android:text="산기대학로 엽기 떡볶기"
+                        android:text="@string/dumyText"
                         android:ellipsize="end"
                         android:layout_width="match_parent"
                         android:maxLines="2"

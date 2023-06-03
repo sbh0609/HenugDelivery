@@ -24,14 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:text="만약 매칭방에 입장한 상태라면 (버튼 클릭)"/>
-
-
-
         <TextView
             android:layout_marginTop="30dp"
             android:layout_width="match_parent"
@@ -51,6 +43,43 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/orderAcceptNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/participatePeopleSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="4"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="만약 매칭방에 입장한 상태라면 (버튼 클릭)"/>
+        <Button
+            android:id="@+id/clearChat"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:text="채팅창 초기화"/>
+
+    </LinearLayout>
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -65,70 +94,26 @@
             app:layout_constraintBottom_toTopOf="@id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/createNotMychat"
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent"
-                    android:text="상대 채팅"/>
-                <Button
-                    android:id="@+id/clearChat"
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent"
-                    android:text="채팅창 초기화"/>
-                <Button
-                    android:id="@+id/exit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="나가기"/>
-
-                <TextView
-                    android:id="@+id/orderAcceptNum"
-                    android:gravity="center"
-                    android:text="0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <TextView
-                    android:gravity="center"
-                    android:text=" / "
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/participatePeopleSize"
-                    android:gravity="center"
-                    android:text="4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:gravity="center"
-                    android:text=" 주문 수락"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
-            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <EditText
+                    android:padding="10dp"
                     android:hint="주문에 사용할 포인트를 입력하세요"
                     android:id="@+id/inputPoint"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/custom_button_cancle"
-                    android:inputType="number"
-                    android:padding="8dp" />
+                    android:inputType="numberDecimal"/>
                 <Button
                     android:id="@+id/orderAccept"
                     android:visibility="gone"
                     android:background="@drawable/custom_button_done"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="80dp"
+                    android:layout_height="match_parent"
                     android:text="주문 수락"/>
 
 

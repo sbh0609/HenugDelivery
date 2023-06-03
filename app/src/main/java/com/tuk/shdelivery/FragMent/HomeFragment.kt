@@ -77,8 +77,6 @@ class HomeFragment() : Fragment(), CoroutineScope {
         launch {
             val lst = async { loadData() }.await()
 
-            Log.d("lst", lst.toString())
-
             adapter = CustomAdapter(lst)
 
             binding.recycleView.adapter = adapter
@@ -93,18 +91,6 @@ class HomeFragment() : Fragment(), CoroutineScope {
     }
 
     private fun createScrollListener() {
-        binding.hint.setOnTouchListener { _, _ ->
-            binding.hint.visibility = View.GONE
-            true
-        }
-        binding.IconScroll.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                binding.hint.visibility = View.GONE
-            }
-        })
-
-
         binding.scrollUpButton.visibility = View.INVISIBLE
         binding.recycleView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var temp = 0
@@ -222,7 +208,7 @@ class HomeFragment() : Fragment(), CoroutineScope {
             }
 
             fun setData(data: MatchRoomData) {
-                val diffMillis = data.deliveryTime - data.createTime
+                val diffMillis = data.deliveryTime - Calendar.getInstance().timeInMillis
 
                 bd.matchId.text = data.id
                 bd.tag.text = "${data.menu}"

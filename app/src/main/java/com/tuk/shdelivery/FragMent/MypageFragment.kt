@@ -1,5 +1,6 @@
 package com.tuk.shdelivery.FragMent
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -22,9 +23,13 @@ class MypageFragment : Fragment() {
         //충전 버튼 설정
         binding.charge.setOnClickListener {
             intent.setClass(requireContext(),ChargeActivity::class.java)
-            startActivity(intent)
+            activity?.startActivityForResult(intent, 2)
         }
         //마이페이지 유저이름, 포인트 설정
+        updateProfile()
+    }
+
+    public fun updateProfile() {
         val user = intent.getSerializableExtra("user") as User
         binding.userName.text = user.userName
         binding.point.text = user.userPoint.toString() + "P"

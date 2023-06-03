@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Toast
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
@@ -42,7 +43,6 @@ class MatchActivity : AppCompatActivity() {
                     finish()
                 }
             } else{
-                Log.d("MatchId", user.toString())
                 Toast.makeText(applicationContext,"매칭방에 이미 입장중 입니다.",Toast.LENGTH_SHORT).show()
             }
         }
@@ -52,9 +52,9 @@ class MatchActivity : AppCompatActivity() {
     private fun setText() {
         val data = intent.getSerializableExtra("selectMatchData") as MatchRoomData
         binding.deliveryTime.text =
-            SimpleDateFormat("MM/dd(E) a K : mm", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.deliveryTime }.time)
+            SimpleDateFormat("MM/dd(E)   a K : mm", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.deliveryTime }.time)
         binding.toolbar.subtitle =
-            SimpleDateFormat("MM/dd(E) a h시 mm분", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.createTime }.time) + " 작성글"
+            SimpleDateFormat("MM/dd(E)   a h시 mm분", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.createTime }.time) + " 작성글"
         binding.description.text = data.description
         binding.storeName.text = data.storeName
         binding.tag.text = data.menu
@@ -65,5 +65,14 @@ class MatchActivity : AppCompatActivity() {
     private fun createActionBar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

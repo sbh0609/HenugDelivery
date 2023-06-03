@@ -6,6 +6,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
@@ -117,11 +118,18 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         //create데이터가 왔다면
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
             var newCreateData = fetchIntent?.getSerializableExtra("createData") as MatchRoomData
+            var user = (intent.getSerializableExtra("user") as User)
+            user.participateMatchId = newCreateData.id
+            intent.putExtra("user",user)
+            val fragment0 = listFragment.get(0) as HomeFragment
+            val fragment1 = listFragment.get(1) as ChatListFragment
+            UserDao().updateUser(user){
+                fragment0.reFresh()
 
-            val fragment = listFragment.get(0) as HomeFragment
+                fragment1.enterChatRoom()
 
-            fragment.adapter?.listData?.add(newCreateData)
-            fragment.adapter?.notifyDataSetChanged()
+                binding.tabLayout.getTabAt(1)!!.select()
+            }
         }
         //매칭방을 입장한 뒤라면
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
@@ -132,12 +140,23 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
             intent.putExtra("user", user)
 
-            fragment.addNewMessageListener(user.participateMatchId)
-            fragment.fetchAllMessages(user.participateMatchId)
+            fragment.enterChatRoom()
 
-            fragment.binding.view.performClick()
-            fragment.binding.exit.isEnabled = true
             binding.tabLayout.getTabAt(1)!!.select()
+        }
+        //포인트를 충전한 뒤라면
+        if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            //프로필 새로고침
+            val user = fetchIntent?.getSerializableExtra("user") as User
+            intent.putExtra("user", user)
+            val fragment = listFragment.get(2) as MypageFragment
+
+            fragment.updateProfile()
+
+            binding.tabLayout.getTabAt(2)!!.select()
+
+            Toast.makeText(this, fetchIntent.getLongExtra("inputPoint",0L).toString() + "P 충전 되었습니다.", Toast.LENGTH_SHORT)
+                .show()
         }
 
         super.onActivityResult(requestCode, resultCode, intent)
