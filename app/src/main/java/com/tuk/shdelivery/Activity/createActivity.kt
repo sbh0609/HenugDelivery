@@ -75,7 +75,7 @@ class createActivity : AppCompatActivity() {
         )
 
         var matchdao = MatchDao()
-        matchdao.createMatchingroom((intent.getSerializableExtra("user") as User),createData){
+        matchdao.createMatchingRoom((intent.getSerializableExtra("user") as User),createData){
             matchdao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData){
                 intent.putExtra("createData", createData)
                 setResult(RESULT_OK, intent)

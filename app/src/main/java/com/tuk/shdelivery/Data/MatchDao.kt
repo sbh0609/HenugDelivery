@@ -10,13 +10,49 @@ class MatchDao {
     private val database = FirebaseDatabase.getInstance().reference
 
     private var childEventListener: ChildEventListener? = null
+    private var orderAcceptListener: ValueEventListener? = null
+
+
+    fun addOrderAcceptListener(matchId: String, callback: () -> Unit) {
+        val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
+        val ref2 = database.child("chatrooms/${matchId}/count")
+
+        orderAcceptListener = object : ValueEventListener {
+            override fun onDataChange(snapshot1: DataSnapshot) {
+                val value1 = snapshot1.getValue(Int::class.java)
+
+                ref2.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot2: DataSnapshot) {
+                        val value2 = snapshot2.getValue(Int::class.java)
+                        if (value1 != null && value2 != null && value1 > value2) {
+                            // value1이 value2를 넘었을 때의 로직을 여기에 추가합니다.
+                            Log.d("test100", "(ohyes)")
+                            callback()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        }
+
+        // ValueEventListener 추가
+        ref1.addValueEventListener(orderAcceptListener!!)
+    }
+
+    fun removeOrderAcceptListener(matchId : String){
+        val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
+        ref1.removeEventListener(orderAcceptListener!!)
+    }
 
     /**
      * input: room <Room 객체>(데이터 클래스의 room객체를 사용한다)
      * output: void
      * 새로운 채팅방을 생성하고 데이터베이스에 저장한다.
      */
-    fun createMatchingroom(user: User, match: MatchRoomData, callback: () -> Unit) {
+    fun createMatchingRoom(user: User, match: MatchRoomData, callback: () -> Unit) {
         // Generate a new chatroom ID
         // Save the chatroom to the database
         database.child("chatrooms").child(match.id).setValue(match)
@@ -81,25 +117,28 @@ class MatchDao {
 
     fun exitUser(user: User, callback: () -> Unit) {
         //count값 감소
-        database.child("chatrooms/${user.participateMatchId}/count").runTransaction(object : Transaction.Handler {
-            override fun doTransaction(mutableData: MutableData): Transaction.Result {
-                val currentValue = mutableData.getValue(Int::class.java)
-                if (currentValue == null) {
-                    mutableData.value = 1
-                } else {
-                    mutableData.value = currentValue - 1
+        database.child("chatrooms/${user.participateMatchId}/count")
+            .runTransaction(object : Transaction.Handler {
+                override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                    val currentValue = mutableData.getValue(Int::class.java)
+                    if (currentValue == null) {
+                        mutableData.value = 1
+                    } else {
+                        mutableData.value = currentValue - 1
+                    }
+                    return Transaction.success(mutableData)
                 }
-                return Transaction.success(mutableData)
-            }
 
-            override fun onComplete(
-                databaseError: DatabaseError?,
-                committed: Boolean,
-                dataSnapshot: DataSnapshot?,
-            ) { }
-        })
+                override fun onComplete(
+                    databaseError: DatabaseError?,
+                    committed: Boolean,
+                    dataSnapshot: DataSnapshot?,
+                ) {
+                }
+            })
         //participatePeopleId 리스트 요소 삭제
-        val reference = database.child("chatrooms/${user.participateMatchId}/chatRoom/participatePeopleId")
+        val reference =
+            database.child("chatrooms/${user.participateMatchId}/chatRoom/participatePeopleId")
         reference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val list =
@@ -246,7 +285,6 @@ class MatchDao {
             }
         })
     }
-    
 
     fun getParticipatingMatch(user: User, callback: (match: MatchRoomData) -> Unit) {
         val matchroomRef =
@@ -255,7 +293,6 @@ class MatchDao {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(MatchRoomData::class.java)
-                    Log.d("test1000", data.toString())
                     callback(data!!)
                 }
             }
@@ -265,9 +302,11 @@ class MatchDao {
             }
         })
     }
-    fun getChatRoomData(user: User,callback: (chatRoom : ChatRoom) -> Unit){
+
+    fun getChatRoomData(user: User, callback: (chatRoom: ChatRoom) -> Unit) {
         val matchroomRef =
-            FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}/chatRoom")
+            FirebaseDatabase.getInstance()
+                .getReference("chatrooms/${user.participateMatchId}/chatRoom")
         matchroomRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {

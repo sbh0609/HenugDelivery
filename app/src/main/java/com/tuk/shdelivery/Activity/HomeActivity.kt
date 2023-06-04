@@ -168,8 +168,11 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
                 backPressedTime = currentTime
                 ToastCustom.toast(this, "한번더 누르면 종료됩니다.")
             } else {
-                moveTaskToBack(true)
-//                super.onBackPressed()
+                // 모든 액티비티를 종료
+                finishAffinity()
+
+                // 앱 프로세스를 종료
+                System.exit(0)
             }
         }
         binding.tabLayout.getTabAt(0)?.select()

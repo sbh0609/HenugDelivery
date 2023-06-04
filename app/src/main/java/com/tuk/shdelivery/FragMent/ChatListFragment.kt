@@ -62,6 +62,9 @@ class ChatListFragment : Fragment() {
         //다운 스크롤 버튼 리스너
         createDownScrollButtonListener()
     }
+    fun allOrderAccept(){
+        Log.d("test100","ohyes")
+    }
 
     private fun orderAceptButtonListener() {
         binding.orderAccept.setOnClickListener {
@@ -155,7 +158,7 @@ class ChatListFragment : Fragment() {
     public fun settingChatRoom() {
         val user = intent.getSerializableExtra("user") as User
         matchDao.removeMessageListener(user.participateMatchId)
-
+        matchDao.removeOrderAcceptListener(user.participateMatchId)
         user.participateMatchId = ""
         intent.putExtra("user", user)
         binding.clearChat.performClick()
@@ -312,6 +315,10 @@ class ChatListFragment : Fragment() {
                         createNotMyChat(i)
                     }
                 }
+            }
+            //모두 주문 수락 리스너
+            matchDao.addOrderAcceptListener(matchId){
+                allOrderAccept()
             }
             callback()
         }
