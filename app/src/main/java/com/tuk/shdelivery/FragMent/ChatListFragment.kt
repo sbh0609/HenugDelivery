@@ -115,7 +115,31 @@ class ChatListFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.exit -> {
-                    exitChatRoom()
+                    val user = intent.getSerializableExtra("user") as User
+                    //본인이 만든방이 아니여야 나가기 가능, 참여중인 매칭방이 있어야만 나가기 가능
+                    if (user.userId != user.participateMatchId && user.participateMatchId != "") {
+                        exitChatRoom()
+                        ((activity as HomeActivity).listFragment[2] as MypageFragment).exitSetProfile()
+                    }
+                    //본인이 만든 방이면
+                    else if (user.userId == user.participateMatchId){
+                        Toast.makeText(
+                            activity,
+                            "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    //매칭방에 참여중이지 않다면
+                    else if(user.participateMatchId == ""){
+                        val snackbar = Snackbar.make(
+                            binding.root,
+                            "매칭방을 찾아보세요!",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackbar.setAction("알겠습니다.") {
+                            snackbar.dismiss()
+                        }.show()
+                    }
                 }
             }
             true
@@ -124,45 +148,21 @@ class ChatListFragment : Fragment() {
 
     public fun exitChatRoom() {
         val user = intent.getSerializableExtra("user") as User
-        //매칭방에 입장중인 상태에서만
-        if (user.participateMatchId != "") {
-            //본인이 만든방이 아니라면
-            if (user.userId != user.participateMatchId) {
-                matchDao.removeMessageListener(user.participateMatchId)
-                user.participateMatchId = ""
-                intent.putExtra("user", user)
-                UserDao().updateUser(user) {
-                    binding.clearChat.performClick()
-                    binding.view.performClick()
-                    updateSubTitle("", "")
-                }
-                initChat = false
-            }
-            //본인이 만든 방이면
-            else {
-                Toast.makeText(
-                    activity,
-                    "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }//매칭방에 입장중이 아니면
-        else if (user.participateMatchId == "") {
-            val snackbar = Snackbar.make(
-                binding.root,
-                "매칭방을 찾아보세요!",
-                Snackbar.LENGTH_SHORT
-            )
-            snackbar.setAction("알겠습니다.") {
-                snackbar.dismiss()
-            }.show()
-            (activity as HomeActivity).binding.tabLayout.getTabAt(0)!!.select()
+        matchDao.removeMessageListener(user.participateMatchId)
+        user.participateMatchId = ""
+        intent.putExtra("user", user)
+        UserDao().updateUser(user) {
+            binding.clearChat.performClick()
+            binding.view.performClick()
+            updateSubTitle("", "")
         }
+        initChat = false
     }
 
     public fun enterChatRoom(callback: () -> Unit) {
         //채팅방에 접속중인 사람이면 생성시 리스너 달기
-        matchId = (intent.getSerializableExtra("user") as User).participateMatchId
+        val user = intent.getSerializableExtra("user") as User
+        matchId = user.participateMatchId
         if (matchId != "") {
             //소제목으로 띄우기
             updateSubTitle()
@@ -171,8 +171,10 @@ class ChatListFragment : Fragment() {
             fetchAllMessages(matchId) {
                 //새로운 메세지 올때 리스너 등록
                 callback()
+
                 initChat = true
             }
+            ((activity as HomeActivity).listFragment[2] as MypageFragment).enterSetProfile(user)
 
             //채팅창 보이게
             binding.nochat.visibility = View.GONE
@@ -274,7 +276,7 @@ class ChatListFragment : Fragment() {
         binding.chatLayout.addView(acceptText.root)
     }
 
-    fun fetchAllMessages(matchId: String, callback: ()->Unit) {
+    fun fetchAllMessages(matchId: String, callback: () -> Unit) {
         matchDao.fetchMessages(matchId) {
             for (i in it) {
                 //공지 사항이라면
@@ -413,7 +415,7 @@ class ChatListFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         //매칭방 입장 함수
-        enterChatRoom(){}
+        enterChatRoom() {}
         return binding.root
     }
 }

@@ -200,4 +200,14 @@ class MatchDao {
             }
         })
     }
+    fun removeMatchRoom(user:User,callback: () -> Unit){
+        val database = FirebaseDatabase.getInstance()
+        val myRef = database.getReference("chatrooms/${user.participateMatchId}")
+
+        myRef.removeValue().addOnSuccessListener {
+            callback()
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "Failed to remove node", e)
+        }
+    }
 }

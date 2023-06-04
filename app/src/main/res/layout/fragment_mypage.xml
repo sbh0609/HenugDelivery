@@ -150,8 +150,16 @@
                 android:text="참여중인 매칭방" />
             <include
                 android:id="@+id/layout_match_room"
-                layout="@layout/layout_match_room"
-                />
+                layout="@layout/layout_match_room"/>
+            <Button
+                android:id="@+id/deliteRoom"
+                android:text="방 삭제"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                android:background="@drawable/custom_button_done"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
 
