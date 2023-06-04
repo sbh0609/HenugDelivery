@@ -126,12 +126,15 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                         //이미 있는 유저라면 intent에 넣기
                         intent.putExtra("user", result)
                     }
+                    // Put userId into intent
+                    intent.putExtra("userId", user.id.toString())
                     startActivity(intent)
                     finish()
                 }
             }
         }
     }
+
 
     // 이메일 로그인 콜백
     private val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
@@ -142,4 +145,5 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
             fetch_UserData()
         }
     }
+
 }
