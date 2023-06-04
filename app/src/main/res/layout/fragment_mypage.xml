@@ -148,8 +148,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="참여중인 매칭방" />
-
+            <include
+                android:id="@+id/layout_match_room"
+                layout="@layout/layout_match_room"
+                />
         </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

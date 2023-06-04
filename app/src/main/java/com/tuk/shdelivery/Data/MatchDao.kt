@@ -1,10 +1,14 @@
 package com.tuk.shdelivery.Data
 
+import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.*
 
 class MatchDao{
     private val database = FirebaseDatabase.getInstance().reference
+
     /**
      * input: room <Room 객체>(데이터 클래스의 room객체를 사용한다)
      * output: void
@@ -125,6 +129,61 @@ class MatchDao{
             override fun onCancelled(databaseError: DatabaseError) {
                 // DB에서 읽는데 실패했을 경우
                 // 로그를 출력하거나 사용자에게 알림을 보냄
+            }
+        })
+    }
+
+    fun getJoinedRoom(userId: String): LiveData<MatchRoomData> {
+        val roomData = MutableLiveData<MatchRoomData>()
+
+        // Firebase에서 사용자 정보를 가져옴
+        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(User::class.java)
+
+                // 사용자가 참여중인 채팅방이 있다면
+                if (user != null && user.participateMatchId.isNotEmpty()) {
+                    val roomId = user.participateMatchId
+
+                    // 해당 채팅방 정보를 Firebase에서 불러옴
+                    val roomRef = FirebaseDatabase.getInstance().getReference("ChatRooms").child(roomId)
+                    roomRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val room = snapshot.getValue(MatchRoomData::class.java)
+
+                            // 채팅방 정보를 LiveData에 설정
+                            if (room != null) {
+                                roomData.value = room
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // 채팅방 정보를 불러오는데 실패한 경우 에러 처리
+                        }
+                    })
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // 사용자 정보를 불러오는데 실패한 경우 에러 처리
+            }
+        })
+
+        return roomData
+    }
+    fun getParticipatingMatch(user: User, callback : (match : MatchRoomData)->Unit){
+        val matchroomRef = FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
+        matchroomRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    val data = dataSnapshot.getValue(MatchRoomData::class.java)
+                    Log.d("test1000",data.toString())
+                    callback(data!!)
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.w(TAG, "loadData:onCancelled", databaseError.toException())
             }
         })
     }

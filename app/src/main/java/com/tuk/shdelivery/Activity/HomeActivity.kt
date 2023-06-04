@@ -9,9 +9,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayout
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
-import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
@@ -25,7 +26,7 @@ import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
 class HomeActivity : AppCompatActivity(), CoroutineScope {
-
+    lateinit var myPageFragment: MypageFragment  // declare myPageFragment here
     private var job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -42,6 +43,12 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        val matchDao = MatchDao()  // Initialize matchDao
+        val userId = intent.getStringExtra("userId")
+        myPageFragment = MypageFragment.newInstance(userId!!) // initialize myPageFragment here
+        val bundle = Bundle()
+        bundle.putString("userId", userId)
+        myPageFragment.arguments = bundle
 
         //프래그먼트 설정
         createFragMentList()
@@ -56,7 +63,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
 
     private fun createFragMentList() {
-        arrayOf(HomeFragment(), ChatListFragment(), MypageFragment()).map {
+        arrayOf(HomeFragment(), ChatListFragment(), myPageFragment).map {  // use myPageFragment here
             listFragment.add(it)
         }
         for (i in listFragment) {
@@ -98,13 +105,13 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.show(listFragment.get(tab?.position!!)).commit()
-                tab?.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
+                transaction.show(listFragment[tab?.position!!]).commit()
+                tab.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.hide(listFragment.get(tab?.position!!)).commit()
+                transaction.hide(listFragment[tab?.position!!]).commit()
                 tab?.icon?.setColorFilter(getColor(R.color.white), PorterDuff.Mode.SRC_IN)
             }
 
