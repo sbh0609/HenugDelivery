@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.UserDao
@@ -18,6 +19,7 @@ import java.util.*
 class MatchActivity : AppCompatActivity() {
     val binding by lazy { ActivityMatchBinding.inflate(layoutInflater) }
     val userDao = UserDao()
+    val matchDao = MatchDao()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -39,8 +41,10 @@ class MatchActivity : AppCompatActivity() {
                 user.participateMatchId = (intent.getSerializableExtra("selectMatchData") as MatchRoomData).id
                 intent.putExtra("user",user)
                 userDao.updateUser(user){
-                    setResult(Activity.RESULT_OK, intent)
-                    finish()
+                    matchDao.joinUserMatchRoom(user,intent.getSerializableExtra("selectMatchData") as MatchRoomData){
+                        setResult(Activity.RESULT_OK, intent)
+                        finish()
+                    }
                 }
             } else{
                 Toast.makeText(applicationContext,"매칭방에 이미 입장중 입니다.",Toast.LENGTH_SHORT).show()

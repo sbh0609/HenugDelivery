@@ -39,6 +39,8 @@ class ChatListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enterChatRoom(){}
+
         //view, clear 버튼 리스너
         visibleListener()
 
@@ -118,7 +120,11 @@ class ChatListFragment : Fragment() {
                     val user = intent.getSerializableExtra("user") as User
                     //본인이 만든방이 아니여야 나가기 가능, 참여중인 매칭방이 있어야만 나가기 가능
                     if (user.userId != user.participateMatchId && user.participateMatchId != "") {
-                        exitChatRoom()
+                        matchDao.exitUser(user){
+                            settingChatRoom()
+                            UserDao().updateUser(intent.getSerializableExtra("user") as User){
+                            }
+                        }
                         ((activity as HomeActivity).listFragment[2] as MypageFragment).exitSetProfile()
                     }
                     //본인이 만든 방이면
@@ -146,16 +152,18 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    public fun exitChatRoom() {
+    public fun settingChatRoom() {
         val user = intent.getSerializableExtra("user") as User
         matchDao.removeMessageListener(user.participateMatchId)
+
         user.participateMatchId = ""
         intent.putExtra("user", user)
-        UserDao().updateUser(user) {
-            binding.clearChat.performClick()
-            binding.view.performClick()
-            updateSubTitle("", "")
-        }
+        binding.clearChat.performClick()
+        binding.view.performClick()
+        updateSubTitle("", "")
+        ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
+
+
         initChat = false
     }
 
@@ -415,7 +423,6 @@ class ChatListFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         //매칭방 입장 함수
-        enterChatRoom() {}
         return binding.root
     }
 }

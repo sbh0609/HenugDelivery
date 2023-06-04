@@ -71,7 +71,7 @@ class MypageFragment : Fragment() {
 
     fun deliteMatchRoom(user: User, callback: () -> Unit) {
         matchDao.removeMatchRoom(user) {
-            ((activity as HomeActivity).listFragment[1] as ChatListFragment).exitChatRoom()
+            ((activity as HomeActivity).listFragment[1] as ChatListFragment).settingChatRoom()
             exitSetProfile()
             callback()
         }

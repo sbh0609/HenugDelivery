@@ -9,20 +9,121 @@ import com.google.firebase.database.*
 class MatchDao {
     private val database = FirebaseDatabase.getInstance().reference
 
-    private var childEventListener : ChildEventListener? = null
+    private var childEventListener: ChildEventListener? = null
+
     /**
      * input: room <Room 객체>(데이터 클래스의 room객체를 사용한다)
      * output: void
      * 새로운 채팅방을 생성하고 데이터베이스에 저장한다.
      */
-    fun createMatchingroom(room: MatchRoomData, callback: () -> Unit) {
+    fun createMatchingroom(user: User, match: MatchRoomData, callback: () -> Unit) {
         // Generate a new chatroom ID
         // Save the chatroom to the database
-        database.child("chatrooms").child(room.id).setValue(room)
+        database.child("chatrooms").child(match.id).setValue(match)
+            .addOnSuccessListener {
+                createChatRoom(ChatRoom(), match) {
+                    callback()
+                }
+                Log.d("HandleData", "Chatroom created")
+            }
+            .addOnFailureListener {
+                // An error occurred
+                Log.d("HandleData", "Failed to create chatroom")
+            }
+    }
+
+    fun joinUserMatchRoom(user: User, match: MatchRoomData, callback: () -> Unit) {
+        //count값 증가
+        database.child("chatrooms/${match.id}/count").runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val currentValue = mutableData.getValue(Int::class.java)
+                if (currentValue == null) {
+                    mutableData.value = 1
+                } else {
+                    mutableData.value = currentValue + 1
+                }
+                return Transaction.success(mutableData)
+            }
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?,
+            ) {
+            }
+        })
+        //participatePeopleId 리스트 요소 추가
+        val reference = database.child("chatrooms/${match.id}/chatRoom/participatePeopleId")
+        reference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val list =
+                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
+                var updatedList = ArrayList<String>()
+                if (list != null) {
+                    updatedList = list as ArrayList
+                }
+
+                updatedList?.add(user.userId)  // newItem은 추가할 항목
+                reference.setValue(updatedList)
+                    .addOnSuccessListener {
+                        callback()
+                    }.addOnFailureListener {
+                        Log.d("fail100", it.toString())
+                    }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+
+
+    }
+
+    fun exitUser(user: User, callback: () -> Unit) {
+        //count값 감소
+        database.child("chatrooms/${user.participateMatchId}/count").runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val currentValue = mutableData.getValue(Int::class.java)
+                if (currentValue == null) {
+                    mutableData.value = 1
+                } else {
+                    mutableData.value = currentValue - 1
+                }
+                return Transaction.success(mutableData)
+            }
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?,
+            ) { }
+        })
+        //participatePeopleId 리스트 요소 삭제
+        val reference = database.child("chatrooms/${user.participateMatchId}/chatRoom/participatePeopleId")
+        reference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val list =
+                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
+                val updatedList = list as ArrayList
+
+                updatedList.remove(user.userId)
+                reference
+                    .setValue(updatedList)
+                    .addOnSuccessListener {
+                        callback()
+                    }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+
+    fun createChatRoom(chatRoom: ChatRoom, matchRoomData: MatchRoomData, callback: () -> Unit) {
+        database.child("chatrooms/${matchRoomData.id}/chatRoom").setValue(chatRoom)
             .addOnSuccessListener {
                 // Chatroom was created successfully
                 callback()
-                Log.d("HandleData", "Chatroom created")
             }
             .addOnFailureListener {
                 // An error occurred
@@ -76,6 +177,7 @@ class MatchDao {
             }
         })
     }
+
     /**
      * input: chatroomId <String>, callback <(Message) -> Unit>
      * chatroomId는 카카오톡 Id로 대체
@@ -95,15 +197,17 @@ class MatchDao {
                     callback(message)
                 }
             }
+
             // 다른 메소드들은 필요에 따라 구현...
-            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) { }
-            override fun onChildRemoved(dataSnapshot: DataSnapshot) { }
-            override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) { }
-            override fun onCancelled(databaseError: DatabaseError) { }
+            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
+            override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(databaseError: DatabaseError) {}
         }
 
         messagesRef.addChildEventListener(childEventListener!!)
     }
+
     fun removeMessageListener(chatroomId: String) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
@@ -191,16 +295,18 @@ class MatchDao {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(MatchRoomData::class.java)
-                    Log.d("test1000",data.toString())
+                    Log.d("test1000", data.toString())
                     callback(data!!)
                 }
             }
+
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.w(TAG, "loadData:onCancelled", databaseError.toException())
             }
         })
     }
-    fun removeMatchRoom(user:User,callback: () -> Unit){
+
+    fun removeMatchRoom(user: User, callback: () -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("chatrooms/${user.participateMatchId}")
 

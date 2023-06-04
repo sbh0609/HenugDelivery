@@ -2,6 +2,7 @@ package com.tuk.shdelivery.Data
 
 import java.io.Serializable
 import java.util.*
+import kotlin.collections.ArrayList
 
 data class MatchRoomData(
     var id: String= "",
@@ -22,8 +23,7 @@ data class User(
 ) : Serializable
 
 data class ChatRoom(
-    var chatId: String = "",
-    var participatePeopleId: List<String> = ArrayList<String>(),
+    var participatePeopleId: ArrayList<String> = ArrayList<String>(),
     var orderAcceptNum: Int = 0,
     var orderPoint : Int = 0,
 ) : Serializable

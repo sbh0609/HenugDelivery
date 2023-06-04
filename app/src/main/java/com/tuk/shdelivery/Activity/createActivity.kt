@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -68,16 +69,18 @@ class createActivity : AppCompatActivity() {
             binding.category.selectedItem as String,
             deliveryCalendar.timeInMillis,
             binding.description.text.toString(),
-            1,
+            0,
             nowTime.timeInMillis,
             binding.store.text.toString()
         )
 
         var matchdao = MatchDao()
-        matchdao.createMatchingroom(createData){
-            intent.putExtra("createData", createData)
-            setResult(RESULT_OK, intent)
-            finish()
+        matchdao.createMatchingroom((intent.getSerializableExtra("user") as User),createData){
+            matchdao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData){
+                intent.putExtra("createData", createData)
+                setResult(RESULT_OK, intent)
+                finish()
+            }
         }
         //!! createMatchRoom 기능사용!!
     }
