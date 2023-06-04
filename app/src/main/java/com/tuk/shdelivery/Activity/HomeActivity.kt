@@ -11,12 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayout
 import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
-import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
 import com.tuk.shdelivery.FragMent.HomeFragment
 import com.tuk.shdelivery.FragMent.MypageFragment
-import com.tuk.shdelivery.MyPageViewModel
-import com.tuk.shdelivery.MyPageViewModelFactory
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.ToastCustom
@@ -46,8 +43,6 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         setContentView(binding.root)
         val matchDao = MatchDao()  // Initialize matchDao
         val userId = intent.getStringExtra("userId")
-        val viewModelFactory = MyPageViewModelFactory(matchDao, userId!!)
-        val viewModel = ViewModelProvider(this, viewModelFactory).get(MyPageViewModel::class.java)
         myPageFragment = MypageFragment.newInstance(userId!!) // initialize myPageFragment here
         val bundle = Bundle()
         bundle.putString("userId", userId)

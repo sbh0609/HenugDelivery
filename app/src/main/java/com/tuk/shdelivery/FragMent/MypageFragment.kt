@@ -1,21 +1,13 @@
 package com.tuk.shdelivery.FragMent
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.tuk.shdelivery.Activity.ChargeActivity
-import com.tuk.shdelivery.R
-import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.FragmentMypageBinding
-import com.tuk.shdelivery.Activity.settingActivity
 import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.User
-import com.tuk.shdelivery.MyPageViewModel
-import com.tuk.shdelivery.MyPageViewModelFactory
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import java.util.*
@@ -43,11 +35,9 @@ class MypageFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val user = activity?.intent?.getSerializableExtra("user") as User?
-        val userId = user?.userId
-        val matchDao = MatchDao()  // Initialize matchDao
-        val viewModelFactory = MyPageViewModelFactory(matchDao, userId!!)
-        val viewModel = ViewModelProvider(this, viewModelFactory).get(MyPageViewModel::class.java)
+        val user = activity?.intent?.getSerializableExtra("user") as User
+//        val userId = user?.userId
+//        val matchDao = MatchDao()  // Initialize matchDao
 
         MatchDao().getParticipatingMatch(user){
             var match = it
