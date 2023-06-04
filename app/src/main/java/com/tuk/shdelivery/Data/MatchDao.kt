@@ -176,37 +176,19 @@ class MatchDao{
 
         return roomData
     }
-    // In MatchDao.kt
-    private val db = FirebaseDatabase.getInstance()
-//    private val matchRef = db.getReference("MatchRoom")
-//    private val _participatingMatch = MutableLiveData<MatchRoomData>()
-    fun getParticipatingMatch(userId: String): LiveData<MatchRoomData> {
-        val _participatingMatch = MutableLiveData<MatchRoomData>()
-
-        val userRef = database.child("users").child(userId)
-        userRef.addValueEventListener(object : ValueEventListener {
+    fun getParticipatingMatch(user: User, callback : (match : MatchRoomData)->Unit){
+        val matchroomRef = FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
+        matchroomRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val user = dataSnapshot.getValue(User::class.java)
-                if(user != null && user.participateMatchId != null){
-                    val matchRef = database.child("matchRooms")
-                    matchRef.child(user.participateMatchId).addListenerForSingleValueEvent(object: ValueEventListener {
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            val match = dataSnapshot.getValue(MatchRoomData::class.java)
-                            _participatingMatch.value = match
-                        }
-
-                        override fun onCancelled(databaseError: DatabaseError) {
-                            Log.w(TAG, "loadMatch:onCancelled", databaseError.toException())
-                        }
-                    })
+                if (dataSnapshot.exists()) {
+                    val data = dataSnapshot.getValue(MatchRoomData::class.java)
+                    Log.d("test1000",data.toString())
+                    callback(data!!)
                 }
             }
-
             override fun onCancelled(databaseError: DatabaseError) {
-                Log.w(TAG, "loadUser:onCancelled", databaseError.toException())
+                Log.w(TAG, "loadData:onCancelled", databaseError.toException())
             }
         })
-
-        return _participatingMatch
     }
 }

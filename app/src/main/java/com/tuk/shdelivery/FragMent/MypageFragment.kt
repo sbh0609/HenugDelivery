@@ -2,6 +2,7 @@ package com.tuk.shdelivery.FragMent
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -15,6 +16,9 @@ import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.MyPageViewModel
 import com.tuk.shdelivery.MyPageViewModelFactory
+import com.tuk.shdelivery.custom.Data
+import com.tuk.shdelivery.custom.DeliverTime
+import java.util.*
 
 
 class MypageFragment : Fragment() {
@@ -40,28 +44,37 @@ class MypageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val user = activity?.intent?.getSerializableExtra("user") as User?
-        val userId = arguments?.getString("userId") ?: ""
+        val userId = user?.userId
         val matchDao = MatchDao()  // Initialize matchDao
-        val viewModelFactory = MyPageViewModelFactory(matchDao, userId)
+        val viewModelFactory = MyPageViewModelFactory(matchDao, userId!!)
         val viewModel = ViewModelProvider(this, viewModelFactory).get(MyPageViewModel::class.java)
 
-        viewModel.participatingMatch.observe(viewLifecycleOwner, Observer { match ->
+        MatchDao().getParticipatingMatch(user){
+            var match = it
             // Check if participateMatchId is empty
             if (user?.participateMatchId == "") {
                 binding.layoutMatchRoom.root.visibility = View.GONE
             } else {
                 binding.layoutMatchRoom.root.visibility = View.VISIBLE
 
-                // Update the views in layout_match_room
-                binding.layoutMatchRoom.matchId.text = match.id.toString()
+                val category = Data.category()
+
+                val diffMillis = match.deliveryTime - match.createTime
+
+                binding.layoutMatchRoom.tag.text = "${match.menu}"
                 binding.layoutMatchRoom.description.text = match.description
-                binding.layoutMatchRoom.createTime.text = match.createTime.toString()
                 binding.layoutMatchRoom.count.text = match.count.toString()
-                binding.layoutMatchRoom.store.text = match.storeName.toString()
-                // If you have a way to convert deliveryTime to a string you can update it like this
-                binding.layoutMatchRoom.deliveryTime.text = match.deliveryTime.toString()
+                binding.layoutMatchRoom.tagImage.setImageResource(category[match.menu]!!)
+                binding.layoutMatchRoom.store.text = match.storeName
+                binding.layoutMatchRoom.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
+                binding.layoutMatchRoom.createTime.text = DeliverTime(
+                    Calendar.getInstance().apply { timeInMillis = match.createTime }).getCreateTime()
+                binding.layoutMatchRoom.goneCreateTime.text = DeliverTime.setCalendar(
+                    Calendar.getInstance().apply { timeInMillis = match.createTime })
+                binding.layoutMatchRoom.goneDeliveryTime.text = DeliverTime.setCalendar(
+                    Calendar.getInstance().apply { timeInMillis = match.deliveryTime })
             }
-        })
+        }
         return binding.root
     }
     companion object {
