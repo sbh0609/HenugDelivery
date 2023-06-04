@@ -39,7 +39,7 @@ class ChatListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterChatRoom(){}
+        enterChatRoom() {}
 
         //view, clear 버튼 리스너
         visibleListener()
@@ -120,15 +120,15 @@ class ChatListFragment : Fragment() {
                     val user = intent.getSerializableExtra("user") as User
                     //본인이 만든방이 아니여야 나가기 가능, 참여중인 매칭방이 있어야만 나가기 가능
                     if (user.userId != user.participateMatchId && user.participateMatchId != "") {
-                        matchDao.exitUser(user){
+                        matchDao.exitUser(user) {
                             settingChatRoom()
-                            UserDao().updateUser(intent.getSerializableExtra("user") as User){
+                            UserDao().updateUser(intent.getSerializableExtra("user") as User) {
                             }
                         }
                         ((activity as HomeActivity).listFragment[2] as MypageFragment).exitSetProfile()
                     }
                     //본인이 만든 방이면
-                    else if (user.userId == user.participateMatchId){
+                    else if (user.userId == user.participateMatchId) {
                         Toast.makeText(
                             activity,
                             "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)",
@@ -136,7 +136,7 @@ class ChatListFragment : Fragment() {
                         ).show()
                     }
                     //매칭방에 참여중이지 않다면
-                    else if(user.participateMatchId == ""){
+                    else if (user.participateMatchId == "") {
                         val snackbar = Snackbar.make(
                             binding.root,
                             "매칭방을 찾아보세요!",
@@ -172,20 +172,23 @@ class ChatListFragment : Fragment() {
         val user = intent.getSerializableExtra("user") as User
         matchId = user.participateMatchId
         if (matchId != "") {
-            //소제목으로 띄우기
-            updateSubTitle()
 
-            addNewMessageListener(matchId)
-            fetchAllMessages(matchId) {
-                //새로운 메세지 올때 리스너 등록
-                callback()
+            matchDao.getChatRoomData(user) {
+                //소제목으로 띄우기
+                updateSubTitle(it.orderAcceptNum.toString(), it.participatePeopleId.size.toString())
+                addNewMessageListener(matchId)
+                fetchAllMessages(matchId) {
+                    //새로운 메세지 올때 리스너 등록
+                    callback()
 
-                initChat = true
+                    initChat = true
+                }
+                ((activity as HomeActivity).listFragment[2] as MypageFragment).enterSetProfile(user)
+                ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
+
+                //채팅창 보이게
+                binding.nochat.visibility = View.GONE
             }
-            ((activity as HomeActivity).listFragment[2] as MypageFragment).enterSetProfile(user)
-
-            //채팅창 보이게
-            binding.nochat.visibility = View.GONE
         } else {
             binding.nochat.visibility = View.VISIBLE
         }

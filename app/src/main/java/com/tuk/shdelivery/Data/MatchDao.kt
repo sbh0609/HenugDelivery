@@ -246,47 +246,7 @@ class MatchDao {
             }
         })
     }
-
-    fun getJoinedRoom(userId: String): LiveData<MatchRoomData> {
-        val roomData = MutableLiveData<MatchRoomData>()
-
-        // Firebase에서 사용자 정보를 가져옴
-        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.getValue(User::class.java)
-
-                // 사용자가 참여중인 채팅방이 있다면
-                if (user != null && user.participateMatchId.isNotEmpty()) {
-                    val roomId = user.participateMatchId
-
-                    // 해당 채팅방 정보를 Firebase에서 불러옴
-                    val roomRef =
-                        FirebaseDatabase.getInstance().getReference("ChatRooms").child(roomId)
-                    roomRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val room = snapshot.getValue(MatchRoomData::class.java)
-
-                            // 채팅방 정보를 LiveData에 설정
-                            if (room != null) {
-                                roomData.value = room
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // 채팅방 정보를 불러오는데 실패한 경우 에러 처리
-                        }
-                    })
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // 사용자 정보를 불러오는데 실패한 경우 에러 처리
-            }
-        })
-
-        return roomData
-    }
+    
 
     fun getParticipatingMatch(user: User, callback: (match: MatchRoomData) -> Unit) {
         val matchroomRef =
@@ -296,6 +256,22 @@ class MatchDao {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(MatchRoomData::class.java)
                     Log.d("test1000", data.toString())
+                    callback(data!!)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.w(TAG, "loadData:onCancelled", databaseError.toException())
+            }
+        })
+    }
+    fun getChatRoomData(user: User,callback: (chatRoom : ChatRoom) -> Unit){
+        val matchroomRef =
+            FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}/chatRoom")
+        matchroomRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    val data = dataSnapshot.getValue(ChatRoom::class.java)
                     callback(data!!)
                 }
             }
