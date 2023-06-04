@@ -35,6 +35,29 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val user1 = User("2", "원찬2", "", 100L, 0L)
+
+        val intent = Intent(this, HomeActivity::class.java)
+        Udao.getUser(user1.userId.toString()){
+            var result = it
+            //새로운 유저라면
+            if (result == null) {
+                val newUser = user1
+                intent.putExtra("user", newUser)
+                Udao.addUser(newUser)
+            } else {
+                //이미 있는 유저라면 intent에 넣기
+                intent.putExtra("user", result)
+            }
+            startActivity(intent)
+            finish()
+        }
+
+
+//        kakaoLogin()
+    }
+
+    private fun kakaoLogin() {
         // 카톡에서 네이티브키 복사 후 붙혀넣기
         KakaoSdk.init(this, "네이티브키")
         //        Log.d(TAG, "keyhash : ${Utility.getKeyHash(this)}")

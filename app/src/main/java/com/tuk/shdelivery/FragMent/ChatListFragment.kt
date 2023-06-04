@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.Activity.HomeActivity
@@ -32,6 +33,7 @@ class ChatListFragment : Fragment() {
 
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentChatListBinding.inflate(layoutInflater) }
+    var initChat = false
     val matchDao = MatchDao()
     lateinit var matchId: String
 
@@ -43,9 +45,6 @@ class ChatListFragment : Fragment() {
 
         //나가기 버튼 리스너
         createExitButtonListener()
-
-        //매칭방 입장 함수
-        enterChatRoom()
 
         //주문 수락 버튼 리스너
         orderAceptButtonListener()
@@ -155,18 +154,18 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    public fun enterChatRoom() {
+    public fun enterChatRoom(callback : ()->Unit) {
         //채팅방에 접속중인 사람이면 생성시 리스너 달기
         matchId = (intent.getSerializableExtra("user") as User).participateMatchId
         if (matchId != "") {
-            fetchAllMessages(matchId)
+            //소제목으로 띄우기
+            updateSubTitle()
+
+            fetchAllMessages(matchId, callback)
             //새로운 메세지 올때 리스너 등록
             addNewMessageListener(matchId)
             //채팅창 보이게
             binding.nochat.visibility = View.GONE
-
-            //소제목으로 띄우기
-            updateSubTitle()
         } else {
             binding.nochat.visibility = View.VISIBLE
         }
@@ -181,75 +180,100 @@ class ChatListFragment : Fragment() {
     }
     fun addNewMessageListener(matchId: String) {
         matchDao.fetchNewMessage(matchId) {
-            //공지 사항이라면
-            if(it.userId == "주문 수락" || it.userId == "주문 취소"){
-                //바인딩 생성
-                var acceptText = LayoutOrderacceptBinding.inflate(layoutInflater)
-
-                if(it.userId == "주문 수락"){
-
-                    acceptText.name.text = it.userName
-                    acceptText.text.text = "님이 ${it.chat}P 만큼 주문수락 하였습니다."
-                    acceptText.text.setTextColor(resources.getColor(R.color.orangeClick))
-                    acceptText.name.setTextColor(resources.getColor(R.color.orangeClick))
-
-                }else if(it.userId == "주문 취소"){
-
-                    acceptText.name.text = it.userName
-                    acceptText.text.text = "님이 취소 하였습니다."
-                    acceptText.text.setTextColor(resources.getColor(R.color.red))
-                    acceptText.name.setTextColor(resources.getColor(R.color.red))
+            if(initChat){
+                //공지 사항이라면
+                if(it.userId == "주문 수락" || it.userId == "주문 취소"){
+                    createOrerAcceptText(it)
+                    //주문 수락,취소 버튼 활성화
+                    if (it.userName == (intent.getSerializableExtra("user") as User).userName) {
+                        binding.orderAccept.isEnabled = true
+                    }
                 }
-                binding.chatLayout.addView(acceptText.root)
-                //주문 수락,취소 버튼 활성화
-                if(it.userName == (intent.getSerializableExtra("user") as User).userName){
-                    binding.orderAccept.isEnabled = true
-                }
-            }
-            //채팅이라면
-            else{
-                //내가 친 채팅이면 안나오게
-                if (it.userId != (intent.getSerializableExtra("user") as User).userId) {
-                    var infalte = LayoutChatBinding.inflate(layoutInflater)
-                    infalte.userId.text = it.userId
-                    infalte.userName.text = it.userName
-                    infalte.chat.text = it.chat
-                    infalte.chatTime.text = DeliverTime(
-                        Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
-                    binding.chatLayout.addView(infalte.root)
+                //채팅이라면
+                else{
+                    //다른 사람이 친 채팅이면
+                    if (it.userId != (intent.getSerializableExtra("user") as User).userId) {
+
+                        //현재 스크롤 최하단 위치
+                        val scrollMax =
+                            (binding.scrollView.getChildAt(0).height - binding.scrollView.height).coerceAtLeast(0)
+
+
+                        createNotMyChat(it)
+
+                        binding.scrollView.post {
+
+                            //스크롤이 최하단이라면 최하단으로 움직인다.
+                            if (scrollMax == binding.scrollView.scrollY) {
+                                val bottom =
+                                    binding.scrollView.getChildAt(0).bottom + binding.scrollView.paddingBottom
+                                binding.scrollView.scrollTo(0, bottom)
+                            }
+                            //최하단보다  스크롤 하단 버튼을 활성화한다.
+                            else {
+                                Snackbar.make(
+                                    binding.chatLayout,
+                                    "${it.userName} 님이 보내셨습니다.\n${it.chat}",
+                                    Snackbar.LENGTH_LONG
+                                ).apply {
+                                    val textView =
+                                        view.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+                                    setAction("아래로", { binding.scrollDonwButton.performClick() })
+                                    view.background = resources.getDrawable(R.drawable.custom_button_done)
+                                    anchorView = binding.input
+                                    textView.textSize = 18f
+                                }.show()
+                                binding.scrollDonwButton.visibility = View.INVISIBLE
+                            }
+                        }
+
+                    }
+                    //내 채팅은 안한다
+                    else {}
                 }
             }
         }
     }
 
-    fun fetchAllMessages(matchId: String) {
+    private fun createOrerAcceptText(it: Chat) {
+        //바인딩 생성
+        var acceptText = LayoutOrderacceptBinding.inflate(layoutInflater)
+        var color : Int? = null
+
+        if (it.userId == "주문 수락") {
+            acceptText.chat.text = "님이 ${it.chat}P 만큼 주문수락 하였습니다."
+            color = resources.getColor(R.color.orangeClick)
+        } else if (it.userId == "주문 취소") {
+            acceptText.chat.text = "님이 취소 하였습니다."
+            color = resources.getColor(R.color.orange)
+        }
+
+        acceptText.userName.text = it.userName
+        acceptText.userId.text = it.userId
+
+        acceptText.userName.setTextColor(color!!)
+        acceptText.chat.setTextColor(resources.getColor(R.color.orangeClick))
+
+        acceptText.chatTime.text =
+            DeliverTime(Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
+
+        binding.chatLayout.addView(acceptText.root)
+    }
+
+    fun fetchAllMessages(matchId: String, callback: () -> Unit) {
         matchDao.fetchMessages(matchId) {
             for (i in it) {
                 //공지 사항이라면
                 if(i.userId == "주문 수락" || i.userId == "주문 취소"){
+                    Log.d("test101",i.toString())
                     //바인딩 생성
-                    var acceptText = LayoutOrderacceptBinding.inflate(layoutInflater)
-
-                    if(i.userId == "주문 수락"){
-
-                        acceptText.name.text = i.userName
-                        acceptText.text.text = "님이 ${i.chat}P 만큼 주문수락 하였습니다."
-                        acceptText.text.setTextColor(resources.getColor(R.color.orangeClick))
-                        acceptText.name.setTextColor(resources.getColor(R.color.orangeClick))
-
-                    }else if(i.userId == "주문 취소"){
-
-                        acceptText.name.text = i.userName
-                        acceptText.text.text = "님이 취소 하였습니다."
-                        acceptText.text.setTextColor(resources.getColor(R.color.red))
-                        acceptText.name.setTextColor(resources.getColor(R.color.red))
-                    }
-                    binding.chatLayout.addView(acceptText.root)
+                    createOrerAcceptText(i)
                 }
                 //채팅이면
                 else{
-                    //내채팅이면
+                    //내채팅이면 그냥 띄우기
                     if (i.userId == (intent.getSerializableExtra("user") as User).userId) {
+                        Log.d("test102",i.toString())
                         var infalte = LayoutMychatBinding.inflate(layoutInflater)
                         infalte.userId.text = i.userId
                         infalte.userName.text = i.userName
@@ -260,10 +284,13 @@ class ChatListFragment : Fragment() {
                     }
                     //다른사람이 쓴 채팅이면
                     else {
+                        Log.d("test103",it.toString())
                         createNotMyChat(i)
                     }
                 }
             }
+            initChat = true
+            callback()
         }
     }
 
@@ -347,8 +374,8 @@ class ChatListFragment : Fragment() {
         }
     }
 
-
     private fun createNotMyChat(chat: Chat) {
+
         val inflate = LayoutChatBinding.inflate(layoutInflater)
 
         inflate.userId.text = chat.userId
@@ -365,36 +392,9 @@ class ChatListFragment : Fragment() {
                 inflate.profile.visibility = View.GONE
             }
         }
-        //현재 스크롤 최하단 위치
-        val scrollMax =
-            (binding.scrollView.getChildAt(0).height - binding.scrollView.height).coerceAtLeast(0)
+
 
         binding.chatLayout.addView(inflate.root)
-        binding.scrollView.post {
-
-            //스크롤이 최하단이라면 최하단으로 움직인다.
-            if (scrollMax == binding.scrollView.scrollY) {
-                val bottom =
-                    binding.scrollView.getChildAt(0).bottom + binding.scrollView.paddingBottom
-                binding.scrollView.scrollTo(0, bottom)
-            }
-            //최하단보다  스크롤 하단 버튼을 활성화한다.
-            else {
-                Snackbar.make(
-                    binding.chatLayout,
-                    "${chat.userName} 님이 보내셨습니다.\n${chat.chat}",
-                    Snackbar.LENGTH_LONG
-                ).apply {
-                    val textView =
-                        view.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
-                    setAction("아래로", { binding.scrollDonwButton.performClick() })
-                    view.background = resources.getDrawable(R.drawable.custom_button_done)
-                    anchorView = binding.input
-                    textView.textSize = 18f
-                }.show()
-                binding.scrollDonwButton.visibility = View.INVISIBLE
-            }
-        }
     }
 
     override fun onCreateView(
@@ -402,6 +402,8 @@ class ChatListFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
+        //매칭방 입장 함수
+        enterChatRoom(){}
         return binding.root
     }
 }

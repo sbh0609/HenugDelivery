@@ -126,9 +126,10 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             UserDao().updateUser(user){
                 fragment0.reFresh()
 
-                fragment1.enterChatRoom()
+                fragment1.enterChatRoom(){
+                    binding.tabLayout.getTabAt(1)!!.select()
+                }
 
-                binding.tabLayout.getTabAt(1)!!.select()
             }
         }
         //매칭방을 입장한 뒤라면
@@ -140,9 +141,9 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
             intent.putExtra("user", user)
 
-            fragment.enterChatRoom()
-
-            binding.tabLayout.getTabAt(1)!!.select()
+            fragment.enterChatRoom(){
+                binding.tabLayout.getTabAt(1)!!.select()
+            }
         }
         //포인트를 충전한 뒤라면
         if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
