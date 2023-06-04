@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/custom_button_cancle"
-                    android:inputType="numberDecimal"/>
+                    android:inputType="number"/>
                 <Button
                     android:id="@+id/orderAccept"
                     android:visibility="gone"

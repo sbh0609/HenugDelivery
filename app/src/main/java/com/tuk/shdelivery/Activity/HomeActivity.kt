@@ -5,13 +5,10 @@ import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayout
-import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
@@ -171,7 +168,8 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
                 backPressedTime = currentTime
                 ToastCustom.toast(this, "한번더 누르면 종료됩니다.")
             } else {
-                super.onBackPressed()
+                moveTaskToBack(true)
+//                super.onBackPressed()
             }
         }
         binding.tabLayout.getTabAt(0)?.select()

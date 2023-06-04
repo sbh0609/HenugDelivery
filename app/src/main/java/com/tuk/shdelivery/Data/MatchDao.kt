@@ -6,9 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.*
 
-class MatchDao{
+class MatchDao {
     private val database = FirebaseDatabase.getInstance().reference
 
+    private var childEventListener : ChildEventListener? = null
     /**
      * input: room <Room 객체>(데이터 클래스의 room객체를 사용한다)
      * output: void
@@ -87,22 +88,31 @@ class MatchDao{
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
 
-        messagesRef.addChildEventListener(object : ChildEventListener {
+        childEventListener = object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val message = snapshot.getValue(Chat::class.java)
                 if (message != null) {
                     callback(message)
                 }
             }
-            // 이외의 메서드들은 필요에 따라 구현하세요.
+            // 다른 메소드들은 필요에 따라 구현...
             override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) { }
             override fun onChildRemoved(dataSnapshot: DataSnapshot) { }
             override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?) { }
             override fun onCancelled(databaseError: DatabaseError) { }
+        }
 
-            // 다른 메소드들은 필요에 따라 구현...
-        })
+        messagesRef.addChildEventListener(childEventListener!!)
     }
+    fun removeMessageListener(chatroomId: String) {
+        val database = FirebaseDatabase.getInstance()
+        val messagesRef = database.getReference("chatrooms/$chatroomId/messages")
+
+        childEventListener?.let {
+            messagesRef.removeEventListener(it)
+        }
+    }
+
     /**
      * input: callback <(List<Chatroom>) -> Unit>
      * output: void
@@ -147,7 +157,8 @@ class MatchDao{
                     val roomId = user.participateMatchId
 
                     // 해당 채팅방 정보를 Firebase에서 불러옴
-                    val roomRef = FirebaseDatabase.getInstance().getReference("ChatRooms").child(roomId)
+                    val roomRef =
+                        FirebaseDatabase.getInstance().getReference("ChatRooms").child(roomId)
                     roomRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val room = snapshot.getValue(MatchRoomData::class.java)
@@ -172,8 +183,10 @@ class MatchDao{
 
         return roomData
     }
-    fun getParticipatingMatch(user: User, callback : (match : MatchRoomData)->Unit){
-        val matchroomRef = FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
+
+    fun getParticipatingMatch(user: User, callback: (match: MatchRoomData) -> Unit) {
+        val matchroomRef =
+            FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
         matchroomRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
