@@ -117,10 +117,8 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             var user = (intent.getSerializableExtra("user") as User)
             user.participateMatchId = newCreateData.id
             intent.putExtra("user",user)
-            val fragment0 = listFragment.get(0) as HomeFragment
             val fragment1 = listFragment.get(1) as ChatListFragment
             UserDao().updateUser(user){
-                fragment0.reFresh()
 
                 fragment1.enterChatRoom(){
                     binding.tabLayout.getTabAt(1)!!.select()

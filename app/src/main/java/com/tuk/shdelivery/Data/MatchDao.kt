@@ -307,7 +307,7 @@ class MatchDao {
         val matchroomRef =
             FirebaseDatabase.getInstance()
                 .getReference("chatrooms/${user.participateMatchId}/chatRoom")
-        matchroomRef.addValueEventListener(object : ValueEventListener {
+        matchroomRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(ChatRoom::class.java)
