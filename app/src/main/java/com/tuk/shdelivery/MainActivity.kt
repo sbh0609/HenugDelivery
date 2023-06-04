@@ -76,5 +76,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope  {
 
             dao.updateUser(ex)
         }
+/*
+        binding.orderBtn.setOnClickListener{
+            launch {
+                val funcd = matchFunc()
+                val id = "2018156010" //방장 아이디
+                val id2 = "2018156011" //오더 수락 || 취소 아이디
+                val result: Fdatabase? = funcd.getDb(id) //객체 호출
+
+                if (result != null) {
+                    val orderAccept = result.orderAcceptNum + 1 //order수락명수 +1
+                    funcd.addOrderUser(id, id2) //order수락 유저 노드 추가
+                    //funcd.delOrderUser(id, id2) oder취소 유저 노드 제거
+                } else {
+                    binding.text1.text = "User not found"
+                }
+            }
+        }
+*/
     }
 }
