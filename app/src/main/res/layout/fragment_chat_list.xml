@@ -96,26 +96,43 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <EditText
-                    android:padding="10dp"
-                    android:hint="주문에 사용할 포인트를 입력하세요"
-                    android:id="@+id/inputPoint"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/custom_button_cancle"
-                    android:inputType="number"/>
-                <Button
-                    android:id="@+id/orderAccept"
-                    android:visibility="gone"
-                    android:background="@drawable/custom_button_done"
-                    android:layout_width="80dp"
-                    android:layout_height="match_parent"
-                    android:text="주문 수락"/>
+                android:layout_height="match_parent">
 
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <EditText
+                        android:padding="10dp"
+                        android:hint="주문에 사용할 포인트를 입력하세요"
+                        android:id="@+id/inputPoint"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/custom_button_cancle"
+                        android:inputType="number"/>
+                    <Button
+                        android:id="@+id/orderAccept"
+                        android:visibility="gone"
+                        android:background="@drawable/custom_button_done"
+                        android:layout_width="80dp"
+                        android:layout_height="match_parent"
+                        android:text="주문 수락"/>
+
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/deliveryComplite"
+                    android:text="배달 완료"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:visibility="visible"
+                    android:background="@drawable/custom_button_done"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
 

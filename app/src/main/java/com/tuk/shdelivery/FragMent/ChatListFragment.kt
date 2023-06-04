@@ -61,6 +61,12 @@ class ChatListFragment : Fragment() {
 
         //다운 스크롤 버튼 리스너
         createDownScrollButtonListener()
+
+        //배달완료 버튼 리스너
+        binding.deliveryComplite.setOnClickListener {
+            binding.deliveryComplite.isEnabled = false
+
+        }
     }
 
     fun allOrderAccept() {
@@ -72,6 +78,7 @@ class ChatListFragment : Fragment() {
 
         binding.orderAccept.visibility = View.GONE
         binding.inputPoint.isEnabled = false
+        binding.deliveryComplite.visibility = View.VISIBLE
     }
 
     private fun orderAceptButtonListener() {
