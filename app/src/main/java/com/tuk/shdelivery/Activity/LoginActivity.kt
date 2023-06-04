@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user1 = User("2", "원찬2", "", 100L, 0L)
+        val user1 = User("1", "원찬1", "", 100L, 0L)
 
         val intent = Intent(this, HomeActivity::class.java)
         Udao.getUser(user1.userId.toString()){

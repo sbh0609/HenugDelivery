@@ -2,37 +2,114 @@ package com.tuk.shdelivery.Data
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.*
 
 class MatchDao {
-    private val database = FirebaseDatabase.getInstance().reference
+    private var database = FirebaseDatabase.getInstance().reference
 
     private var childEventListener: ChildEventListener? = null
     private var orderAcceptListener: ValueEventListener? = null
 
+    fun getOrderUser(ownerId: String, callback: (Any?) -> (Unit)) {
+        database?.child("chatrooms")?.child(ownerId)?.child("chatRoom")
+            ?.child("orderAcceptNum")?.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        val result = dataSnapshot.getValue(Long::class.java)
+                        callback(result)
+                    } else {
+                        callback(null)
+                    }
+                }
 
-    fun addOrderAcceptListener(matchId: String, callback: () -> Unit) {
+                override fun onCancelled(databaseError: DatabaseError) {
+                }
+            })
+    }
+
+    fun chnOrderUser(ownerId: String, num: Long) {
+        database.child("chatrooms").child(ownerId).child("chatRoom")
+            ?.child("orderAcceptNum")?.setValue(num)
+    }
+
+    fun orderUserPlus(ownerId: String) {
+
+        getOrderUser(ownerId) { num ->
+            if (num != null) {
+                chnOrderUser(ownerId, (num as Long) + 1)
+            }
+        }
+    }
+
+    fun orderUserMisnus(ownerId: String) {
+
+        getOrderUser(ownerId) { num ->
+            if (num != null) {
+                chnOrderUser(ownerId, (num as Long) - 1)
+            }
+        }
+    }
+
+    fun getOrderPoint(ownerId: String, callback: (Any?) -> (Unit)) {
+        database?.child("chatrooms/${ownerId}/chatRoom/orderPoint")
+            ?.addListenerForSingleValueEvent(object : ValueEventListener {
+
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    Log.d("test100", dataSnapshot.toString())
+                    if (dataSnapshot.exists()) {
+                        val result = dataSnapshot.getValue(Long::class.java)
+                        callback(result)
+                    } else {
+                        callback(null)
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                }
+            })
+    }
+
+    fun chnOrderPoint(ownerId: String, point: Int) {
+        database.child("chatrooms").child(ownerId).child("chatRoom").child("orderPoint")
+            .setValue(point)
+    }
+
+    fun orderPointPlus(ownerId: String, point: Int, callback: () -> Unit) {
+
+        getOrderPoint(ownerId) { num ->
+            Log.d("test100", num.toString())
+            if (num != null) {
+                chnOrderPoint(ownerId, point + (num as Long).toInt())
+            }
+            callback()
+        }
+    }
+
+    fun addOrderAcceptListener(
+        matchId: String,
+        callback1: (orderAcceptNum: Int) -> Unit,
+        callback2: () -> Unit,
+    ) {
         val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
         val ref2 = database.child("chatrooms/${matchId}/count")
 
         orderAcceptListener = object : ValueEventListener {
             override fun onDataChange(snapshot1: DataSnapshot) {
                 val value1 = snapshot1.getValue(Int::class.java)
-
-                ref2.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot2: DataSnapshot) {
-                        val value2 = snapshot2.getValue(Int::class.java)
-                        if (value1 != null && value2 != null && value1 > value2) {
-                            // value1이 value2를 넘었을 때의 로직을 여기에 추가합니다.
-                            Log.d("test100", "(ohyes)")
-                            callback()
+                if (value1 != null) {
+                    callback1(value1!!)
+                    ref2.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot2: DataSnapshot) {
+                            val value2 = snapshot2.getValue(Int::class.java)
+                            if (value1 != null && value2 != null && value1 == value2) {
+                                // value1이 value2를 넘었을 때의 로직을 여기에 추가합니다.
+                                callback2()
+                            }
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {}
-                })
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -42,9 +119,10 @@ class MatchDao {
         ref1.addValueEventListener(orderAcceptListener!!)
     }
 
-    fun removeOrderAcceptListener(matchId : String){
+    fun removeOrderAcceptListener(matchId: String) {
         val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
-        ref1.removeEventListener(orderAcceptListener!!)
+        if (orderAcceptListener != null)
+            ref1.removeEventListener(orderAcceptListener!!)
     }
 
     /**
@@ -326,6 +404,8 @@ class MatchDao {
         val myRef = database.getReference("chatrooms/${user.participateMatchId}")
 
         myRef.removeValue().addOnSuccessListener {
+            removeMessageListener(user.participateMatchId)
+            removeOrderAcceptListener(user.participateMatchId)
             callback()
         }.addOnFailureListener { e ->
             Log.e(TAG, "Failed to remove node", e)

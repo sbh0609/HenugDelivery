@@ -2,6 +2,7 @@ package com.tuk.shdelivery.FragMent
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -25,7 +26,12 @@ class MypageFragment : Fragment() {
     var matchDao = MatchDao()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding.Qna.setOnClickListener {
+            val url =
+                "https://open.kakao.com/o/s6Vru8nf" // yourChatRoom을 실제 카카오톡 오픈채팅방의 링크로 변경해주세요.
 
+            startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(url)))
+        }
 
         //충전 버튼 설정
         binding.charge.setOnClickListener {
@@ -37,14 +43,14 @@ class MypageFragment : Fragment() {
         binding.deliteRoom.setOnClickListener {
             val user = intent.getSerializableExtra("user") as User
             //자기가 만든 매칭방일 경우
-            if(user.userId == user.participateMatchId){
-                deliteMatchRoom(user){
+            if (user.userId == user.participateMatchId) {
+                deliteMatchRoom(user) {
                     ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
                 }
             }
             //본인이 만든 매칭방이 아닐경우
-            else{
-                Toast.makeText(context, "본인이 만든 매칭방만 삭제 가능합니다." , Toast.LENGTH_SHORT).show()
+            else {
+                Toast.makeText(context, "본인이 만든 매칭방만 삭제 가능합니다.", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -70,10 +76,19 @@ class MypageFragment : Fragment() {
     }
 
     fun deliteMatchRoom(user: User, callback: () -> Unit) {
-        matchDao.removeMatchRoom(user) {
-            ((activity as HomeActivity).listFragment[1] as ChatListFragment).settingChatRoom()
-            exitSetProfile()
-            callback()
+        val regex = "\\d+".toRegex()
+        val numbers =
+            regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
+        //전부 수락했으면 못지움
+        if (numbers[0] != numbers[1]) {
+            matchDao.removeMatchRoom(user) {
+                val user = intent.getSerializableExtra("user") as User
+                ((activity as HomeActivity).listFragment[1] as ChatListFragment).outSettingChatRoom()
+                exitSetProfile()
+                callback()
+            }
+        } else {
+            Toast.makeText(context, "배달을 완료하세요!! \n문제발생시 문의사항으로 연락주세요", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -113,7 +128,7 @@ class MypageFragment : Fragment() {
             }
         }
         //입장중이지 않다면
-        if(user.participateMatchId == ""){
+        if (user.participateMatchId == "") {
             exitSetProfile()
         }
     }
