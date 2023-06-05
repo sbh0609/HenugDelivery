@@ -49,20 +49,25 @@ class createActivity : AppCompatActivity() {
     }
 
     private fun done() {
-
+        binding.done.isEnabled = false
+        binding.cancle.isEnabled = false
         val nowTime = Calendar.getInstance().apply {
             set(Calendar.SECOND, 59)
         }
-        deliveryCalendar.set(Calendar.SECOND, 0)
-        if (binding.description.text.toString() == "") {
-            Toast.makeText(this, "내용을 입력하세요", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (nowTime >= deliveryCalendar) {
-            Toast.makeText(this, "현재 시간을 확인 하세요", Toast.LENGTH_SHORT).show()
-            return
-        }
 
+        //안되는 경우들
+        deliveryCalendar.set(Calendar.SECOND, 0)
+        if (binding.description.text.toString() == "" || nowTime >= deliveryCalendar) {
+            var text =
+                if (binding.description.text.toString() == "")
+                    "내용을 입력하세요"
+                else
+                    "현재 시간을 확인 하세요"
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+            binding.done.isEnabled = true
+            binding.cancle.isEnabled = true
+            return
+        }
 
         val createData = MatchRoomData(
             (intent.getSerializableExtra("user") as User).userId,
@@ -75,14 +80,13 @@ class createActivity : AppCompatActivity() {
         )
 
         var matchdao = MatchDao()
-        matchdao.createMatchingRoom((intent.getSerializableExtra("user") as User),createData){
-            matchdao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData){
+        matchdao.createMatchingRoom((intent.getSerializableExtra("user") as User), createData) {
+            matchdao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData) {
                 intent.putExtra("createData", createData)
                 setResult(RESULT_OK, intent)
                 finish()
             }
         }
-        //!! createMatchRoom 기능사용!!
     }
 
     private fun createaDatePicker() {

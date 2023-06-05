@@ -72,9 +72,10 @@ class ChatListFragment : Fragment() {
     fun allOrderAccept() {
         //모두 주문을 눌렀을때!!
         val regex = "\\d+".toRegex()
-        val numbers = regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
+        val numbers =
+            regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
 
-        Toast.makeText(context,"배달에 대해 말해 주세요!",Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "배달에 대해 말해 주세요!", Toast.LENGTH_SHORT).show()
 
         binding.orderAccept.visibility = View.GONE
         binding.inputPoint.isEnabled = false
@@ -86,16 +87,17 @@ class ChatListFragment : Fragment() {
             binding.orderAccept.isEnabled = false
 
             val regex = "\\d+".toRegex()
-            val numbers = regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
+            val numbers =
+                regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
 
-            Log.d("test100",numbers.toString())
+            Log.d("test100", numbers.toString())
 
             var text = ""
             var point = 0
 
             //혼자 일땐..
-            if(numbers[1] == 1){
-                Toast.makeText(context,"같이 배달먹어요!!",Toast.LENGTH_SHORT).show()
+            if (numbers[1] == 1) {
+                Toast.makeText(context, "같이 배달먹어요!!", Toast.LENGTH_SHORT).show()
                 binding.orderAccept.isEnabled = true
                 return@setOnClickListener
             }
@@ -139,9 +141,12 @@ class ChatListFragment : Fragment() {
                 chat,
                 (intent.getSerializableExtra("user") as User).participateMatchId
             )
-            Log.d("test100",(intent.getSerializableExtra("user") as User).toString())
-            Log.d("test100",point.toString())
-            matchDao.orderPointPlus((intent.getSerializableExtra("user") as User).participateMatchId, point) {
+            Log.d("test100", (intent.getSerializableExtra("user") as User).toString())
+            Log.d("test100", point.toString())
+            matchDao.orderPointPlus(
+                (intent.getSerializableExtra("user") as User).participateMatchId,
+                point
+            ) {
                 binding.orderAccept.isEnabled = true
             }
 
@@ -153,41 +158,54 @@ class ChatListFragment : Fragment() {
         binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.exit -> {
-                    val regex = "\\d+".toRegex()
-                    val numbers = regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
-                    //전부 수락했으면 못나감
-                    if (numbers[0] != numbers[1]){
-                        val user = intent.getSerializableExtra("user") as User
-                        //본인이 만든방이 아니여야 나가기 가능, 참여중인 매칭방이 있어야만 나가기 가능
-                        if (user.userId != user.participateMatchId && user.participateMatchId != "") {
-                            matchDao.exitUser(user) {
-                                outSettingChatRoom()
-                                UserDao().updateUser(intent.getSerializableExtra("user") as User) {
-                                }
-                            }
-                            ((activity as HomeActivity).listFragment[2] as MypageFragment).exitSetProfile()
+                    val user = intent.getSerializableExtra("user") as User
+
+                    // 방 주인인지 판단
+                    val isOwner = user.userId == user.participateMatchId
+
+                    // 매칭방에 참가 중인지 판단
+                    val isParticipating = user.participateMatchId != ""
+
+                    // 모든 사용자가 주문을 수락한 상태인지 판단
+                    val isAllAccepted = if (isParticipating) {
+                        val regex = "\\d+".toRegex()
+                        val numbers =
+                            regex.findAll(binding.toolbar.subtitle).map { it.value.toInt() }
+                                .toList()
+                        numbers[0] == numbers[1]
+                    } else false
+
+                    when {
+                        // 모든 사용자가 주문을 수락한 상태라면
+                        isAllAccepted -> {
+                            Toast.makeText(
+                                context,
+                                "배달을 완료하세요!! \n문제발생시 문의사항으로 연락주세요",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        //본인이 만든 방이면
-                        else if (user.userId == user.participateMatchId) {
+                        // 방 주인이라면
+                        isOwner -> {
                             Toast.makeText(
                                 activity,
                                 "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                        //매칭방에 참여중이지 않다면
-                        else if (user.participateMatchId == "") {
-                            val snackbar = Snackbar.make(
-                                binding.root,
-                                "매칭방을 찾아보세요!",
-                                Snackbar.LENGTH_SHORT
-                            )
-                            snackbar.setAction("알겠습니다.") {
-                                snackbar.dismiss()
-                            }.show()
+                        // 매칭방에 참가 중이라면
+                        isParticipating -> {
+                            matchDao.exitUser(user) {
+                                outSettingChatRoom()
+                                UserDao().updateUser(user) {}
+                            }
+                            ((activity as HomeActivity).listFragment[2] as MypageFragment).exitSetProfile()
                         }
-                    } else{
-                        Toast.makeText(context,"배달을 완료하세요!! \n문제발생시 문의사항으로 연락주세요",Toast.LENGTH_SHORT).show()
+                        // 아무것도 해당하지 않는 경우
+                        else -> {
+                            val snackbar =
+                                Snackbar.make(binding.root, "매칭방을 찾아보세요!", Snackbar.LENGTH_SHORT)
+                            snackbar.setAction("알겠습니다.") { snackbar.dismiss() }.show()
+                        }
                     }
                 }
             }
@@ -212,7 +230,6 @@ class ChatListFragment : Fragment() {
             binding.toolbar.subtitle = ""
             ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
 
-
             initChat = false
         }
     }
@@ -225,8 +242,10 @@ class ChatListFragment : Fragment() {
 
             matchDao.getChatRoomData(user) {
                 //소제목으로 띄우기
-                binding.toolbar.subtitle =
-                    String.format("%s / %s 주문 수락", it.orderAcceptNum.toString(), it.participatePeopleId.size.toString())
+                updateSubTitle(
+                    it.orderAcceptNum.toString(),
+                    it.participatePeopleId.size.toString()
+                )
                 addNewMessageListener(matchId)
                 fetchAllMessages(matchId) {
                     //새로운 메세지 올때 리스너 등록
@@ -237,7 +256,8 @@ class ChatListFragment : Fragment() {
 
                 //모두 주문 수락 리스너
                 matchDao.addOrderAcceptListener(matchId, { int ->
-                    binding.toolbar.subtitle = int.toString() + binding.toolbar.subtitle.toString().substring(1)
+                    binding.toolbar.subtitle =
+                        int.toString() + binding.toolbar.subtitle.toString().substring(1)
                 },
                     { allOrderAccept() })
 
