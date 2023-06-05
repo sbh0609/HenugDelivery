@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -30,7 +31,7 @@ class MypageFragment : Fragment() {
             val url =
                 "https://open.kakao.com/o/s6Vru8nf" // yourChatRoom을 실제 카카오톡 오픈채팅방의 링크로 변경해주세요.
 
-            startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
 
         //충전 버튼 설정
@@ -77,8 +78,10 @@ class MypageFragment : Fragment() {
 
     fun deliteMatchRoom(user: User, callback: () -> Unit) {
         val regex = "\\d+".toRegex()
+
         val numbers =
-            regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
+            regex.findAll(((activity as HomeActivity).listFragment[1] as ChatListFragment).binding.toolbar.subtitle.toString())
+                .map { it.value.toInt() }.toList()
         //전부 수락했으면 못지움
         if (numbers[0] != numbers[1]) {
             matchDao.removeMatchRoom(user) {

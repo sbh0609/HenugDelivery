@@ -96,6 +96,7 @@ class ChatListFragment : Fragment() {
             //혼자 일땐..
             if(numbers[1] == 1){
                 Toast.makeText(context,"같이 배달먹어요!!",Toast.LENGTH_SHORT).show()
+                binding.orderAccept.isEnabled = true
                 return@setOnClickListener
             }
             //!!! 주문 수락 기능
