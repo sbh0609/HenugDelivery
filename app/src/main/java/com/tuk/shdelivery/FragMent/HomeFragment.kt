@@ -1,5 +1,6 @@
 package com.tuk.shdelivery.FragMent
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -26,11 +27,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
-class HomeFragment() : Fragment(), CoroutineScope {
-    private var job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
+class HomeFragment() : Fragment(){
 
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
@@ -72,12 +69,8 @@ class HomeFragment() : Fragment(), CoroutineScope {
     private fun createRecyclerView() {
         binding.toolbar.title = "전체"
         //데이터를 불러온다.
-        var matchDao = MatchDao()
-
-        launch {
-            val lst = async { loadData() }.await()
-
-            adapter = CustomAdapter(lst)
+        loadData {
+            adapter = CustomAdapter(it)
 
             binding.recycleView.adapter = adapter
 
@@ -86,6 +79,7 @@ class HomeFragment() : Fragment(), CoroutineScope {
 
             binding.recycleView.adapter!!.notifyDataSetChanged()
         }
+
         //스크롤 리스너 설정
         createScrollListener()
     }
@@ -123,34 +117,18 @@ class HomeFragment() : Fragment(), CoroutineScope {
     }
 
     /**DB에서 데이터 불러오는 함수*/
-    suspend fun loadData(): ArrayList<MatchRoomData> = withContext(Dispatchers.IO) {
-        val deferred = CompletableDeferred<ArrayList<MatchRoomData>>()
+    fun loadData(callback : (data : ArrayList<MatchRoomData>)->Unit){
 
-        adapter?.listData?.clear()
-
-        var matchDao = MatchDao()
-        var result = ArrayList<MatchRoomData>()
-        matchDao.fetchChatrooms {
-            result = it as ArrayList<MatchRoomData>
-
-            //백업
-            datalist = result
-
-            deferred.complete(result)
+        MatchDao.fetchChatrooms {
+            datalist = it
+            callback(it)
         }
-        deferred.await()
     }
 
     /**새로고침 함수*/
-    fun reFresh(): Unit {
-        adapter?.listData?.clear()
-
-        launch {
-            val loadData = loadData()
-            //!!여기도 refresh부분
-            for (data in loadData) {
-                adapter?.listData?.add(data)
-            }
+    fun reFresh(){
+        loadData {
+            adapter?.listData = it
 
             adapter?.notifyDataSetChanged()
 

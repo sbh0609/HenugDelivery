@@ -79,9 +79,8 @@ class createActivity : AppCompatActivity() {
             binding.store.text.toString()
         )
 
-        var matchdao = MatchDao()
-        matchdao.createMatchingRoom((intent.getSerializableExtra("user") as User), createData) {
-            matchdao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData) {
+        MatchDao.createMatchingRoom((intent.getSerializableExtra("user") as User), createData) {
+            MatchDao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData) {
                 intent.putExtra("createData", createData)
                 setResult(RESULT_OK, intent)
                 finish()

@@ -1,21 +1,16 @@
 package com.tuk.shdelivery.FragMent
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.tuk.shdelivery.Activity.ChargeActivity
 import com.tuk.shdelivery.Activity.HomeActivity
 import com.tuk.shdelivery.databinding.FragmentMypageBinding
 import com.tuk.shdelivery.Data.MatchDao
-import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
-import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import java.util.*
@@ -24,7 +19,6 @@ import java.util.*
 class MypageFragment : Fragment() {
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentMypageBinding.inflate(layoutInflater) }
-    var matchDao = MatchDao()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.Qna.setOnClickListener {
@@ -57,7 +51,7 @@ class MypageFragment : Fragment() {
         }
 
         //처음 프로필 세팅
-        enterSetProfile(intent.getSerializableExtra("user") as User)
+        SetProfile(intent.getSerializableExtra("user") as User)
 
         //마이페이지 유저이름, 포인트 설정
         updateProfile()
@@ -84,8 +78,7 @@ class MypageFragment : Fragment() {
                 .map { it.value.toInt() }.toList()
         //전부 수락했으면 못지움
         if (numbers[0] != numbers[1]) {
-            matchDao.removeMatchRoom(user) {
-                val user = intent.getSerializableExtra("user") as User
+            MatchDao.removeMatchRoom(user) {
                 ((activity as HomeActivity).listFragment[1] as ChatListFragment).outSettingChatRoom()
                 exitSetProfile()
                 callback()
@@ -100,10 +93,10 @@ class MypageFragment : Fragment() {
         binding.deliteRoom.visibility = View.GONE
     }
 
-    fun enterSetProfile(user: User) {
+    fun SetProfile(user: User) {
         //매칭방에 입장중이라면
         if (user.participateMatchId != "") {
-            matchDao.getParticipatingMatch(user) {
+            MatchDao.getParticipatingMatch(user) {
                 var match = it
                 binding.layoutMatchRoom.root.visibility = View.VISIBLE
                 //본인이 만든 방이면 삭제 버튼 활성화
@@ -134,5 +127,7 @@ class MypageFragment : Fragment() {
         if (user.participateMatchId == "") {
             exitSetProfile()
         }
+
+        updateProfile()
     }
 }

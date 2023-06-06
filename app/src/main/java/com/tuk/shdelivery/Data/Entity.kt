@@ -24,6 +24,7 @@ data class User(
 
 data class ChatRoom(
     var participatePeopleId: ArrayList<String> = ArrayList<String>(),
+    var orderAcceptPeopleId : ArrayList<String> = ArrayList<String>(),
     var orderAcceptNum: Int = 0,
     var orderPoint : Int = 0,
 ) : Serializable

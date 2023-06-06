@@ -94,13 +94,13 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.show(listFragment[tab?.position!!]).commit()
+                transaction.show(listFragment[tab?.position!!]).commitAllowingStateLoss()
                 tab.icon?.setColorFilter(getColor(R.color.orange), PorterDuff.Mode.SRC_IN)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.hide(listFragment[tab?.position!!]).commit()
+                transaction.hide(listFragment[tab?.position!!]).commitAllowingStateLoss()
                 tab?.icon?.setColorFilter(getColor(R.color.white), PorterDuff.Mode.SRC_IN)
             }
 

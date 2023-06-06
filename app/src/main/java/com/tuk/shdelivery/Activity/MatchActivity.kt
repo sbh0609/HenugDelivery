@@ -19,7 +19,6 @@ import java.util.*
 class MatchActivity : AppCompatActivity() {
     val binding by lazy { ActivityMatchBinding.inflate(layoutInflater) }
     val userDao = UserDao()
-    val matchDao = MatchDao()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -41,7 +40,7 @@ class MatchActivity : AppCompatActivity() {
                 user.participateMatchId = (intent.getSerializableExtra("selectMatchData") as MatchRoomData).id
                 intent.putExtra("user",user)
                 userDao.updateUser(user){
-                    matchDao.joinUserMatchRoom(user,intent.getSerializableExtra("selectMatchData") as MatchRoomData){
+                    MatchDao.joinUserMatchRoom(user,intent.getSerializableExtra("selectMatchData") as MatchRoomData){
                         setResult(Activity.RESULT_OK, intent)
                         finish()
                     }
