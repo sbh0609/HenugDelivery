@@ -34,22 +34,49 @@ class MatchActivity : AppCompatActivity() {
         }
         //매칭방 입장
         binding.done.setOnClickListener {
-            var user = intent.getSerializableExtra("user") as User
-            //매칭방이 없어야 가능
-            if(user.participateMatchId == ""){
-                user.participateMatchId = (intent.getSerializableExtra("selectMatchData") as MatchRoomData).id
-                intent.putExtra("user",user)
-                userDao.updateUser(user){
-                    MatchDao.joinUserMatchRoom(user,intent.getSerializableExtra("selectMatchData") as MatchRoomData){
-                        setResult(Activity.RESULT_OK, intent)
+            enterButton()
+        }
+    }
+
+    private fun enterButton() {
+        fun showToast(message: String) {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
+
+        binding.done.isEnabled = false
+
+        val user = intent.getSerializableExtra("user") as User
+        val selectData = intent.getSerializableExtra("selectMatchData") as MatchRoomData
+
+        // If the user is not in a match room
+        if (user.participateMatchId.isEmpty()) {
+            MatchDao.getChatRoomData(selectData.id) { chatRoomData ->
+                if (chatRoomData == null) {
+                    showToast("사라진 방 입니다.")
+                    finish()
+                } else {
+                    intent.putExtra("selectChatRoom", chatRoomData)
+                    // If the room is not full
+                    if (chatRoomData.participatePeopleId.size != chatRoomData.orderAcceptNum) {
+                        user.participateMatchId = selectData.id
+                        intent.putExtra("user", user)
+                        userDao.updateUser(user) {
+                            MatchDao.joinUserMatchRoom(user, selectData) {
+                                setResult(RESULT_OK, intent)
+                                finish()
+                            }
+                        }
+                    } else {
+                        // If the room is already in delivery state
+                        showToast("배달이 시작된 방입니다.")
                         finish()
                     }
                 }
-            } else{
-                Toast.makeText(applicationContext,"매칭방에 이미 입장중 입니다.",Toast.LENGTH_SHORT).show()
             }
+        } else {
+            showToast("매칭방에 이미 입장중 입니다.")
+            finish()
         }
-
     }
 
     private fun setText() {

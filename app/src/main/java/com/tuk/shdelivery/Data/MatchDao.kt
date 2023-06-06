@@ -10,118 +10,186 @@ object MatchDao {
     var childEventListener: ChildEventListener? = null
     var orderAcceptListener: ValueEventListener? = null
     var peopleNumListener: ValueEventListener? = null
+    var deliveryCompliteListenner : ValueEventListener? = null
 
-    fun orderUserPlus2(user: User, callback: (Any?) -> (Unit)) {
-        val orderAcceptNumRef = database?.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
-
-        orderAcceptNumRef?.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        var result = dataSnapshot.getValue(Long::class.java)
-                        if(result == null){
-                            result = 0
-                        }
-                        orderAcceptNumRef.setValue(result.toInt() + 1)
-                    }
-                }
-                override fun onCancelled(databaseError: DatabaseError) {
-                }
-            })
-
-        //orderAcceptPeopleId 리스트 요소 추가
+    fun deliveryCompliteListener(user: User, callback: () -> Unit){
         val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
-        ref3.addListenerForSingleValueEvent(object : ValueEventListener {
+
+        deliveryCompliteListenner = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val list =
-                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
-                var updatedList = ArrayList<String>()
-                if (list != null) {
-                    updatedList = list as ArrayList
-                }
-
-                updatedList?.add(user.userId)  // newItem은 추가할 항목
-                ref3.setValue(updatedList)
-                    .addOnSuccessListener {
-                        callback(null)
-                    }.addOnFailureListener {
-                        Log.d("fail100", it.toString())
-                    }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-            }
-        })
-
-    }
-    fun orderUserMisnus2(user: User, callback: (Any?) -> (Unit)) {
-        val orderAcceptNumRef = database?.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
-
-        orderAcceptNumRef?.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    var result = dataSnapshot.getValue(Long::class.java)
-                    if(result == null){
-                        result = 0
-                    }
-                    orderAcceptNumRef.setValue(result.toInt() - 1)
+                if (dataSnapshot.value == null) {
+                    callback()
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
+                Log.w("TAG", "loadData:onCancelled", databaseError.toException())
+            }
+        }
+
+        ref3.addValueEventListener(deliveryCompliteListenner!!)
+    }
+
+    fun orderUserPlus2(user: User, callback: (Any?) -> (Unit)) {
+        val orderAcceptNumRef = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
+
+        orderAcceptNumRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val currentValue = mutableData.getValue(Long::class.java)
+                if (currentValue == null) {
+                    mutableData.value = 1L
+                } else {
+                    mutableData.value = currentValue + 1
+                }
+                return Transaction.success(mutableData)
+            }
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?,
+            ) {
+                // OrderAcceptNum 트랜잭션 완료 후, 다음 작업을 실행
+                if (committed) {
+                    //orderAcceptPeopleId 리스트 요소 추가
+                    val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
+                    ref3.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                            val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
+                            val updatedList = if (list != null) list as ArrayList else ArrayList<String>()
+
+                            // Only update if user is not already in the list
+                            if (!updatedList.contains(user.userId)) {
+                                updatedList.add(user.userId)
+                                mutableData.value = updatedList
+                            }
+
+                            return Transaction.success(mutableData)
+                        }
+
+                        override fun onComplete(
+                            databaseError: DatabaseError?,
+                            committed: Boolean,
+                            dataSnapshot: DataSnapshot?
+                        ) {
+                            if (databaseError == null) {
+                                callback(null)
+                            } else {
+                                callback(databaseError)
+                            }
+                        }
+                    })
+                }
             }
         })
+    }
+    fun orderUserMisnus2(user: User, callback: (Any?) -> (Unit)) {
+        val orderAcceptNumRef = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
 
+        orderAcceptNumRef.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val currentValue = mutableData.getValue(Long::class.java)
+                if (currentValue == null || currentValue <= 0) {
+                    mutableData.value = 0L
+                } else {
+                    mutableData.value = currentValue - 1
+                }
+                return Transaction.success(mutableData)
+            }
 
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?,
+            ) {
+                // OrderAcceptNum 트랜잭션 완료 후, 다음 작업을 실행
+                if (committed) {
+                    //orderAcceptPeopleId 리스트 요소 삭제
+                    val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
+                    ref3.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                            val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
+                            val updatedList = list as ArrayList
+
+                            // Only update if user is in the list
+                            if(updatedList.contains(user.userId)) {
+                                updatedList.remove(user.userId)
+                                mutableData.value = updatedList
+                            }
+
+                            return Transaction.success(mutableData)
+                        }
+
+                        override fun onComplete(
+                            databaseError: DatabaseError?,
+                            committed: Boolean,
+                            dataSnapshot: DataSnapshot?
+                        ) {
+                            if (databaseError == null) {
+                                callback(null)
+                            } else {
+                                callback(databaseError)
+                            }
+                        }
+                    })
+                }
+            }
+        })
+    }
+    fun deliveryComplite(user: User, callback: (Any?) -> Unit){
         //orderAcceptPeopleId 리스트 요소 삭제
         val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
-        ref3.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val list =
-                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
+        ref3.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
                 val updatedList = list as ArrayList
 
                 updatedList.remove(user.userId)
-                ref3
-                    .setValue(updatedList)
-                    .addOnSuccessListener {
-                        callback(null)
-                    }
+                mutableData.value = updatedList
+
+                return Transaction.success(mutableData)
             }
-            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?
+            ) {
+                // Transaction completed
+                if (committed) {
+                    callback(null)
+                } else {
+                    callback(databaseError)
+                }
+            }
         })
-    }
-
-    fun getOrderPoint(ownerId: String, callback: (Any?) -> (Unit)) {
-        database?.child("chatrooms/${ownerId}/chatRoom/orderPoint")
-            ?.addListenerForSingleValueEvent(object : ValueEventListener {
-
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        val result = dataSnapshot.getValue(Long::class.java)
-                        callback(result)
-                    } else {
-                        callback(null)
-                    }
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                }
-            })
-    }
-
-    fun setOrderPoint(ownerId: String, point: Int) {
-        database.child("chatrooms").child(ownerId).child("chatRoom").child("orderPoint")
-            .setValue(point)
     }
 
     fun updateOrderPoint(ownerId: String, point: Int, callback: () -> Unit) {
 
-        getOrderPoint(ownerId) { num ->
-            if (num != null) {
-                setOrderPoint(ownerId, point + (num as Long).toInt())
+        val reference = database.child("chatrooms/${ownerId}/chatRoom/orderPoint")
+        reference.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                val currentValue = mutableData.getValue(Long::class.java)
+                if (currentValue == null) {
+                    mutableData.value = 0L  // 처음 설정하는 경우, 값을 10으로 설정
+                } else {
+                    mutableData.value = currentValue + point.toLong()  // 기존 값에 10을 더함
+                }
+                return Transaction.success(mutableData) // 트랜잭션의 결과를 반환
             }
-            callback()
-        }
+
+            override fun onComplete(
+                databaseError: DatabaseError?,
+                committed: Boolean,
+                dataSnapshot: DataSnapshot?
+            ) {
+                // 트랜잭션이 완료된 후 실행할 작업
+                if (databaseError == null) {
+                    callback()
+                }
+            }
+        })
     }
 
     fun addOrderAcceptListener(
@@ -179,6 +247,12 @@ object MatchDao {
         removeMessageListener(matchId)
         removeOrderAcceptListener(matchId)
         removePeopleNumListener(matchId)
+        removedeliveryCompliteListenner(matchId)
+    }
+    fun removedeliveryCompliteListenner(matchId: String) {
+        val ref3 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptPeopleId")
+        if (orderAcceptListener != null)
+            ref3.removeEventListener(orderAcceptListener!!)
     }
     fun removeOrderAcceptListener(matchId: String) {
         val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
@@ -222,7 +296,7 @@ object MatchDao {
     }
 
     fun joinUserMatchRoom(user: User, match: MatchRoomData, callback: () -> Unit) {
-        //count값 증가
+// count값 증가
         database.child("chatrooms/${match.id}/count").runTransaction(object : Transaction.Handler {
             override fun doTransaction(mutableData: MutableData): Transaction.Result {
                 val currentValue = mutableData.getValue(Int::class.java)
@@ -239,36 +313,41 @@ object MatchDao {
                 committed: Boolean,
                 dataSnapshot: DataSnapshot?,
             ) {
-            }
-        })
-        //participatePeopleId 리스트 요소 추가
-        val reference = database.child("chatrooms/${match.id}/chatRoom/participatePeopleId")
-        reference.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val list =
-                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
-                var updatedList = ArrayList<String>()
-                if (list != null) {
-                    updatedList = list as ArrayList
+                if (databaseError != null) {
+                    Log.e("Firebase", "Error in count transaction: ${databaseError.message}")
+                } else if (committed) {
+                    //participatePeopleId 리스트 요소 추가
+                    val reference = database.child("chatrooms/${match.id}/chatRoom/participatePeopleId")
+                    reference.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                            val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
+                            val updatedList = if (list != null) list as ArrayList else ArrayList<String>()
+
+                            updatedList.add(user.userId)  // newItem은 추가할 항목
+                            mutableData.value = updatedList
+
+                            return Transaction.success(mutableData)
+                        }
+
+                        override fun onComplete(
+                            databaseError: DatabaseError?,
+                            committed: Boolean,
+                            dataSnapshot: DataSnapshot?,
+                        ) {
+                            if (databaseError != null) {
+                                Log.e("Firebase", "Error in participatePeopleId transaction: ${databaseError.message}")
+                            } else if (committed) {
+                                callback()
+                            }
+                        }
+                    })
                 }
-
-                updatedList?.add(user.userId)  // newItem은 추가할 항목
-                reference.setValue(updatedList)
-                    .addOnSuccessListener {
-                        callback()
-                    }.addOnFailureListener {
-                        Log.d("fail100", it.toString())
-                    }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
             }
         })
 
     }
 
     fun exitUser(user: User, callback: () -> Unit) {
-        //count값 감소
         database.child("chatrooms/${user.participateMatchId}/count")
             .runTransaction(object : Transaction.Handler {
                 override fun doTransaction(mutableData: MutableData): Transaction.Result {
@@ -286,27 +365,27 @@ object MatchDao {
                     committed: Boolean,
                     dataSnapshot: DataSnapshot?,
                 ) {
+                    if (committed) {
+                        // 'count' 트랜잭션 완료 후 'participatePeopleId' 작업 수행
+                        val reference = database.child("chatrooms/${user.participateMatchId}/chatRoom/participatePeopleId")
+                        reference.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                val list = dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
+                                val updatedList = list as ArrayList<String>
+
+                                updatedList.remove(user.userId)
+                                reference
+                                    .setValue(updatedList)
+                                    .addOnSuccessListener {
+                                        callback()
+                                    }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {}
+                        })
+                    }
                 }
             })
-        //participatePeopleId 리스트 요소 삭제
-        val reference =
-            database.child("chatrooms/${user.participateMatchId}/chatRoom/participatePeopleId")
-        reference.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val list =
-                    dataSnapshot.getValue(object : GenericTypeIndicator<List<String>>() {})
-                val updatedList = list as ArrayList
-
-                updatedList.remove(user.userId)
-                reference
-                    .setValue(updatedList)
-                    .addOnSuccessListener {
-                        callback()
-                    }
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
     }
 
     fun createChatRoom(chatRoom: ChatRoom, matchRoomData: MatchRoomData, callback: () -> Unit) {
@@ -408,15 +487,17 @@ object MatchDao {
         })
     }
 
-    fun getChatRoomData(user: User, callback: (chatRoom: ChatRoom) -> Unit) {
+    fun getChatRoomData(matchId: String, callback: (chatRoom: ChatRoom?) -> Unit) {
         val matchroomRef =
             FirebaseDatabase.getInstance()
-                .getReference("chatrooms/${user.participateMatchId}/chatRoom")
+                .getReference("chatrooms/${matchId}/chatRoom")
         matchroomRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(ChatRoom::class.java)
                     callback(data!!)
+                } else{
+                    callback(null)
                 }
             }
 

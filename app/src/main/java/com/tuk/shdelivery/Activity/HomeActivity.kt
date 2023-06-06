@@ -134,6 +134,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             val fragment = listFragment.get(1) as ChatListFragment
 
             intent.putExtra("user", user)
+            intent.putExtra("selectChatRoom",fetchIntent.getSerializableExtra("selectChatRoom"))
 
             fragment.enterChatRoom(){
                 binding.tabLayout.getTabAt(1)!!.select()
