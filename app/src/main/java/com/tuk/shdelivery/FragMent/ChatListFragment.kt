@@ -3,7 +3,6 @@ package com.tuk.shdelivery.FragMent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -16,7 +15,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.Activity.HomeActivity
 import com.tuk.shdelivery.Data.Chat
-import com.tuk.shdelivery.Data.ChatRoom
 import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
@@ -105,6 +103,7 @@ class ChatListFragment : Fragment() {
     private fun orderAceptButtonListener() {
         binding.orderAccept.setOnClickListener {
             binding.orderAccept.isEnabled = false
+            binding.inputPoint.isEnabled = false
             val regex = "\\d+".toRegex()
             val numbers =
                 regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
@@ -116,6 +115,7 @@ class ChatListFragment : Fragment() {
             if (numbers[1] == 1) {
                 Toast.makeText(context, "같이 배달먹어요!!", Toast.LENGTH_SHORT).show()
                 binding.orderAccept.isEnabled = true
+                binding.inputPoint.isEnabled = true
                 return@setOnClickListener
             }
             val user = intent.getSerializableExtra("user") as User
@@ -128,6 +128,7 @@ class ChatListFragment : Fragment() {
                     Toast.makeText(requireContext(), "보유 포인트보다 많이 적을 수 없습니다.", Toast.LENGTH_SHORT)
                         .show()
                     binding.orderAccept.isEnabled = true
+                    binding.inputPoint.isEnabled = true
                     return@setOnClickListener
                 }
                 binding.orderAccept.text = "주문 취소"
