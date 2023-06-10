@@ -27,7 +27,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
-class HomeFragment() : Fragment(){
+class HomeFragment() : Fragment() {
 
     val intent by lazy { requireActivity().intent }
     val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
@@ -57,11 +57,10 @@ class HomeFragment() : Fragment(){
 
     fun createMatching(): Unit {
         //참여중인 매칭방이 없어야 만들수 있다.
-        if((intent.getSerializableExtra("user") as User).participateMatchId == ""){
+        if ((intent.getSerializableExtra("user") as User).participateMatchId == "") {
             intent.setClass(requireContext(), createActivity::class.java)
             requireActivity().startActivityForResult(intent, 0)
-        }
-        else{
+        } else {
             ToastCustom.toast(requireContext(), "참여중인 매칭방이 있습니다.")
         }
     }
@@ -117,7 +116,7 @@ class HomeFragment() : Fragment(){
     }
 
     /**DB에서 데이터 불러오는 함수*/
-    fun loadData(callback : (data : ArrayList<MatchRoomData>)->Unit){
+    fun loadData(callback: (data: ArrayList<MatchRoomData>) -> Unit) {
 
         MatchDao.fetchChatrooms {
             datalist = it
@@ -126,9 +125,10 @@ class HomeFragment() : Fragment(){
     }
 
     /**새로고침 함수*/
-    fun reFresh(){
+    fun reFresh() {
         loadData {
-            adapter?.listData = it
+            adapter?.listData =
+                if (binding.toolbar.title == "전체") it else it.filter { it.menu == binding.toolbar.title } as ArrayList<MatchRoomData>
 
             adapter?.notifyDataSetChanged()
 
@@ -155,8 +155,7 @@ class HomeFragment() : Fragment(){
 
         //레이아웃 매니져 설정
         binding.IconScroll.layoutManager = LinearLayoutManager(
-            requireContext(),
-            LinearLayoutManager.HORIZONTAL, false
+            requireContext(), LinearLayoutManager.HORIZONTAL, false
         )
 
     }
@@ -165,8 +164,7 @@ class HomeFragment() : Fragment(){
     //신경쓰지 않아도 되는 스크롤 뷰
     inner class CustomAdapter(var listData: ArrayList<MatchRoomData>) :
         RecyclerView.Adapter<CustomAdapter.Holder>() {
-        inner class Holder(var bd: LayoutMatchRoomBinding) :
-            RecyclerView.ViewHolder(bd.root) {
+        inner class Holder(var bd: LayoutMatchRoomBinding) : RecyclerView.ViewHolder(bd.root) {
             init {
                 bd.root.setOnClickListener {
                     //!!! 여기도 수정 id, data라는 key값?
@@ -195,12 +193,12 @@ class HomeFragment() : Fragment(){
                 bd.tagImage.setImageResource(categoryMap[data.menu]!!)
                 bd.store.text = data.storeName
                 bd.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
-                bd.createTime.text = DeliverTime(
-                    Calendar.getInstance().apply { timeInMillis = data.createTime }).getCreateTime()
-                bd.goneCreateTime.text = DeliverTime.setCalendar(
-                    Calendar.getInstance().apply { timeInMillis = data.createTime })
-                bd.goneDeliveryTime.text = DeliverTime.setCalendar(
-                    Calendar.getInstance().apply { timeInMillis = data.deliveryTime })
+                bd.createTime.text = DeliverTime(Calendar.getInstance()
+                    .apply { timeInMillis = data.createTime }).getCreateTime()
+                bd.goneCreateTime.text = DeliverTime.setCalendar(Calendar.getInstance()
+                    .apply { timeInMillis = data.createTime })
+                bd.goneDeliveryTime.text = DeliverTime.setCalendar(Calendar.getInstance()
+                    .apply { timeInMillis = data.deliveryTime })
             }
         }
 
@@ -239,10 +237,8 @@ class HomeFragment() : Fragment(){
                     binding.toolbar.title = bd.TextView.text
                     ToastCustom.toast(context!!, "${bd.TextView.text} 메뉴 선택!")
                     adapter?.listData =
-                        if (bd.TextView.text != "전체")
-                            datalist?.filter { it.menu == bd.TextView.text } as ArrayList<MatchRoomData>
-                        else
-                            datalist
+                        if (bd.TextView.text != "전체") datalist?.filter { it.menu == bd.TextView.text } as ArrayList<MatchRoomData>
+                        else datalist
                     adapter?.notifyDataSetChanged()
                 }
             }
@@ -258,8 +254,7 @@ class HomeFragment() : Fragment(){
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-            val b =
-                CategoryIconBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val b = CategoryIconBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             val holder = Holder(b)
 
             return holder
