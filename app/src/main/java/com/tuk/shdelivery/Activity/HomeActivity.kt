@@ -118,7 +118,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             user.participateMatchId = newCreateData.id
             intent.putExtra("user",user)
             val fragment1 = listFragment.get(1) as ChatListFragment
-            UserDao().updateUser(user){
+            UserDao.updateUser(user){
 
                 fragment1.enterChatRoom(){
                     binding.tabLayout.getTabAt(1)!!.select()
@@ -146,8 +146,6 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             val user = fetchIntent?.getSerializableExtra("user") as User
             intent.putExtra("user", user)
             val fragment = listFragment.get(2) as MypageFragment
-
-            fragment.updateProfile()
 
             binding.tabLayout.getTabAt(2)!!.select()
 

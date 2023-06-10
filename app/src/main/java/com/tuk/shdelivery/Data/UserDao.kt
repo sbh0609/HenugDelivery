@@ -7,7 +7,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class UserDao {
+object UserDao {
     private var userRef: DatabaseReference? = null
 
     init {
@@ -39,6 +39,7 @@ class UserDao {
                     callback(null)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
@@ -61,5 +62,20 @@ class UserDao {
         userRef?.child(user!!.userId.toString())?.setValue(user)?.addOnSuccessListener {
             callback()
         }
+    }
+
+    fun userListener(user: User, callback: (user: User?) -> Unit) {
+        userRef?.child(user.userId)?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    val user = dataSnapshot.getValue(User::class.java)
+                    callback(user!!)
+                } else {
+                    callback(null)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 }

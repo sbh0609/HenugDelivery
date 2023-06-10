@@ -46,7 +46,7 @@ class ChargeActivity : AppCompatActivity() {
         intent.putExtra("user",user)
         intent.putExtra("inputPoint", inputPoint)
         //충전 하기
-        UserDao().updateUser(user) {
+        UserDao.updateUser(user) {
             setResult(Activity.RESULT_OK, intent)
             finish()
         }

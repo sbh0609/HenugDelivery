@@ -55,8 +55,9 @@ object MatchDao {
                 //매칭방 데이터가 변경될때 실행될 코드
                 else {
                     val value = snapshot.getValue(MatchRoomData::class.java)
-                    if (value != null)
+                    if (value != null){
                         callback2(value)
+                    }
                 }
             }
 

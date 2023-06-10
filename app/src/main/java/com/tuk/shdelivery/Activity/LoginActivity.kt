@@ -26,7 +26,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    val Udao = UserDao()
+    val Udao = UserDao
 
     // 바인딩 객체 생성
     // 카톡에서 네이티브키 복사 후 붙혀넣기

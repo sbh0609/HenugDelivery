@@ -51,7 +51,7 @@ class ChatListFragment : Fragment() {
         //배달 시작 리스너
         binding.deliveryStart.setOnClickListener {
             MatchDao.deliveryStart((intent.getSerializableExtra("user") as User).participateMatchId) {
-                deliveryStart()
+//                deliveryStart()
             }
         }
 
@@ -92,21 +92,23 @@ class ChatListFragment : Fragment() {
                 //!!!배달 완료시 실행 할 함수
                 user.matchPoint = 0
 
-                //본인이 만든 방이면 orderPoint가져가고 방 지우기
+                //본인이 만든 방이면 orderPoint가져가기
                 if (user.userId == user.participateMatchId) {
                     user.userPoint += it!!.orderPoint
-                    MatchDao.removeMatchRoom(user) { }
                 }
 
-                intent.putExtra("user", user)
+                UserDao.updateUser(user){
+                    //본인 방이면 방 지우기
+                    if(user.userId == user.participateMatchId) {
+                        MatchDao.removeMatchRoom(user) {
+                        }
+                    }
+                    val snackbar =
+                        Snackbar.make(binding.root, "맛있게 드세요!", Snackbar.LENGTH_SHORT)
+                    snackbar.setAction("닫기") { snackbar.dismiss() }.show()
+                }
             }
         }
-
-        ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(
-            (intent.getSerializableExtra(
-                "user"
-            ) as User)
-        )
     }
 
     private fun orderAceptButtonListener() {
@@ -176,9 +178,8 @@ class ChatListFragment : Fragment() {
             intent.putExtra("user", user)
 
             MatchDao.updateOrderPoint(user.participateMatchId, point) {
-                UserDao().updateUser(user) {
+                UserDao.updateUser(user) {
                     binding.orderAccept.isEnabled = true
-                    ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
                 }
             }
         }
@@ -232,7 +233,7 @@ class ChatListFragment : Fragment() {
                         else -> {
                             val snackbar =
                                 Snackbar.make(binding.root, "매칭방을 찾아보세요!", Snackbar.LENGTH_SHORT)
-                            snackbar.setAction("알겠습니다.") { snackbar.dismiss() }.show()
+                            snackbar.setAction("알겠습니다") { snackbar.dismiss() }.show()
                         }
                     }
                 }
@@ -266,10 +267,9 @@ class ChatListFragment : Fragment() {
             user.matchPoint = 0
         }
         intent.putExtra("user", user)
-        UserDao().updateUser(user) {
+        UserDao.updateUser(user) {
             updateSubTitle()
             ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
-            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
         }
     }
 
@@ -287,6 +287,7 @@ class ChatListFragment : Fragment() {
                     MatchDao.getParticipatingMatch(matchId) { matchRoomData ->
                         MatchDao.getChatRoomData(matchId) {
                             intent.putExtra("matchRoomData", matchRoomData)
+                            intent.putExtra("chatRoomData", it)
                             //주문 수락 중이고, 배달 상태가 아니라면
                             if (user.matchPoint != 0L) {
                                 binding.inputPoint.setText(user.matchPoint.toString())
@@ -294,23 +295,23 @@ class ChatListFragment : Fragment() {
                                 binding.orderAccept.isEnabled = true
                                 binding.orderAccept.text = "주문 취소"
 
-                                //배달 상태라면
-                                if (it!!.orderAcceptNum == it.participatePeopleId.size) {
-                                    //방장이라면 deliveryStart 버튼 활성화
-                                    if (user.userId == user.participateMatchId) {
-                                        binding.deliveryStart.visibility = View.VISIBLE
-                                    }
+                                //배달중 상태라면
+                                if(matchRoomData!!.id == "start"){
+                                    binding.orderAccept.visibility = View.GONE
+                                    binding.deliveryComplite.visibility = View.VISIBLE
+                                    deliveryStart()
+
                                     //만약 배달 완료를 누른 상태라면
-                                    if (!it.orderAcceptPeopleId.contains(user.userId) && matchRoomData!!.id == "start") {
+                                    if (!it!!.orderAcceptPeopleId.contains(user.userId)) {
                                         //!!! 배달 완료 시 실행할 함수
                                         binding.deliveryComplite.isEnabled = false
                                     }
-                                } else {
-                                    binding.deliveryComplite.visibility = View.GONE
                                 }
                             }
                             //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록
                             addNewMessageListener(matchId) {}
+
+                            Log.d("test300", "enterMatchRoom")
 
                             //주문 수락 리스너
                             MatchDao.addOrderAcceptListener(matchId) { chatRoomData ->
@@ -318,7 +319,10 @@ class ChatListFragment : Fragment() {
                                     orderAcceptNum = chatRoomData.orderAcceptNum.toString(),
                                     participatePeopleSize = chatRoomData.participatePeopleId.size.toString()
                                 )
-                                intent.putExtra("chatRoomData", chatRoomData)
+                                //인원이 변경될 때
+                                if((intent.getSerializableExtra("chatRoomData") as ChatRoom).participatePeopleId.size != chatRoomData.participatePeopleId.size){
+                                    ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
+                                }
                                 //방장이고, 배달중이 아닐떄
                                 if (user.userId == user.participateMatchId && (intent.getSerializableExtra(
                                         "matchRoomData"
@@ -329,24 +333,23 @@ class ChatListFragment : Fragment() {
                                     binding.deliveryStart.visibility =
                                         if (chatRoomData.participatePeopleId.size == chatRoomData.orderAcceptNum) View.VISIBLE else View.GONE
                                 }
+                                intent.putExtra("chatRoomData", chatRoomData)
                             }
 
                             //매칭방이 변경될때 리스너
                             MatchDao.matchRoomListener(matchId, {
                                 //매칭방이 사라졌을때
+                                //매칭방이 사라졌다는 메세지
+                                Toast.makeText(context, "매칭방이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                                 outSettingChatRoom(false)
                             }) {
                                 //배달이 시작됬을때
-                                if (it.id == "start" && binding.deliveryStart.visibility == View.VISIBLE) {
+                                if (it.id == "start" && (intent.getSerializableExtra("matchRoomData") as MatchRoomData).id != "start") {
                                     deliveryStart()
                                 }
                                 //매칭방 데이터가 변경됬을때
                                 intent.putExtra("matchRoomData", it)
                             }
-
-                            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(
-                                user
-                            )
 
                             //채팅창 보이게
                             binding.nochat.visibility = View.GONE
@@ -355,8 +358,6 @@ class ChatListFragment : Fragment() {
                 }
                 //매칭방이 없다면 나가기 액션
                 else {
-                    //매칭방이 사라졌다는 메세지
-                    Toast.makeText(context, "매칭방이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                     outSettingChatRoom(isExists)
                 }
             }
@@ -372,7 +373,6 @@ class ChatListFragment : Fragment() {
         orderAcceptNum: String = "",
         participatePeopleSize: String = "",
     ) {
-        Log.d("test300", "updateSubTitle")
         var acceptNum = orderAcceptNum
         var count = participatePeopleSize
         if (binding.toolbar.subtitle == null) {

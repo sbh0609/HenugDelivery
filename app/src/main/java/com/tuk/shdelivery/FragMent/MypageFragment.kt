@@ -12,6 +12,7 @@ import com.tuk.shdelivery.databinding.FragmentMypageBinding
 import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
+import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import java.util.*
@@ -51,15 +52,20 @@ class MypageFragment : Fragment() {
 
         }
 
-        //처음 프로필 세팅
-        SetProfile(intent.getSerializableExtra("user") as User)
+        val user = intent.getSerializableExtra("user") as User
+        UserDao.userListener(user) { user ->
+            if(user != null){
+                intent.putExtra("user",user)
+                //처음 프로필 세팅
+                SetProfile(user)
 
-        //마이페이지 유저이름, 포인트 설정
-        updateProfile()
+                //마이페이지 유저이름, 포인트 설정
+                updateProfile(user)
+            }
+        }
     }
 
-    public fun updateProfile() {
-        val user = intent.getSerializableExtra("user") as User
+    fun updateProfile(user: User) {
         binding.userName.text = user.userName
         binding.point.text = user.userPoint.toString() + "P"
     }
@@ -77,7 +83,6 @@ class MypageFragment : Fragment() {
         val matchRoomData = intent.getSerializableExtra("matchRoomData") as MatchRoomData
         if (matchRoomData.id != "start") {
             MatchDao.removeMatchRoom(user) {
-                exitSetProfile()
                 callback()
             }
         } else {
@@ -85,16 +90,11 @@ class MypageFragment : Fragment() {
         }
     }
 
-    fun exitSetProfile() {
-        binding.layoutMatchRoom.root.visibility = View.GONE
-        binding.deliteRoom.visibility = View.GONE
-    }
-
     fun SetProfile(user: User) {
         //매칭방에 입장중이라면
         if (user.participateMatchId != "") {
             MatchDao.getParticipatingMatch(user.participateMatchId) {
-                if(it!=null){
+                if (it != null) {
                     var match = it
                     binding.layoutMatchRoom.root.visibility = View.VISIBLE
                     //본인이 만든 방이면 삭제 버튼 활성화
@@ -104,14 +104,15 @@ class MypageFragment : Fragment() {
 
                     val category = Data.category()
 
-                    val diffMillis = match.deliveryTime - match.createTime
+                    val diffMillis = match.deliveryTime - Calendar.getInstance().timeInMillis
 
                     binding.layoutMatchRoom.tag.text = "${match.menu}"
                     binding.layoutMatchRoom.description.text = match.description
                     binding.layoutMatchRoom.count.text = match.count.toString()
                     binding.layoutMatchRoom.tagImage.setImageResource(category[match.menu]!!)
                     binding.layoutMatchRoom.store.text = match.storeName
-                    binding.layoutMatchRoom.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
+                    binding.layoutMatchRoom.deliveryTime.text =
+                        DeliverTime.getHourMinute(diffMillis)
                     binding.layoutMatchRoom.createTime.text = DeliverTime(
                         Calendar.getInstance()
                             .apply { timeInMillis = match.createTime }).getCreateTime()
@@ -124,9 +125,10 @@ class MypageFragment : Fragment() {
         }
         //입장중이지 않다면
         if (user.participateMatchId == "") {
-            exitSetProfile()
+            binding.layoutMatchRoom.root.visibility = View.GONE
+            binding.deliteRoom.visibility = View.GONE
         }
 
-        updateProfile()
+        updateProfile(user)
     }
 }

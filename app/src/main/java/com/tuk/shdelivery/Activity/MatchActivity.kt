@@ -18,7 +18,7 @@ import java.util.*
 
 class MatchActivity : AppCompatActivity() {
     val binding by lazy { ActivityMatchBinding.inflate(layoutInflater) }
-    val userDao = UserDao()
+    val userDao = UserDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
