@@ -50,26 +50,28 @@ class MatchActivity : AppCompatActivity() {
 
         // If the user is not in a match room
         if (user.participateMatchId.isEmpty()) {
-            MatchDao.getChatRoomData(selectData.id) { chatRoomData ->
-                if (chatRoomData == null) {
-                    showToast("사라진 방 입니다.")
-                    finish()
-                } else {
-                    intent.putExtra("selectChatRoom", chatRoomData)
-                    // If the room is not full
-                    if (chatRoomData.participatePeopleId.size != chatRoomData.orderAcceptNum) {
-                        user.participateMatchId = selectData.id
-                        intent.putExtra("user", user)
-                        userDao.updateUser(user) {
-                            MatchDao.joinUserMatchRoom(user, selectData) {
-                                setResult(RESULT_OK, intent)
-                                finish()
-                            }
-                        }
-                    } else {
-                        // If the room is already in delivery state
-                        showToast("배달이 시작된 방입니다.")
+            MatchDao.getParticipatingMatch(selectData.id) { matchRoomData ->
+                MatchDao.getChatRoomData(selectData.id) { chatRoomData ->
+                    if (matchRoomData == null) {
+                        showToast("사라진 방 입니다.")
                         finish()
+                    } else {
+                        intent.putExtra("selectChatRoom", chatRoomData)
+                        // 아직 배달이 시작되지 않았으면
+                        if (matchRoomData.id != "start") {
+                            user.participateMatchId = selectData.id
+                            intent.putExtra("user", user)
+                            userDao.updateUser(user) {
+                                MatchDao.joinUserMatchRoom(user, selectData) {
+                                    setResult(RESULT_OK, intent)
+                                    finish()
+                                }
+                            }
+                        } else {
+                            // 배달이 시작됬으면
+                            showToast("배달이 시작된 방입니다.")
+                            finish()
+                        }
                     }
                 }
             }
@@ -82,9 +84,13 @@ class MatchActivity : AppCompatActivity() {
     private fun setText() {
         val data = intent.getSerializableExtra("selectMatchData") as MatchRoomData
         binding.deliveryTime.text =
-            SimpleDateFormat("MM/dd(E)   a K : mm", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.deliveryTime }.time)
+            SimpleDateFormat("MM/dd(E)   a K : mm", Locale.KOREAN).format(
+                Calendar.getInstance().apply { timeInMillis = data.deliveryTime }.time
+            )
         binding.toolbar.subtitle =
-            SimpleDateFormat("MM/dd(E)   a h시 mm분", Locale.KOREAN).format(Calendar.getInstance().apply { timeInMillis = data.createTime }.time) + " 작성글"
+            SimpleDateFormat("MM/dd(E)   a h시 mm분", Locale.KOREAN).format(
+                Calendar.getInstance().apply { timeInMillis = data.createTime }.time
+            ) + " 작성글"
         binding.description.text = data.description
         binding.storeName.text = data.storeName
         binding.tag.text = data.menu
@@ -96,6 +102,7 @@ class MatchActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {

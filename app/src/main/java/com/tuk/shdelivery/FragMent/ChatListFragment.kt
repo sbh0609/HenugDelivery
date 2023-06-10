@@ -2,6 +2,7 @@ package com.tuk.shdelivery.FragMent
 
 import android.opengl.Visibility
 import android.os.Bundle
+import android.service.autofill.FieldClassification.Match
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -16,9 +17,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.tuk.shdelivery.Activity.HomeActivity
-import com.tuk.shdelivery.Data.Chat
-import com.tuk.shdelivery.Data.MatchDao
-import com.tuk.shdelivery.Data.User
+import com.tuk.shdelivery.Data.*
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.DeliverTime
@@ -51,7 +50,9 @@ class ChatListFragment : Fragment() {
 
         //배달 시작 리스너
         binding.deliveryStart.setOnClickListener {
-            allOrderAccept()
+            MatchDao.deliveryStart((intent.getSerializableExtra("user") as User).participateMatchId) {
+                deliveryStart()
+            }
         }
 
         //보내기 버튼 활성, 비활성화
@@ -69,34 +70,35 @@ class ChatListFragment : Fragment() {
         //배달완료 버튼 리스너
         binding.deliveryComplite.setOnClickListener {
             binding.deliveryComplite.isEnabled = false
-            MatchDao.deliveryComplite((intent.getSerializableExtra("user") as User)){}
+            MatchDao.deliveryComplite((intent.getSerializableExtra("user") as User)) {
+                //!!!배달 완료 메세지 보내기
+            }
         }
     }
 
     fun deliveryStart() {
         //방장이 배달 시작을 눌렀을 때
         binding.orderAccept.visibility = View.GONE
+        binding.deliveryStart.visibility = View.GONE
         binding.inputPoint.isEnabled = false
         binding.deliveryComplite.visibility = View.VISIBLE
         Toast.makeText(context, "배달에 대해 말해 주세요!", Toast.LENGTH_SHORT).show()
 
+        Log.d("test300", "deliveryCompliteListener")
         //모두 배달 완료 리스너 달기
-        MatchDao.deliveryCompliteListener((intent.getSerializableExtra("user") as User)){
+        MatchDao.deliveryCompliteListener((intent.getSerializableExtra("user") as User)) {
             val user = intent.getSerializableExtra("user") as User
-            MatchDao.getChatRoomData(user.participateMatchId){
+            MatchDao.getChatRoomData(user.participateMatchId) {
                 //!!!배달 완료시 실행 할 함수
                 user.matchPoint = 0
 
                 //본인이 만든 방이면 orderPoint가져가고 방 지우기
-                if(user.userId == user.participateMatchId){
+                if (user.userId == user.participateMatchId) {
                     user.userPoint += it!!.orderPoint
-                    MatchDao.removeMatchRoom(user){ }
+                    MatchDao.removeMatchRoom(user) { }
                 }
 
-                intent.putExtra("user",user)
-
-                //방을 나가기
-                outSettingChatRoom(true)
+                intent.putExtra("user", user)
             }
         }
 
@@ -158,21 +160,15 @@ class ChatListFragment : Fragment() {
             }
             binding.inputPoint.isEnabled = binding.orderAccept.text.toString() == "주문 수락"
             var orderChat = String.format(
-                "%sP 만큼 %s 하였습니다.",
-                binding.inputPoint.text.toString(),
-                text
+                "%sP 만큼 %s 하였습니다.", binding.inputPoint.text.toString(), text
             )
             //주문 수락|취소 Chat 만들기
             val chat = Chat(
-                text,
-                user.userName,
-                orderChat,
-                Calendar.getInstance().timeInMillis
+                text, user.userName, orderChat, Calendar.getInstance().timeInMillis
             )
 
             MatchDao.sendMessageToFirebase(
-                chat,
-                user.participateMatchId
+                chat, user.participateMatchId
             )
 
             user.userPoint -= point
@@ -200,30 +196,30 @@ class ChatListFragment : Fragment() {
                     // 매칭방에 참가 중인지 판단
                     val isParticipating = user.participateMatchId != ""
 
-                    // 모든 사용자가 주문을 수락한 상태인지 판단
-                    val isAllAccepted = if (isParticipating) {
-                        val regex = "\\d+".toRegex()
-                        val numbers =
-                            regex.findAll(binding.toolbar.subtitle).map { it.value.toInt() }
-                                .toList()
-                        numbers[0] == numbers[1]
+                    // 현재 배달 중인지 판단
+                    val isDeliverStart = if (isParticipating) {
+                        (intent.getSerializableExtra("matchRoomData") as MatchRoomData).id == "start"
                     } else false
 
+                    val isOrderAccept = binding.orderAccept.text == "주문 취소"
+
                     when {
-                        // 모든 사용자가 주문을 수락한 상태라면
-                        isAllAccepted -> {
+                        // 배달중이라면
+                        isDeliverStart -> {
                             Toast.makeText(
-                                context,
-                                "배달을 완료하세요!! \n문제발생시 문의사항으로 연락주세요",
-                                Toast.LENGTH_SHORT
+                                context, "배달을 완료하세요!! \n문제발생시 문의사항으로 연락주세요", Toast.LENGTH_SHORT
                             ).show()
                         }
                         // 방 주인이라면
                         isOwner -> {
                             Toast.makeText(
-                                activity,
-                                "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)",
-                                Toast.LENGTH_SHORT
+                                activity, "방을 생성한 사람이 나갈 수 없습니다.(방을 삭제해 주세요)", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        //주문 수락상태에서 나갈 수 없음
+                        isOrderAccept -> {
+                            Toast.makeText(
+                                activity, "주문 수락 중입니다!", Toast.LENGTH_SHORT
                             ).show()
                         }
                         // 매칭방에 참가 중이라면
@@ -245,7 +241,7 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    public fun outSettingChatRoom(isExists : Boolean) {
+    public fun outSettingChatRoom(isExists: Boolean) {
         val user = intent.getSerializableExtra("user") as User
         //주문 수락 상태 + 모두 수락버튼을 누르지 않았을때 + 매칭방이 존재 할때 주문 취소를 누르고 나간다.
         if (binding.orderAccept.text == "주문 취소" && binding.deliveryComplite.visibility == View.GONE && isExists) {
@@ -261,10 +257,11 @@ class ChatListFragment : Fragment() {
         binding.orderAccept.isEnabled = true
         binding.orderAccept.text = "주문 수락"
         binding.deliveryComplite.isEnabled = true
-       MatchDao.removeListener(user.participateMatchId)
+        binding.deliveryComplite.visibility = View.GONE
+        MatchDao.removeListener(user.participateMatchId)
         user.participateMatchId = ""
         //만약 포인트를 걸고 있다면 반환 한다.
-        if(user.matchPoint != 0L){
+        if (user.matchPoint != 0L) {
             user.userPoint += user.matchPoint
             user.matchPoint = 0
         }
@@ -284,11 +281,12 @@ class ChatListFragment : Fragment() {
 
         //입장중이었다면
         if (matchId != "") {
-            MatchDao.isMatchExists(matchId){isExists->
+            MatchDao.isMatchExists(matchId) { isExists ->
                 //매칭방이 존재 한다면 들어가는 액션
-                if(isExists){
-                    MatchDao.getParticipatingMatch(user){ matchRoomData->
+                if (isExists) {
+                    MatchDao.getParticipatingMatch(matchId) { matchRoomData ->
                         MatchDao.getChatRoomData(matchId) {
+                            intent.putExtra("matchRoomData", matchRoomData)
                             //주문 수락 중이고, 배달 상태가 아니라면
                             if (user.matchPoint != 0L) {
                                 binding.inputPoint.setText(user.matchPoint.toString())
@@ -297,49 +295,58 @@ class ChatListFragment : Fragment() {
                                 binding.orderAccept.text = "주문 취소"
 
                                 //배달 상태라면
-                                if (it!!.orderAcceptNum == it!!.participatePeopleId.size) {
+                                if (it!!.orderAcceptNum == it.participatePeopleId.size) {
                                     //방장이라면 deliveryStart 버튼 활성화
-                                    if(user.userId == user.participateMatchId){
+                                    if (user.userId == user.participateMatchId) {
                                         binding.deliveryStart.visibility = View.VISIBLE
                                     }
                                     //만약 배달 완료를 누른 상태라면
-                                    if(!it.orderAcceptPeopleId.contains(user.userId) && matchRoomData.id == "start"){
+                                    if (!it.orderAcceptPeopleId.contains(user.userId) && matchRoomData!!.id == "start") {
                                         //!!! 배달 완료 시 실행할 함수
                                         binding.deliveryComplite.isEnabled = false
                                     }
-                                }
-                                else{
+                                } else {
                                     binding.deliveryComplite.visibility = View.GONE
                                 }
                             }
-
-                            //소제목으로 띄우기
-                            updateSubTitle(
-                                it!!.orderAcceptPeopleId.size.toString(),
-                                it!!.participatePeopleId.size.toString()
-                            )
                             //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록
-                            addNewMessageListener(matchId) {
-                            }
-                            //count 리스너
-                            MatchDao.addPeopleNumListener(matchId) {
-                                updateSubTitle(participatePeopleSize = it.toString())
+                            addNewMessageListener(matchId) {}
+
+                            //주문 수락 리스너
+                            MatchDao.addOrderAcceptListener(matchId) { chatRoomData ->
+                                updateSubTitle(
+                                    orderAcceptNum = chatRoomData.orderAcceptNum.toString(),
+                                    participatePeopleSize = chatRoomData.participatePeopleId.size.toString()
+                                )
+                                intent.putExtra("chatRoomData", chatRoomData)
+                                //방장이고, 배달중이 아닐떄
+                                if (user.userId == user.participateMatchId && (intent.getSerializableExtra(
+                                        "matchRoomData"
+                                    ) as MatchRoomData).id != "start"
+                                ) {
+                                    //모두 주문수락 누르면 배달시작버튼 활성화
+                                    //모두 주문수락 안눌렀다면 배달시작버튼 비활성화
+                                    binding.deliveryStart.visibility =
+                                        if (chatRoomData.participatePeopleId.size == chatRoomData.orderAcceptNum) View.VISIBLE else View.GONE
+                                }
                             }
 
-                            //모두 주문 수락 리스너
-                            MatchDao.addOrderAcceptListener(matchId, { int ->
-                                updateSubTitle(orderAcceptNum = int.toString())
-                            },
-                                { binding.deliveryStart.visibility = View.VISIBLE; },
-                                { }
-                            )
-
-                            //매치방이 사라질때 나가게 되는 리스너
-                            MatchDao.removeMatchRoomListener(matchId){
+                            //매칭방이 변경될때 리스너
+                            MatchDao.matchRoomListener(matchId, {
+                                //매칭방이 사라졌을때
                                 outSettingChatRoom(false)
+                            }) {
+                                //배달이 시작됬을때
+                                if (it.id == "start" && binding.deliveryStart.visibility == View.VISIBLE) {
+                                    deliveryStart()
+                                }
+                                //매칭방 데이터가 변경됬을때
+                                intent.putExtra("matchRoomData", it)
                             }
 
-                            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
+                            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(
+                                user
+                            )
 
                             //채팅창 보이게
                             binding.nochat.visibility = View.GONE
@@ -347,9 +354,9 @@ class ChatListFragment : Fragment() {
                     }
                 }
                 //매칭방이 없다면 나가기 액션
-                else{
+                else {
                     //매칭방이 사라졌다는 메세지
-                    Toast.makeText(context, "매칭방이 삭제되었습니다.",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "매칭방이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                     outSettingChatRoom(isExists)
                 }
             }
@@ -365,10 +372,10 @@ class ChatListFragment : Fragment() {
         orderAcceptNum: String = "",
         participatePeopleSize: String = "",
     ) {
-        Log.d("test300","updateSubTitle")
+        Log.d("test300", "updateSubTitle")
         var acceptNum = orderAcceptNum
         var count = participatePeopleSize
-        if(binding.toolbar.subtitle == null){
+        if (binding.toolbar.subtitle == null) {
             binding.toolbar.subtitle = ""
         }
         if (acceptNum == "" || count == "") {
@@ -381,17 +388,16 @@ class ChatListFragment : Fragment() {
                 count = numbers[1].toString()
             }
             //전체 명수만 온경우
-            else if (count != ""){
+            else if (count != "") {
                 acceptNum = numbers[0].toString()
             }
             //아무것도 안온경우
-            else{
+            else {
                 binding.toolbar.subtitle = ""
                 return
             }
         }
-        binding.toolbar.subtitle =
-            String.format("%s / %s 주문 수락", acceptNum, count)
+        binding.toolbar.subtitle = String.format("%s / %s 주문 수락", acceptNum, count)
     }
 
     fun addNewMessageListener(matchId: String, callback: () -> Unit) {
@@ -433,8 +439,8 @@ class ChatListFragment : Fragment() {
         infalte.userId.text = it.userId
         infalte.userName.text = it.userName
         infalte.chat.text = it.chat
-        infalte.chatTime.text = DeliverTime(
-            Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
+        infalte.chatTime.text =
+            DeliverTime(Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
         binding.chatLayout.addView(infalte.root)
     }
 
@@ -449,15 +455,12 @@ class ChatListFragment : Fragment() {
             //최하단보다  스크롤 하단 버튼을 활성화한다.
             else {
                 Snackbar.make(
-                    binding.chatLayout,
-                    "${it.userName}\n${it.chat}",
-                    Snackbar.LENGTH_LONG
+                    binding.chatLayout, "${it.userName}\n${it.chat}", Snackbar.LENGTH_LONG
                 ).apply {
                     val textView =
                         view.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
                     setAction("아래로", { binding.scrollDonwButton.performClick() })
-                    view.background =
-                        resources.getDrawable(R.drawable.custom_button_done)
+                    view.background = resources.getDrawable(R.drawable.custom_button_done)
                     anchorView = binding.input
                     textView.textSize = 18f
                 }.show()
@@ -567,8 +570,8 @@ class ChatListFragment : Fragment() {
         inflate.userId.text = chat.userId
         inflate.userName.text = chat.userName
         inflate.chat.text = chat.chat
-        inflate.chatTime.text = DeliverTime(
-            Calendar.getInstance().apply { timeInMillis = chat.chatTime }).getTime()
+        inflate.chatTime.text =
+            DeliverTime(Calendar.getInstance().apply { timeInMillis = chat.chatTime }).getTime()
 
         if (binding.chatLayout.childCount > 1) {
             val lastView =

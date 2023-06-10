@@ -9,9 +9,9 @@ object MatchDao {
 
     var childEventListener: ChildEventListener? = null
     var orderAcceptListener: ValueEventListener? = null
-    var peopleNumListener: ValueEventListener? = null
     var deliveryCompliteListener: ValueEventListener? = null
-    var removeMatchRoomListener : ValueEventListener? = null
+    var matchRoomListener: ValueEventListener? = null
+    var refHashMap = hashMapOf<String,Pair<DatabaseReference,ValueEventListener>>()
 
     //매칭방이 있는지 확인 하는 함수 (true, false)
     fun isMatchExists(matchId: String, callback: (isExists: Boolean) -> Unit) {
@@ -27,19 +27,45 @@ object MatchDao {
         })
     }
 
-    fun removeMatchRoomListener(matchId: String, callback: () -> Unit){
-        removeMatchRoomListener = object : ValueEventListener {
+    fun deliveryStart(matchId: String, callback: () -> Unit) {
+        // Generate a new chatroom ID
+        // Save the chatroom to the database
+        database.child("chatrooms/${matchId}/id").setValue("start")
+            .addOnSuccessListener {
+                callback()
+                Log.d("HandleData", "Chatroom created")
+            }
+            .addOnFailureListener {
+                // An error occurred
+                Log.d("HandleData", "Failed to create chatroom")
+            }
+    }
+
+    fun matchRoomListener(
+        matchId: String,
+        callback: () -> Unit,
+        callback2: (matchRoomData: MatchRoomData) -> Unit,
+    ) {
+        matchRoomListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) {
                     // 노드가 삭제되었을 때 실행될 코드
                     callback()
                 }
+                //매칭방 데이터가 변경될때 실행될 코드
+                else {
+                    val value = snapshot.getValue(MatchRoomData::class.java)
+                    if (value != null)
+                        callback2(value)
+                }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         }
 
         val ref = database.child("chatrooms/${matchId}")
-        ref.addValueEventListener(removeMatchRoomListener!!)
+        refHashMap["matchRoomListener"] = Pair(ref,matchRoomListener!!)
+        ref.addValueEventListener(matchRoomListener!!)
 
     }
 
@@ -58,7 +84,7 @@ object MatchDao {
                 Log.w("TAG", "loadData:onCancelled", databaseError.toException())
             }
         }
-
+        refHashMap["deliveryCompliteListener"] = Pair(ref3,deliveryCompliteListener!!)
         ref3.addValueEventListener(deliveryCompliteListener!!)
     }
 
@@ -236,88 +262,32 @@ object MatchDao {
 
     fun addOrderAcceptListener(
         matchId: String,
-        callback1: (orderAcceptNum: Int) -> Unit,
-        callback2: () -> Unit,
-        callback3: () -> Unit
+        callback: (chatRoom: ChatRoom) -> Unit,
     ) {
-        val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
-        val ref2 = database.child("chatrooms/${matchId}/count")
+        val ref1 = database.child("chatrooms/${matchId}/chatRoom")
 
         orderAcceptListener = object : ValueEventListener {
             override fun onDataChange(snapshot1: DataSnapshot) {
-                val value1 = snapshot1.getValue(Int::class.java)
-                if (value1 != null) {
-                    callback1(value1!!)
-                    ref2.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot2: DataSnapshot) {
-                            val value2 = snapshot2.getValue(Int::class.java)
-                            //같을 때
-                            if (value1 != null && value2 != null && value1 == value2) {
-                                // value1이 value2를 넘었을 때의 로직을 여기에 추가합니다.
-                                callback2()
-                            }
-                            //다를때
-                            else if(value1 != null && value2 != null && value1 != value2){
-                                callback3()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {}
-                    })
+                if (snapshot1.exists()) {
+                    val chatRoom = snapshot1.getValue(ChatRoom::class.java)
+                    if (chatRoom != null) {
+                        callback(chatRoom)
+                    }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {}
         }
-
+        refHashMap["orderAcceptListener"] = Pair(ref1,orderAcceptListener!!)
         // ValueEventListener 추가
         ref1.addValueEventListener(orderAcceptListener!!)
     }
 
-    fun addPeopleNumListener(
-        matchId: String,
-        callback: (PeopleNum: Int) -> Unit,
-    ) {
-        val ref2 = database.child("chatrooms/${matchId}/count")
-
-        peopleNumListener = object : ValueEventListener {
-            override fun onDataChange(snapshot1: DataSnapshot) {
-                val value1 = snapshot1.getValue(Int::class.java)
-                if (value1 != null) {
-                    callback(value1)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        }
-        // ValueEventListener 추가
-        ref2.addValueEventListener(peopleNumListener!!)
-    }
-
     fun removeListener(matchId: String) {
+        for(i in refHashMap){
+            i.value.first.removeEventListener(i.value.second)
+        }
         removeMessageListener(matchId)
-        removeOrderAcceptListener(matchId)
-        removePeopleNumListener(matchId)
-        removedeliveryCompliteListenner(matchId)
-        removeRemoveMatchRoomListener(matchId)
-    }
-
-    fun removedeliveryCompliteListenner(matchId: String) {
-        val ref3 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptPeopleId")
-        if (orderAcceptListener != null)
-            ref3.removeEventListener(orderAcceptListener!!)
-    }
-
-    fun removeOrderAcceptListener(matchId: String) {
-        val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
-        if (orderAcceptListener != null)
-            ref1.removeEventListener(orderAcceptListener!!)
-    }
-
-    fun removePeopleNumListener(matchId: String) {
-        val ref1 = database.child("chatrooms/${matchId}/count")
-        if (peopleNumListener != null)
-            ref1.removeEventListener(peopleNumListener!!)
     }
 
     fun removeMessageListener(chatroomId: String) {
@@ -327,11 +297,6 @@ object MatchDao {
         childEventListener?.let {
             messagesRef.removeEventListener(it)
         }
-    }
-    fun removeRemoveMatchRoomListener(matchId: String){
-        val ref1 = database.child("chatrooms/${matchId}")
-        if (removeMatchRoomListener != null)
-            ref1.removeEventListener(removeMatchRoomListener!!)
     }
 
     /**
@@ -538,14 +503,16 @@ object MatchDao {
         })
     }
 
-    fun getParticipatingMatch(user: User, callback: (match: MatchRoomData) -> Unit) {
+    fun getParticipatingMatch(matchId: String, callback: (match: MatchRoomData?) -> Unit) {
         val matchroomRef =
-            FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
+            FirebaseDatabase.getInstance().getReference("chatrooms/${matchId}")
         matchroomRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(MatchRoomData::class.java)
                     callback(data!!)
+                } else {
+                    callback(null)
                 }
             }
 

@@ -10,6 +10,7 @@ import com.tuk.shdelivery.Activity.ChargeActivity
 import com.tuk.shdelivery.Activity.HomeActivity
 import com.tuk.shdelivery.databinding.FragmentMypageBinding
 import com.tuk.shdelivery.Data.MatchDao
+import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
@@ -71,13 +72,10 @@ class MypageFragment : Fragment() {
     }
 
     fun deliteMatchRoom(user: User, callback: () -> Unit) {
-        val regex = "\\d+".toRegex()
 
-        val numbers =
-            regex.findAll(((activity as HomeActivity).listFragment[1] as ChatListFragment).binding.toolbar.subtitle.toString())
-                .map { it.value.toInt() }.toList()
-        //전부 수락했으면 못지움
-        if (numbers[0] != numbers[1]) {
+        //배달이 시작됐으면 못지움
+        val matchRoomData = intent.getSerializableExtra("matchRoomData") as MatchRoomData
+        if (matchRoomData.id != "start") {
             MatchDao.removeMatchRoom(user) {
                 exitSetProfile()
                 callback()
@@ -95,31 +93,33 @@ class MypageFragment : Fragment() {
     fun SetProfile(user: User) {
         //매칭방에 입장중이라면
         if (user.participateMatchId != "") {
-            MatchDao.getParticipatingMatch(user) {
-                var match = it
-                binding.layoutMatchRoom.root.visibility = View.VISIBLE
-                //본인이 만든 방이면 삭제 버튼 활성화
-                if (user.userId == user.participateMatchId) {
-                    binding.deliteRoom.visibility = View.VISIBLE
-                } else binding.deliteRoom.visibility = View.GONE
+            MatchDao.getParticipatingMatch(user.participateMatchId) {
+                if(it!=null){
+                    var match = it
+                    binding.layoutMatchRoom.root.visibility = View.VISIBLE
+                    //본인이 만든 방이면 삭제 버튼 활성화
+                    if (user.userId == user.participateMatchId) {
+                        binding.deliteRoom.visibility = View.VISIBLE
+                    } else binding.deliteRoom.visibility = View.GONE
 
-                val category = Data.category()
+                    val category = Data.category()
 
-                val diffMillis = match.deliveryTime - match.createTime
+                    val diffMillis = match.deliveryTime - match.createTime
 
-                binding.layoutMatchRoom.tag.text = "${match.menu}"
-                binding.layoutMatchRoom.description.text = match.description
-                binding.layoutMatchRoom.count.text = match.count.toString()
-                binding.layoutMatchRoom.tagImage.setImageResource(category[match.menu]!!)
-                binding.layoutMatchRoom.store.text = match.storeName
-                binding.layoutMatchRoom.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
-                binding.layoutMatchRoom.createTime.text = DeliverTime(
-                    Calendar.getInstance()
-                        .apply { timeInMillis = match.createTime }).getCreateTime()
-                binding.layoutMatchRoom.goneCreateTime.text = DeliverTime.setCalendar(
-                    Calendar.getInstance().apply { timeInMillis = match.createTime })
-                binding.layoutMatchRoom.goneDeliveryTime.text = DeliverTime.setCalendar(
-                    Calendar.getInstance().apply { timeInMillis = match.deliveryTime })
+                    binding.layoutMatchRoom.tag.text = "${match.menu}"
+                    binding.layoutMatchRoom.description.text = match.description
+                    binding.layoutMatchRoom.count.text = match.count.toString()
+                    binding.layoutMatchRoom.tagImage.setImageResource(category[match.menu]!!)
+                    binding.layoutMatchRoom.store.text = match.storeName
+                    binding.layoutMatchRoom.deliveryTime.text = DeliverTime.getHourMinute(diffMillis)
+                    binding.layoutMatchRoom.createTime.text = DeliverTime(
+                        Calendar.getInstance()
+                            .apply { timeInMillis = match.createTime }).getCreateTime()
+                    binding.layoutMatchRoom.goneCreateTime.text = DeliverTime.setCalendar(
+                        Calendar.getInstance().apply { timeInMillis = match.createTime })
+                    binding.layoutMatchRoom.goneDeliveryTime.text = DeliverTime.setCalendar(
+                        Calendar.getInstance().apply { timeInMillis = match.deliveryTime })
+                }
             }
         }
         //입장중이지 않다면
