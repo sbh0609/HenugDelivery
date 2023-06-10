@@ -125,6 +125,16 @@
                 </LinearLayout>
 
                 <Button
+                    android:id="@+id/deliveryStart"
+                    android:text="배달 Start"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:background="@drawable/custom_button_done"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <Button
                     android:id="@+id/deliveryComplite"
                     android:text="배달 완료"
                     android:textSize="20dp"

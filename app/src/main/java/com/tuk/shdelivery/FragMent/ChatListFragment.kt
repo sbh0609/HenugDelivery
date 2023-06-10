@@ -1,5 +1,6 @@
 package com.tuk.shdelivery.FragMent
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -48,6 +49,11 @@ class ChatListFragment : Fragment() {
         //주문 수락 버튼 리스너
         orderAceptButtonListener()
 
+        //배달 시작 리스너
+        binding.deliveryStart.setOnClickListener {
+            allOrderAccept()
+        }
+
         //보내기 버튼 활성, 비활성화
         sendButtonSetting(binding.input, binding.send)
 
@@ -67,8 +73,8 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    fun allOrderAccept() {
-        //모두 주문을 눌렀을때!!
+    fun deliveryStart() {
+        //방장이 배달 시작을 눌렀을 때
         binding.orderAccept.visibility = View.GONE
         binding.inputPoint.isEnabled = false
         binding.deliveryComplite.visibility = View.VISIBLE
@@ -279,59 +285,65 @@ class ChatListFragment : Fragment() {
         //입장중이었다면
         if (matchId != "") {
             MatchDao.isMatchExists(matchId){isExists->
-                Log.d("test300",isExists.toString())
                 //매칭방이 존재 한다면 들어가는 액션
                 if(isExists){
-                    MatchDao.getChatRoomData(matchId) {
-                        //주문 수락 중이고, 배달 상태가 아니라면
-                        if (user.matchPoint != 0L) {
-                            binding.inputPoint.setText(user.matchPoint.toString())
-                            binding.inputPoint.isEnabled = false
-                            binding.orderAccept.isEnabled = true
-                            binding.orderAccept.text = "주문 취소"
+                    MatchDao.getParticipatingMatch(user){ matchRoomData->
+                        MatchDao.getChatRoomData(matchId) {
+                            //주문 수락 중이고, 배달 상태가 아니라면
+                            if (user.matchPoint != 0L) {
+                                binding.inputPoint.setText(user.matchPoint.toString())
+                                binding.inputPoint.isEnabled = false
+                                binding.orderAccept.isEnabled = true
+                                binding.orderAccept.text = "주문 취소"
 
-                            //배달 상태라면
-                            if (it!!.orderAcceptNum == it!!.participatePeopleId.size) {
-                                allOrderAccept()
-                                //만약 배달 완료를 누른 상태라면
-                                if(!it.orderAcceptPeopleId.contains(user.userId)){
-                                    //!!! 배달 완료 시 실행할 함수
-                                    binding.deliveryComplite.isEnabled = false
+                                //배달 상태라면
+                                if (it!!.orderAcceptNum == it!!.participatePeopleId.size) {
+                                    //방장이라면 deliveryStart 버튼 활성화
+                                    if(user.userId == user.participateMatchId){
+                                        binding.deliveryStart.visibility = View.VISIBLE
+                                    }
+                                    //만약 배달 완료를 누른 상태라면
+                                    if(!it.orderAcceptPeopleId.contains(user.userId) && matchRoomData.id == "start"){
+                                        //!!! 배달 완료 시 실행할 함수
+                                        binding.deliveryComplite.isEnabled = false
+                                    }
+                                }
+                                else{
+                                    binding.deliveryComplite.visibility = View.GONE
                                 }
                             }
-                            else{
-                                binding.deliveryComplite.visibility = View.GONE
+
+                            //소제목으로 띄우기
+                            updateSubTitle(
+                                it!!.orderAcceptPeopleId.size.toString(),
+                                it!!.participatePeopleId.size.toString()
+                            )
+                            //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록
+                            addNewMessageListener(matchId) {
                             }
+                            //count 리스너
+                            MatchDao.addPeopleNumListener(matchId) {
+                                updateSubTitle(participatePeopleSize = it.toString())
+                            }
+
+                            //모두 주문 수락 리스너
+                            MatchDao.addOrderAcceptListener(matchId, { int ->
+                                updateSubTitle(orderAcceptNum = int.toString())
+                            },
+                                { binding.deliveryStart.visibility = View.VISIBLE; },
+                                { }
+                            )
+
+                            //매치방이 사라질때 나가게 되는 리스너
+                            MatchDao.removeMatchRoomListener(matchId){
+                                outSettingChatRoom(false)
+                            }
+
+                            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
+
+                            //채팅창 보이게
+                            binding.nochat.visibility = View.GONE
                         }
-
-                        //소제목으로 띄우기
-                        updateSubTitle(
-                            it!!.orderAcceptPeopleId.size.toString(),
-                            it!!.participatePeopleId.size.toString()
-                        )
-                        //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록
-                        addNewMessageListener(matchId) {
-                        }
-                        //count 리스너
-                        MatchDao.addPeopleNumListener(matchId) {
-                            updateSubTitle(participatePeopleSize = it.toString())
-                        }
-
-                        //모두 주문 수락 리스너
-                        MatchDao.addOrderAcceptListener(matchId, { int ->
-                            updateSubTitle(orderAcceptNum = int.toString())
-                        },
-                            { allOrderAccept() })
-
-                        //매치방이 사라질때 나가게 되는 리스너
-                        MatchDao.removeMatchRoomListener(matchId){
-                            enterChatRoom{}
-                        }
-
-                        ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
-
-                        //채팅창 보이게
-                        binding.nochat.visibility = View.GONE
                     }
                 }
                 //매칭방이 없다면 나가기 액션
@@ -353,7 +365,7 @@ class ChatListFragment : Fragment() {
         orderAcceptNum: String = "",
         participatePeopleSize: String = "",
     ) {
-
+        Log.d("test300","updateSubTitle")
         var acceptNum = orderAcceptNum
         var count = participatePeopleSize
         if(binding.toolbar.subtitle == null){

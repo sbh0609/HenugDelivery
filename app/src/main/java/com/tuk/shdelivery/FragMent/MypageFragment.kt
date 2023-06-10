@@ -79,7 +79,6 @@ class MypageFragment : Fragment() {
         //전부 수락했으면 못지움
         if (numbers[0] != numbers[1]) {
             MatchDao.removeMatchRoom(user) {
-                ((activity as HomeActivity).listFragment[1] as ChatListFragment).outSettingChatRoom(true)
                 exitSetProfile()
                 callback()
             }

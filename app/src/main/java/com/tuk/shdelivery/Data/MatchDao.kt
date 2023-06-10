@@ -238,6 +238,7 @@ object MatchDao {
         matchId: String,
         callback1: (orderAcceptNum: Int) -> Unit,
         callback2: () -> Unit,
+        callback3: () -> Unit
     ) {
         val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
         val ref2 = database.child("chatrooms/${matchId}/count")
@@ -250,9 +251,14 @@ object MatchDao {
                     ref2.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot2: DataSnapshot) {
                             val value2 = snapshot2.getValue(Int::class.java)
+                            //같을 때
                             if (value1 != null && value2 != null && value1 == value2) {
                                 // value1이 value2를 넘었을 때의 로직을 여기에 추가합니다.
                                 callback2()
+                            }
+                            //다를때
+                            else if(value1 != null && value2 != null && value1 != value2){
+                                callback3()
                             }
                         }
 
@@ -535,7 +541,7 @@ object MatchDao {
     fun getParticipatingMatch(user: User, callback: (match: MatchRoomData) -> Unit) {
         val matchroomRef =
             FirebaseDatabase.getInstance().getReference("chatrooms/${user.participateMatchId}")
-        matchroomRef.addValueEventListener(object : ValueEventListener {
+        matchroomRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val data = dataSnapshot.getValue(MatchRoomData::class.java)
