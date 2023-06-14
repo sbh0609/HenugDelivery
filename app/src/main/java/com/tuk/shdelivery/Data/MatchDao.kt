@@ -3,6 +3,7 @@ package com.tuk.shdelivery.Data
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.google.firebase.database.*
+import java.util.Calendar
 
 object MatchDao {
     private var database = FirebaseDatabase.getInstance().reference
@@ -55,7 +56,7 @@ object MatchDao {
                 //매칭방 데이터가 변경될때 실행될 코드
                 else {
                     val value = snapshot.getValue(MatchRoomData::class.java)
-                    if (value != null){
+                    if (value != null) {
                         callback2(value)
                     }
                 }
@@ -65,7 +66,7 @@ object MatchDao {
         }
 
         val ref = database.child("chatrooms/${matchId}")
-        refHashMap["matchRoomListener"] = Pair(ref,matchRoomListener!!)
+        refHashMap["matchRoomListener"] = Pair(ref, matchRoomListener!!)
         ref.addValueEventListener(matchRoomListener!!)
 
     }
@@ -85,7 +86,7 @@ object MatchDao {
                 Log.w("TAG", "loadData:onCancelled", databaseError.toException())
             }
         }
-        refHashMap["deliveryCompliteListener"] = Pair(ref3,deliveryCompliteListener!!)
+        refHashMap["deliveryCompliteListener"] = Pair(ref3, deliveryCompliteListener!!)
         ref3.addValueEventListener(deliveryCompliteListener!!)
     }
 
@@ -279,13 +280,13 @@ object MatchDao {
 
             override fun onCancelled(error: DatabaseError) {}
         }
-        refHashMap["orderAcceptListener"] = Pair(ref1,orderAcceptListener!!)
+        refHashMap["orderAcceptListener"] = Pair(ref1, orderAcceptListener!!)
         // ValueEventListener 추가
         ref1.addValueEventListener(orderAcceptListener!!)
     }
 
     fun removeListener(matchId: String) {
-        for(i in refHashMap){
+        for (i in refHashMap) {
             i.value.first.removeEventListener(i.value.second)
         }
         removeMessageListener(matchId)

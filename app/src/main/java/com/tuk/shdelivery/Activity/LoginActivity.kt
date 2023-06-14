@@ -38,7 +38,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         val user1 = User("1", "원찬1", "", 100L, 0L)
 
         val intent = Intent(this, HomeActivity::class.java)
-        Udao.getUser(user1.userId.toString()){
+        Udao.getUser(user1.userId){
             var result = it
             //새로운 유저라면
             if (result == null) {

@@ -167,11 +167,6 @@
 
 
 
-                <TextView
-                    android:gravity="center"
-                    android:text="채팅방에 입장하셨습니다."
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
 
 
             </LinearLayout>

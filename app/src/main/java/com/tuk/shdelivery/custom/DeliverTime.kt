@@ -50,18 +50,24 @@ class DeliverTime(var data: Calendar) {
 
         fun getHourMinute(diffMillis: Long): String {
             val diff = diffMillis / (60 * 1000)
+            var diffString = ""
+            if (diff >= 0) {
 
-            val hours = diff / 60
-            val minutes = diff % 60
+                val hours = diff / 60
+                val minutes = diff % 60
 
-            var diffString =
-                if (hours == 0L) {
-                    minutes.toString() + "분"
-                } else {
-                    hours.toString() + "시간 " + minutes + "분"
-                }
+                diffString =
+                    if (hours == 0L) {
+                        minutes.toString() + "분"
+                    } else {
+                        hours.toString() + "시간 " + minutes + "분"
+                    }
+                diffString = String.format("%s 후 주문", diffString)
 
-            return String.format("%s 후 주문", diffString)
+            } else {
+                diffString = "배달중"
+            }
+            return diffString
         }
 
         /**

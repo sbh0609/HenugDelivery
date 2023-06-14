@@ -23,6 +23,7 @@ import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.FragmentChatListBinding
 import com.tuk.shdelivery.databinding.LayoutChatBinding
+import com.tuk.shdelivery.databinding.LayoutEnterExitChatBinding
 import com.tuk.shdelivery.databinding.LayoutMychatBinding
 import com.tuk.shdelivery.databinding.LayoutOrderacceptBinding
 import java.util.*
@@ -37,7 +38,7 @@ class ChatListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterChatRoom() {}
+        enterChatRoom{}
 
         //view, clear 버튼 리스너
         visibleListener()
@@ -97,14 +98,12 @@ class ChatListFragment : Fragment() {
                     user.userPoint += it!!.orderPoint
                 }
 
-                UserDao.updateUser(user){
+                UserDao.updateUser(user) {
                     //본인 방이면 방 지우기
-                    if(user.userId == user.participateMatchId) {
-                        MatchDao.removeMatchRoom(user) {
-                        }
+                    if (user.userId == user.participateMatchId) {
+                        MatchDao.removeMatchRoom(user) {}
                     }
-                    val snackbar =
-                        Snackbar.make(binding.root, "맛있게 드세요!", Snackbar.LENGTH_SHORT)
+                    val snackbar = Snackbar.make(binding.root, "맛있게 드세요!", Snackbar.LENGTH_SHORT)
                     snackbar.setAction("닫기") { snackbar.dismiss() }.show()
                 }
             }
@@ -115,20 +114,10 @@ class ChatListFragment : Fragment() {
         binding.orderAccept.setOnClickListener {
             binding.orderAccept.isEnabled = false
             binding.inputPoint.isEnabled = false
-            val regex = "\\d+".toRegex()
-            val numbers =
-                regex.findAll(binding.toolbar.subtitle.toString()).map { it.value.toInt() }.toList()
 
             var text = ""
             var point = 0
 
-            //혼자 일땐..
-            if (numbers[1] == 1) {
-                Toast.makeText(context, "같이 배달먹어요!!", Toast.LENGTH_SHORT).show()
-                binding.orderAccept.isEnabled = true
-                binding.inputPoint.isEnabled = true
-                return@setOnClickListener
-            }
             val user = intent.getSerializableExtra("user") as User
             //!!! 주문 수락 눌렀을때
             if (binding.orderAccept.text.toString() == "주문 수락") {
@@ -162,7 +151,7 @@ class ChatListFragment : Fragment() {
             }
             binding.inputPoint.isEnabled = binding.orderAccept.text.toString() == "주문 수락"
             var orderChat = String.format(
-                "%sP 만큼 %s 하였습니다.", binding.inputPoint.text.toString(), text
+                "%sP 만큼 %s 하였습니다.", binding.inputPoint.text.toString().toInt().toString(), text
             )
             //주문 수락|취소 Chat 만들기
             val chat = Chat(
@@ -296,7 +285,7 @@ class ChatListFragment : Fragment() {
                                 binding.orderAccept.text = "주문 취소"
 
                                 //배달중 상태라면
-                                if(matchRoomData!!.id == "start"){
+                                if (matchRoomData!!.id == "start") {
                                     binding.orderAccept.visibility = View.GONE
                                     binding.deliveryComplite.visibility = View.VISIBLE
                                     deliveryStart()
@@ -366,7 +355,6 @@ class ChatListFragment : Fragment() {
         else {
             binding.nochat.visibility = View.VISIBLE
         }
-        callback()
     }
 
     fun updateSubTitle(
@@ -401,7 +389,7 @@ class ChatListFragment : Fragment() {
     }
 
     fun addNewMessageListener(matchId: String, callback: () -> Unit) {
-        MatchDao.fetchNewMessage(matchId) {
+        MatchDao.fetchNewMessage(matchId, callback ) {
             //내 채팅이라면
             if (it.userId == (intent.getSerializableExtra("user") as User).userId) {
                 createMyChat(it)
@@ -472,13 +460,8 @@ class ChatListFragment : Fragment() {
     private fun createOrerAcceptText(it: Chat) {
         //바인딩 생성
         var acceptText = LayoutOrderacceptBinding.inflate(layoutInflater)
-        var color: Int? = null
-
-        if (it.userId == "주문 수락") {
-            color = resources.getColor(R.color.orangeClick)
-        } else if (it.userId == "주문 취소") {
-            color = resources.getColor(R.color.orange)
-        }
+        var color: Int? =
+            resources.getColor(if (it.userId == "주문 수락") R.color.orangeClick else R.color.orange)
 
         acceptText.userName.text = it.userName
         acceptText.userId.text = it.userId
