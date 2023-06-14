@@ -256,9 +256,10 @@ class ChatListFragment : Fragment() {
             }
             //배달완료를 눌렀었다면 회수한다.
             else{
+                Toast.makeText(context,"포인트가 정산 되었습니다!",Toast.LENGTH_SHORT).show()
                 user.userPoint += it!!.toLong()
+                MatchDao.deleteRedemptionPoint(user){}
             }
-            user.userPoint += user.matchPoint
             user.matchPoint = 0L
             intent.putExtra("user", user)
             UserDao.updateUser(user) {

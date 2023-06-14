@@ -13,6 +13,12 @@ object MatchDao {
     var deliveryCompliteListener: ValueEventListener? = null
     var matchRoomListener: ValueEventListener? = null
     var refHashMap = hashMapOf<String, Pair<DatabaseReference, ValueEventListener>>()
+    //
+    fun deleteRedemptionPoint(user: User,callback: () -> Unit){
+        database.child("CompleteList/${user.userId}").removeValue().addOnSuccessListener {
+            callback()
+        }
+    }
 
     //배달완료를 누른상태인지 확인하는 함수
     fun isRedemptionPoint(user: User, callback: (matchPoint : Int?) -> Unit) {
@@ -227,40 +233,41 @@ object MatchDao {
         //orderAcceptPeopleId 리스트 요소 삭제
         val ref3 =
             database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
-        ref3.runTransaction(object : Transaction.Handler {
-            override fun doTransaction(mutableData: MutableData): Transaction.Result {
-                val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
-                val updatedList = list as ArrayList
-
-                updatedList.remove(user.userId)
-                mutableData.value = updatedList
-
-                return Transaction.success(mutableData)
+        getChatRoomData(user.participateMatchId){
+            var matchPoint = 0
+            //방장이면
+            if(user.userId == user.participateMatchId){
+                matchPoint = it!!.orderPoint
             }
+            database.child("CompleteList/${user.userId}").setValue(matchPoint)
+                .addOnSuccessListener {
+                    ref3.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                            val list = mutableData.getValue(object : GenericTypeIndicator<List<String>>() {})
+                            val updatedList = list as ArrayList
 
-            override fun onComplete(
-                databaseError: DatabaseError?,
-                committed: Boolean,
-                dataSnapshot: DataSnapshot?,
-            ) {
-                // Transaction completed
-                if (committed) {
-                    getChatRoomData(user.participateMatchId){
-                        var matchPoint = 0
-                        //방장이면
-                        if(user.userId == user.participateMatchId){
-                            matchPoint = it!!.orderPoint
+                            updatedList.remove(user.userId)
+                            mutableData.value = updatedList
+
+                            return Transaction.success(mutableData)
                         }
-                        database.child("CompleteList/${user.userId}").setValue(matchPoint)
-                            .addOnSuccessListener {
+
+                        override fun onComplete(
+                            databaseError: DatabaseError?,
+                            committed: Boolean,
+                            dataSnapshot: DataSnapshot?,
+                        ) {
+                            // Transaction completed
+                            if (committed) {
                                 callback(null)
+                            } else {
+                                callback(databaseError)
                             }
-                    }
-                } else {
-                    callback(databaseError)
+                        }
+                    })
                 }
-            }
-        })
+        }
+
     }
 
     fun updateOrderPoint(ownerId: String, point: Int, callback: () -> Unit) {
