@@ -1,8 +1,7 @@
 package com.tuk.shdelivery.FragMent
 
-import android.opengl.Visibility
 import android.os.Bundle
-import android.service.autofill.FieldClassification.Match
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -21,11 +20,7 @@ import com.tuk.shdelivery.Data.*
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.custom.DeliverTime
-import com.tuk.shdelivery.databinding.FragmentChatListBinding
-import com.tuk.shdelivery.databinding.LayoutChatBinding
-import com.tuk.shdelivery.databinding.LayoutEnterExitChatBinding
-import com.tuk.shdelivery.databinding.LayoutMychatBinding
-import com.tuk.shdelivery.databinding.LayoutOrderacceptBinding
+import com.tuk.shdelivery.databinding.*
 import java.util.*
 
 
@@ -38,10 +33,7 @@ class ChatListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterChatRoom{}
-
-        //view, clear 버튼 리스너
-        visibleListener()
+        enterChatRoom {}
 
         //나가기 버튼 리스너
         createExitButtonListener()
@@ -52,7 +44,6 @@ class ChatListFragment : Fragment() {
         //배달 시작 리스너
         binding.deliveryStart.setOnClickListener {
             MatchDao.deliveryStart((intent.getSerializableExtra("user") as User).participateMatchId) {
-//                deliveryStart()
             }
         }
 
@@ -85,7 +76,6 @@ class ChatListFragment : Fragment() {
         binding.deliveryComplite.visibility = View.VISIBLE
         Toast.makeText(context, "배달에 대해 말해 주세요!", Toast.LENGTH_SHORT).show()
 
-        Log.d("test300", "deliveryCompliteListener")
         //모두 배달 완료 리스너 달기
         MatchDao.deliveryCompliteListener((intent.getSerializableExtra("user") as User)) {
             val user = intent.getSerializableExtra("user") as User
@@ -160,7 +150,7 @@ class ChatListFragment : Fragment() {
 
             MatchDao.sendMessageToFirebase(
                 chat, user.participateMatchId
-            )
+            ) {}
 
             user.userPoint -= point
             user.matchPoint = if (point > 0) point.toLong() else 0L
@@ -175,6 +165,7 @@ class ChatListFragment : Fragment() {
     }
 
     private fun createExitButtonListener() {
+        var clickEnabled = true
         binding.toolbar.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.exit -> {
@@ -194,6 +185,10 @@ class ChatListFragment : Fragment() {
                     val isOrderAccept = binding.orderAccept.text == "주문 취소"
 
                     when {
+                        //클릭이 끝나지 않았다면
+                        !clickEnabled -> {
+                            Toast.makeText(context, "삭제중입니다.", Toast.LENGTH_SHORT).show()
+                        }
                         // 배달중이라면
                         isDeliverStart -> {
                             Toast.makeText(
@@ -212,10 +207,22 @@ class ChatListFragment : Fragment() {
                                 activity, "주문 수락 중입니다!", Toast.LENGTH_SHORT
                             ).show()
                         }
-                        // 매칭방에 참가 중이라면
+                        // 매칭방에 참가 중이라면 퇴장하고 퇴장 메세지 띄우기
                         isParticipating -> {
+                            clickEnabled = false
                             MatchDao.exitUser(user) {
-                                outSettingChatRoom(true)
+                                val chat = Chat(
+                                    "퇴장",
+                                    user.userName,
+                                    "님이 퇴장하였습니다.",
+                                    Calendar.getInstance().timeInMillis
+                                )
+                                MatchDao.sendMessageToFirebase(chat, user.participateMatchId) {
+                                    outSettingChatRoom(true)
+                                }
+                                Handler().postDelayed({
+                                    clickEnabled = true // 일정 시간 후 다시 터치 이벤트 허용
+                                }, 2000)
                             }
                         }
                         // 아무것도 해당하지 않는 경우
@@ -238,8 +245,10 @@ class ChatListFragment : Fragment() {
             binding.orderAccept.performClick()
         }
 
-        binding.clearChat.performClick()
-        binding.view.performClick()
+        //모든 채팅 제거
+        binding.chatLayout.removeAllViews()
+        //채팅 가림막 올리기
+        binding.nochat.visibility = View.VISIBLE
 
         binding.inputPoint.text = null
         binding.inputPoint.isEnabled = true
@@ -268,6 +277,7 @@ class ChatListFragment : Fragment() {
         val user = intent.getSerializableExtra("user") as User
         matchId = user.participateMatchId
 
+
         //입장중이었다면
         if (matchId != "") {
             MatchDao.isMatchExists(matchId) { isExists ->
@@ -275,8 +285,13 @@ class ChatListFragment : Fragment() {
                 if (isExists) {
                     MatchDao.getParticipatingMatch(matchId) { matchRoomData ->
                         MatchDao.getChatRoomData(matchId) {
+                            //프로필 설정
+                            ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(
+                                user
+                            )
                             intent.putExtra("matchRoomData", matchRoomData)
                             intent.putExtra("chatRoomData", it)
+
                             //주문 수락 중이고, 배달 상태가 아니라면
                             if (user.matchPoint != 0L) {
                                 binding.inputPoint.setText(user.matchPoint.toString())
@@ -300,8 +315,6 @@ class ChatListFragment : Fragment() {
                             //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록
                             addNewMessageListener(matchId) {}
 
-                            Log.d("test300", "enterMatchRoom")
-
                             //주문 수락 리스너
                             MatchDao.addOrderAcceptListener(matchId) { chatRoomData ->
                                 updateSubTitle(
@@ -309,8 +322,10 @@ class ChatListFragment : Fragment() {
                                     participatePeopleSize = chatRoomData.participatePeopleId.size.toString()
                                 )
                                 //인원이 변경될 때
-                                if((intent.getSerializableExtra("chatRoomData") as ChatRoom).participatePeopleId.size != chatRoomData.participatePeopleId.size){
-                                    ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(user)
+                                if ((intent.getSerializableExtra("chatRoomData") as ChatRoom).participatePeopleId.size != chatRoomData.participatePeopleId.size) {
+                                    ((activity as HomeActivity).listFragment[2] as MypageFragment).SetProfile(
+                                        user
+                                    )
                                 }
                                 //방장이고, 배달중이 아닐떄
                                 if (user.userId == user.participateMatchId && (intent.getSerializableExtra(
@@ -342,6 +357,8 @@ class ChatListFragment : Fragment() {
 
                             //채팅창 보이게
                             binding.nochat.visibility = View.GONE
+
+                            callback()
                         }
                     }
                 }
@@ -389,7 +406,7 @@ class ChatListFragment : Fragment() {
     }
 
     fun addNewMessageListener(matchId: String, callback: () -> Unit) {
-        MatchDao.fetchNewMessage(matchId, callback ) {
+        MatchDao.fetchNewMessage(matchId) {
             //내 채팅이라면
             if (it.userId == (intent.getSerializableExtra("user") as User).userId) {
                 createMyChat(it)
@@ -407,10 +424,11 @@ class ChatListFragment : Fragment() {
                     (binding.scrollView.getChildAt(0).height - binding.scrollView.height).coerceAtLeast(
                         0
                     )
-
                 //공지 사항이라면
                 if (it.userId == "주문 수락" || it.userId == "주문 취소") {
                     createOrerAcceptText(it)
+                } else if (it.userId == "입장" || it.userId == "퇴장") {
+                    createEnterExitChat(it)
                 }
                 // 상대방 채팅이라면
                 else {
@@ -420,6 +438,26 @@ class ChatListFragment : Fragment() {
             }
             callback()
         }
+    }
+
+    private fun createEnterExitChat(it: Chat) {
+        //바인딩 생성
+        var acceptText = LayoutEnterExitChatBinding.inflate(layoutInflater)
+        var color: Int? =
+            resources.getColor(if (it.userId == "입장") R.color.white else R.color.red)
+
+        acceptText.userName.text = it.userName
+        acceptText.userId.text = it.userId
+        acceptText.chat.text = it.chat
+
+        acceptText.userName.setTextColor(color!!)
+        acceptText.chat.setTextColor(color)
+
+        acceptText.chatTime.text =
+            DeliverTime(
+                Calendar.getInstance().apply { timeInMillis = it.chatTime }).getTime()
+
+        binding.chatLayout.addView(acceptText.root)
     }
 
     private fun createMyChat(it: Chat) {
@@ -476,23 +514,6 @@ class ChatListFragment : Fragment() {
         binding.chatLayout.addView(acceptText.root)
     }
 
-    private fun visibleListener() {
-        binding.view.setOnClickListener {
-            if (binding.nochat.visibility == View.GONE) {
-                binding.nochat.visibility = View.VISIBLE
-            } else if (binding.nochat.visibility == View.VISIBLE) {
-                binding.nochat.visibility = View.GONE
-            }
-        }
-
-        //채팅창 클리어 버튼 설정
-        binding.clearChat.setOnClickListener {
-            while (binding.chatLayout.childCount > 1) {
-                binding.chatLayout.removeViewAt(1)
-            }
-        }
-    }
-
     private fun createDownScrollButtonListener() {
         binding.scrollDonwButton.visibility = View.INVISIBLE
         binding.scrollView.viewTreeObserver.addOnScrollChangedListener {
@@ -541,7 +562,7 @@ class ChatListFragment : Fragment() {
             )
             binding.input.text.clear()
 
-            MatchDao.sendMessageToFirebase(chat, matchId)
+            MatchDao.sendMessageToFirebase(chat, matchId) {}
 
         }
     }

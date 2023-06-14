@@ -1,8 +1,6 @@
 package com.tuk.shdelivery.FragMent
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,10 +20,7 @@ import com.tuk.shdelivery.custom.ToastCustom
 import com.tuk.shdelivery.databinding.CategoryIconBinding
 import com.tuk.shdelivery.databinding.FragmentHomeBinding
 import com.tuk.shdelivery.databinding.LayoutMatchRoomBinding
-import kotlinx.coroutines.*
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.coroutines.CoroutineContext
 
 class HomeFragment() : Fragment() {
 
@@ -46,7 +41,10 @@ class HomeFragment() : Fragment() {
         //매칭방 생성 버튼 리스너 달기
         binding.createMatching.setOnClickListener { createMatching() }
         //새로고침 리스너 달기
-        binding.swiper.setOnRefreshListener { reFresh() }
+        binding.swiper.setOnRefreshListener {
+            reFresh()
+            ToastCustom.toast(requireActivity(), "새로고침 완료")
+        }
 
         //upscroll리스너 달기
         binding.scrollUpButton.setOnClickListener {
@@ -131,8 +129,6 @@ class HomeFragment() : Fragment() {
                 if (binding.toolbar.title == "전체") it else it.filter { it.menu == binding.toolbar.title } as ArrayList<MatchRoomData>
 
             adapter?.notifyDataSetChanged()
-
-            ToastCustom.toast(requireActivity(), "새로고침 완료")
 
             binding.scrollUpButton.visibility = View.INVISIBLE
 

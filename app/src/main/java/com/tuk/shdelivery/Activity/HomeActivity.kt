@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
+import com.tuk.shdelivery.Data.Chat
+import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.FragMent.ChatListFragment
@@ -48,7 +50,6 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
         //탭 리스너 달기
         setTabListener()
     }
-
 
 
     private fun createFragMentList() {
@@ -116,14 +117,18 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             var newCreateData = fetchIntent?.getSerializableExtra("createData") as MatchRoomData
             var user = (intent.getSerializableExtra("user") as User)
             user.participateMatchId = newCreateData.id
-            intent.putExtra("user",user)
+            intent.putExtra("user", user)
             val fragment1 = listFragment.get(1) as ChatListFragment
-            UserDao.updateUser(user){
-
-                fragment1.enterChatRoom(){
-                    binding.tabLayout.getTabAt(1)!!.select()
+            val fragment0 = listFragment.get(0) as HomeFragment
+            UserDao.updateUser(user) {
+                //입장 메세지 보내고 들어가기
+                var chat = Chat("입장", user.userName, "님이 입장하였습니다.")
+                MatchDao.sendMessageToFirebase(chat, user.participateMatchId) {
+                    fragment1.enterChatRoom() {
+                        fragment0.reFresh()
+                        binding.tabLayout.getTabAt(1)!!.select()
+                    }
                 }
-
             }
         }
         //매칭방을 입장한 뒤라면
@@ -131,13 +136,18 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             val mypage = listFragment.get(2) as MypageFragment
             //!!참여중인 매칭방 id로 매칭방 가져온다음 매칭방에 참여중 표시
             val user = fetchIntent?.getSerializableExtra("user") as User
-            val fragment = listFragment.get(1) as ChatListFragment
+            val fragment1 = listFragment.get(1) as ChatListFragment
+            val fragment0 = listFragment.get(0) as HomeFragment
 
             intent.putExtra("user", user)
-            intent.putExtra("selectChatRoom",fetchIntent.getSerializableExtra("selectChatRoom"))
-
-            fragment.enterChatRoom(){
-                binding.tabLayout.getTabAt(1)!!.select()
+            intent.putExtra("selectChatRoom", fetchIntent.getSerializableExtra("selectChatRoom"))
+            //입장 메세지 보내고 들어가기
+            var chat = Chat("입장", user.userName, "님이 입장하였습니다.")
+            MatchDao.sendMessageToFirebase(chat, user.participateMatchId) {
+                fragment1.enterChatRoom() {
+                    fragment0.reFresh()
+                    binding.tabLayout.getTabAt(1)!!.select()
+                }
             }
         }
         //포인트를 충전한 뒤라면
@@ -149,7 +159,11 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
             binding.tabLayout.getTabAt(2)!!.select()
 
-            Toast.makeText(this, fetchIntent.getLongExtra("inputPoint",0L).toString() + "P 충전 되었습니다.", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                this,
+                fetchIntent.getLongExtra("inputPoint", 0L).toString() + "P 충전 되었습니다.",
+                Toast.LENGTH_SHORT
+            )
                 .show()
         }
 

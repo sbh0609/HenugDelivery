@@ -441,8 +441,10 @@ object MatchDao {
      * output: void
      * 입력한 메시지를 데이터베이스에 저장한다.
      */
-    fun sendMessageToFirebase(message: Chat, chatroomId: String) {
-        database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message)
+    fun sendMessageToFirebase(message: Chat, chatroomId: String, callback: () -> Unit) {
+        database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message).addOnSuccessListener {
+            callback()
+        }
     }
 
     /**
