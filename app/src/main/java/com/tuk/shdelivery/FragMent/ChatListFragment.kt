@@ -62,8 +62,9 @@ class ChatListFragment : Fragment() {
         //배달완료 버튼 리스너
         binding.deliveryComplite.setOnClickListener {
             binding.deliveryComplite.isEnabled = false
-            MatchDao.deliveryComplite((intent.getSerializableExtra("user") as User)) {
-                //!!!배달 완료 메세지 보내기
+            val user = intent.getSerializableExtra("user") as User
+            MatchDao.deliveryComplite(user) {
+                    //!!!배달 완료 메세지 보내기
             }
         }
     }
@@ -76,27 +77,14 @@ class ChatListFragment : Fragment() {
         binding.deliveryComplite.visibility = View.VISIBLE
         Toast.makeText(context, "배달에 대해 말해 주세요!", Toast.LENGTH_SHORT).show()
 
+
+        val user = intent.getSerializableExtra("user") as User
         //모두 배달 완료 리스너 달기
-        MatchDao.deliveryCompliteListener((intent.getSerializableExtra("user") as User)) {
-            val user = intent.getSerializableExtra("user") as User
-            MatchDao.getChatRoomData(user.participateMatchId) {
-                //!!!배달 완료시 실행 할 함수
-                user.matchPoint = 0
-
-                //본인이 만든 방이면 orderPoint가져가기
-                if (user.userId == user.participateMatchId) {
-                    user.userPoint += it!!.orderPoint
-                }
-
-                UserDao.updateUser(user) {
-                    //본인 방이면 방 지우기
-                    if (user.userId == user.participateMatchId) {
-                        MatchDao.removeMatchRoom(user) {}
-                    }
-                    val snackbar = Snackbar.make(binding.root, "맛있게 드세요!", Snackbar.LENGTH_SHORT)
-                    snackbar.setAction("닫기") { snackbar.dismiss() }.show()
-                }
-            }
+        MatchDao.deliveryCompliteListener(user) {
+            //방 지우기
+            MatchDao.removeMatchRoom(user.participateMatchId) {}
+            val snackbar = Snackbar.make(binding.root, "맛있게 드세요!", Snackbar.LENGTH_SHORT)
+            snackbar.setAction("닫기") { snackbar.dismiss() }.show()
         }
     }
 
@@ -238,7 +226,7 @@ class ChatListFragment : Fragment() {
         }
     }
 
-    public fun outSettingChatRoom(isExists: Boolean) {
+    fun outSettingChatRoom(isExists: Boolean) {
         val user = intent.getSerializableExtra("user") as User
         //주문 수락 상태 + 모두 수락버튼을 누르지 않았을때 + 매칭방이 존재 할때 주문 취소를 누르고 나간다.
         if (binding.orderAccept.text == "주문 취소" && binding.deliveryComplite.visibility == View.GONE && isExists) {
@@ -260,14 +248,23 @@ class ChatListFragment : Fragment() {
         MatchDao.removeListener(user.participateMatchId)
         user.participateMatchId = ""
         //만약 포인트를 걸고 있다면 반환 한다.
-        if (user.matchPoint != 0L) {
+        MatchDao.isRedemptionPoint(user){
+            //배달완료를 누른적 없고 걸었던 포인트가 있다면 회수한다.
+            if(it == null){
+                if(user.matchPoint != 0L)
+                    user.userPoint += user.matchPoint
+            }
+            //배달완료를 눌렀었다면 회수한다.
+            else{
+                user.userPoint += it!!.toLong()
+            }
             user.userPoint += user.matchPoint
-            user.matchPoint = 0
-        }
-        intent.putExtra("user", user)
-        UserDao.updateUser(user) {
-            updateSubTitle()
-            ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
+            user.matchPoint = 0L
+            intent.putExtra("user", user)
+            UserDao.updateUser(user) {
+                updateSubTitle()
+                ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
+            }
         }
     }
 
@@ -304,12 +301,6 @@ class ChatListFragment : Fragment() {
                                     binding.orderAccept.visibility = View.GONE
                                     binding.deliveryComplite.visibility = View.VISIBLE
                                     deliveryStart()
-
-                                    //만약 배달 완료를 누른 상태라면
-                                    if (!it!!.orderAcceptPeopleId.contains(user.userId)) {
-                                        //!!! 배달 완료 시 실행할 함수
-                                        binding.deliveryComplite.isEnabled = false
-                                    }
                                 }
                             }
                             //모든 채팅을 불러오고 새로운 메세지 올때 리스너 등록

@@ -12,7 +12,25 @@ object MatchDao {
     var orderAcceptListener: ValueEventListener? = null
     var deliveryCompliteListener: ValueEventListener? = null
     var matchRoomListener: ValueEventListener? = null
-    var refHashMap = hashMapOf<String,Pair<DatabaseReference,ValueEventListener>>()
+    var refHashMap = hashMapOf<String, Pair<DatabaseReference, ValueEventListener>>()
+
+    //배달완료를 누른상태인지 확인하는 함수
+    fun isRedemptionPoint(user: User, callback: (matchPoint : Int?) -> Unit) {
+        database.child("CompleteList/${user.userId}")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    var matchPoint : Int? = null
+                    if(snapshot.exists()){
+                        matchPoint = snapshot.getValue(Int::class.java)!!
+                    }
+                    callback(matchPoint)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Error: ", error.toException())
+                }
+            })
+    }
 
     //매칭방이 있는지 확인 하는 함수 (true, false)
     fun isMatchExists(matchId: String, callback: (isExists: Boolean) -> Unit) {
@@ -227,7 +245,17 @@ object MatchDao {
             ) {
                 // Transaction completed
                 if (committed) {
-                    callback(null)
+                    getChatRoomData(user.participateMatchId){
+                        var matchPoint = 0
+                        //방장이면
+                        if(user.userId == user.participateMatchId){
+                            matchPoint = it!!.orderPoint
+                        }
+                        database.child("CompleteList/${user.userId}").setValue(matchPoint)
+                            .addOnSuccessListener {
+                                callback(null)
+                            }
+                    }
                 } else {
                     callback(databaseError)
                 }
@@ -442,9 +470,10 @@ object MatchDao {
      * 입력한 메시지를 데이터베이스에 저장한다.
      */
     fun sendMessageToFirebase(message: Chat, chatroomId: String, callback: () -> Unit) {
-        database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message).addOnSuccessListener {
-            callback()
-        }
+        database.child("chatrooms").child(chatroomId).child("messages").push().setValue(message)
+            .addOnSuccessListener {
+                callback()
+            }
     }
 
     /**
@@ -546,15 +575,14 @@ object MatchDao {
         })
     }
 
-    fun removeMatchRoom(user: User, callback: () -> Unit) {
+    fun removeMatchRoom(matchId: String, callback: () -> Unit) {
         val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("chatrooms/${user.participateMatchId}")
+        val myRef = database.getReference("chatrooms/${matchId}")
 
         myRef.removeValue().addOnSuccessListener {
-            removeListener(user.participateMatchId)
             callback()
         }.addOnFailureListener { e ->
-            Log.e(TAG, "Failed to remove node", e)
+            callback()
         }
     }
 }

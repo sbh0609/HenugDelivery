@@ -82,7 +82,7 @@ class MypageFragment : Fragment() {
         //배달이 시작됐으면 못지움
         val matchRoomData = intent.getSerializableExtra("matchRoomData") as MatchRoomData
         if (matchRoomData.id != "start") {
-            MatchDao.removeMatchRoom(user) {
+            MatchDao.removeMatchRoom(user.participateMatchId) {
                 callback()
             }
         } else {
