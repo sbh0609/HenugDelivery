@@ -3,19 +3,22 @@ package com.tuk.shdelivery.Data
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.google.firebase.database.*
-
+// object 키워드는 코틀린에서 Singleton 패턴을 적용한 클래스를 의미한다.
+//Singleton 패턴으로 MatchDao는 앱 내에서 공유되어 사용되는 데이터베이스 접근 객체가 된다.
 object MatchDao {
     private var database = FirebaseDatabase.getInstance().reference
-
+    // 이벤트 리스너 객체들 RealtimeDatabase의 데이터 변화를 감지하고 그에 따라 코드 수행
     var childEventListener: ChildEventListener? = null
     var orderAcceptListener: ValueEventListener? = null
     var peopleNumListener: ValueEventListener? = null
     var deliveryCompliteListenner : ValueEventListener? = null
 
+    //주문 완료 이벤트를 감지하는 리스너 설정
     fun deliveryCompliteListener(user: User, callback: () -> Unit){
         val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
 
         deliveryCompliteListenner = object : ValueEventListener {
+            //데이터 변경시마다 호출, 주문완료 상황 감지
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.value == null) {
                     callback()
@@ -30,6 +33,9 @@ object MatchDao {
         ref3.addValueEventListener(deliveryCompliteListenner!!)
     }
 
+    //주문 수락 사용자 수 증가, 주문 수락한 사용자 id 추가
+    //orderAcceptNum 증가
+    //orederAcceptPeopleId 리스트에 사용자 ID 추가
     fun orderUserPlus2(user: User, callback: (Any?) -> (Unit)) {
         val orderAcceptNumRef = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
 
@@ -83,6 +89,7 @@ object MatchDao {
             }
         })
     }
+    // 주문을 수락한 사용자 수 감소, 사용자 ID제거
     fun orderUserMisnus2(user: User, callback: (Any?) -> (Unit)) {
         val orderAcceptNumRef = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptNum")
 
@@ -136,6 +143,7 @@ object MatchDao {
             }
         })
     }
+    //주문 완료를 갱신하는 함수(주분 수락한 사용자 ID제거)
     fun deliveryComplite(user: User, callback: (Any?) -> Unit){
         //orderAcceptPeopleId 리스트 요소 삭제
         val ref3 = database.child("chatrooms/${user.participateMatchId}/chatRoom/orderAcceptPeopleId")
@@ -164,7 +172,7 @@ object MatchDao {
             }
         })
     }
-
+    // 주문 점수 갱신 함수 point 만큼 주문 점수 증가
     fun updateOrderPoint(ownerId: String, point: Int, callback: () -> Unit) {
 
         val reference = database.child("chatrooms/${ownerId}/chatRoom/orderPoint")
@@ -192,6 +200,7 @@ object MatchDao {
         })
     }
 
+    // 주문을 수락한 사람의 수에 대한 변동 감지
     fun addOrderAcceptListener(
         matchId: String,
         callback1: (orderAcceptNum: Int) -> Unit,
@@ -225,6 +234,7 @@ object MatchDao {
         // ValueEventListener 추가
         ref1.addValueEventListener(orderAcceptListener!!)
     }
+    //참여 인원의 수에 대한 변동을 감지하는 함수
     fun addPeopleNumListener(
         matchId: String,
         callback: (PeopleNum: Int) -> Unit
@@ -243,29 +253,33 @@ object MatchDao {
         // ValueEventListener 추가
         ref2.addValueEventListener(peopleNumListener!!)
     }
+
+    // 입력된 matchId 에 해당하는 리스너 제거
     fun removeListener(matchId: String){
         removeMessageListener(matchId)
         removeOrderAcceptListener(matchId)
         removePeopleNumListener(matchId)
         removedeliveryCompliteListenner(matchId)
     }
+    // orderAcceptPeopleId 에 등록된 리스너 제거
     fun removedeliveryCompliteListenner(matchId: String) {
         val ref3 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptPeopleId")
         if (orderAcceptListener != null)
             ref3.removeEventListener(orderAcceptListener!!)
     }
+    // orederAcceptNum에 등록된 리스너 제거
     fun removeOrderAcceptListener(matchId: String) {
         val ref1 = database.child("chatrooms/${matchId}/chatRoom/orderAcceptNum")
         if (orderAcceptListener != null)
             ref1.removeEventListener(orderAcceptListener!!)
     }
-
+    //count에 등록된 리스너 제거
     fun removePeopleNumListener(matchId: String) {
         val ref1 = database.child("chatrooms/${matchId}/count")
         if (peopleNumListener != null)
             ref1.removeEventListener(peopleNumListener!!)
     }
-
+    // 메시지에 등록된 리스너 제거
     fun removeMessageListener(chatroomId: String) {
         val database = FirebaseDatabase.getInstance()
         val messagesRef = database.getReference("chatrooms/$chatroomId/messages")

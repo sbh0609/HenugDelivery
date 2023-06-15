@@ -20,10 +20,10 @@ import java.util.*
 import android.R as r
 
 class createActivity : AppCompatActivity() {
-    val binding by lazy { ActivityCreateBinding.inflate(layoutInflater) }
-    val categoryMap = Data.category()
+    val binding by lazy { ActivityCreateBinding.inflate(layoutInflater) } // Binding 객체 초기화
+    val categoryMap = Data.category()// 카테고리 정보를 담은 map
 
-    var deliveryCalendar = Calendar.getInstance()
+    var deliveryCalendar = Calendar.getInstance() // 배달 일정을 담은 캘린더 객체
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +48,7 @@ class createActivity : AppCompatActivity() {
         binding.done.setOnClickListener { done() }
     }
 
+    //완료 버튼을 클릭했을 때의 동작을 정의하는 함수
     private fun done() {
         binding.done.isEnabled = false
         binding.cancle.isEnabled = false
@@ -55,7 +56,7 @@ class createActivity : AppCompatActivity() {
             set(Calendar.SECOND, 59)
         }
 
-        //안되는 경우들
+        //입력 내용 검사
         deliveryCalendar.set(Calendar.SECOND, 0)
         if (binding.description.text.toString() == "" || nowTime >= deliveryCalendar) {
             var text =
@@ -68,7 +69,7 @@ class createActivity : AppCompatActivity() {
             binding.cancle.isEnabled = true
             return
         }
-
+        // 매치 데이터 생성
         val createData = MatchRoomData(
             (intent.getSerializableExtra("user") as User).userId,
             binding.category.selectedItem as String,
@@ -78,7 +79,7 @@ class createActivity : AppCompatActivity() {
             nowTime.timeInMillis,
             binding.store.text.toString()
         )
-
+        // 매치 데이터를 서버에 등록
         MatchDao.createMatchingRoom((intent.getSerializableExtra("user") as User), createData) {
             MatchDao.joinUserMatchRoom(intent.getSerializableExtra("user") as User, createData) {
                 intent.putExtra("createData", createData)
@@ -87,7 +88,7 @@ class createActivity : AppCompatActivity() {
             }
         }
     }
-
+    //데이트 피커 생성 함수
     private fun createaDatePicker() {
         val calendar = Calendar.getInstance()
         deliveryCalendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))

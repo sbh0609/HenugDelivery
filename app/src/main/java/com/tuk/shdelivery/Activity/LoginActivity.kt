@@ -21,6 +21,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 
+// 로그인 관련 Activity
 class LoginActivity : AppCompatActivity(), CoroutineScope {
     private var job = Job()
     override val coroutineContext: CoroutineContext
@@ -28,36 +29,16 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
 
     val Udao = UserDao()
 
-    // 바인딩 객체 생성
-    // 카톡에서 네이티브키 복사 후 붙혀넣기
-
+    // 뷰 바인딩을 위한 객체 생성
     val bd by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val user1 = User("1", "원찬1", "", 100L, 0L)
-
-        val intent = Intent(this, HomeActivity::class.java)
-        Udao.getUser(user1.userId.toString()){
-            var result = it
-            //새로운 유저라면
-            if (result == null) {
-                val newUser = user1
-                intent.putExtra("user", newUser)
-                Udao.addUser(newUser)
-            } else {
-                //이미 있는 유저라면 intent에 넣기
-                intent.putExtra("user", result)
-            }
-            startActivity(intent)
-            finish()
-        }
-
-
-//        kakaoLogin()
+        kakaoLogin()  // 카카오 로그인 함수 호출
     }
-
+    // 카카오 로그인을 담당하는 함수
     private fun kakaoLogin() {
+        // 카카오 SDK 초기화
         // 카톡에서 네이티브키 복사 후 붙혀넣기
         KakaoSdk.init(this, "네이티브키")
         //        Log.d(TAG, "keyhash : ${Utility.getKeyHash(this)}")
@@ -65,7 +46,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         setContentView(bd.root)
 
         bd.login.setOnClickListener {
-            login()
+            login() // 로그인 버튼을 누르면 login() 함수 호출
         }
 
         bd.aboutLogin.setOnClickListener {
@@ -74,7 +55,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         }
 
 
-        //로그인 기록있음
+        // 로그인 기록이 있을 경우
         if (AuthApiClient.instance.hasToken()) {
             UserApiClient.instance.accessTokenInfo { _, error ->
                 if (error != null) {
@@ -86,7 +67,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                     }
                 } else {
                     //토큰 유효성 체크 성공(필요 시 토큰 갱신됨)
-                    fetch_UserData()
+                    fetch_UserData() // 사용자 데이터를 가져오는 함수 호출
                 }
             }
         }
@@ -125,7 +106,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
             ) // 카카오 이메일 로그인
         }
     }
-
+    // 사용자 데이터를 가져오는 함수
     private fun fetch_UserData() {
         UserApiClient.instance.me { user, error ->
             if (error != null) {

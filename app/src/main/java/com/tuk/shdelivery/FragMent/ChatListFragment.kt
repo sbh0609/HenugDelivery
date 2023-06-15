@@ -67,7 +67,7 @@ class ChatListFragment : Fragment() {
             MatchDao.deliveryComplite((intent.getSerializableExtra("user") as User)){}
         }
     }
-
+    // 모든 주믄이 수락됐을 때의 동작을 엊ㅇ의한다.
     fun allOrderAccept() {
         //모두 주문을 눌렀을때!!
         binding.orderAccept.visibility = View.GONE

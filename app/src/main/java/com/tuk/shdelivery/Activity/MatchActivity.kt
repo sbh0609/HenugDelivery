@@ -38,6 +38,7 @@ class MatchActivity : AppCompatActivity() {
         }
     }
 
+    //입장 버튼을 클릭했을 때 동작을 정의하는 함수
     private fun enterButton() {
         fun showToast(message: String) {
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
@@ -48,7 +49,7 @@ class MatchActivity : AppCompatActivity() {
         val user = intent.getSerializableExtra("user") as User
         val selectData = intent.getSerializableExtra("selectMatchData") as MatchRoomData
 
-        // If the user is not in a match room
+        // 사용자가 매칭방에 입장해있는지 확인
         if (user.participateMatchId.isEmpty()) {
             MatchDao.getChatRoomData(selectData.id) { chatRoomData ->
                 if (chatRoomData == null) {
@@ -73,12 +74,13 @@ class MatchActivity : AppCompatActivity() {
                     }
                 }
             }
+            // 이미 있으면 트스트 메시지 출력 후 화면 종료
         } else {
             showToast("매칭방에 이미 입장중 입니다.")
             finish()
         }
     }
-
+    // 화면의 텍스트를 설정하는 함수
     private fun setText() {
         val data = intent.getSerializableExtra("selectMatchData") as MatchRoomData
         binding.deliveryTime.text =
