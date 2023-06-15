@@ -55,9 +55,8 @@
                 android:paddingBottom="15dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="메뉴 >"
                     android:textColor="@color/white"
                     android:textSize="18dp"
@@ -65,6 +64,7 @@
 
                 <Spinner
                     android:id="@+id/category"
+                    android:gravity="center"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
@@ -80,6 +80,7 @@
                 android:paddingBottom="15dp">
 
                 <TextView
+                    android:layout_gravity="center_vertical"
                     android:layout_marginRight="15dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -89,6 +90,7 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:gravity="center"
                     android:ellipsize="end"
                     android:id="@+id/store"
                     android:hint="가게를 입력하세요"

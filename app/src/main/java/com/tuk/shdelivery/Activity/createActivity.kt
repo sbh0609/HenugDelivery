@@ -6,17 +6,25 @@ import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tuk.shdelivery.Data.MatchDao
 import com.tuk.shdelivery.Data.MatchRoomData
 import com.tuk.shdelivery.Data.User
+import com.tuk.shdelivery.R
 import com.tuk.shdelivery.custom.Data
 import com.tuk.shdelivery.custom.DeliverTime
 import com.tuk.shdelivery.databinding.ActivityCreateBinding
+import com.tuk.shdelivery.databinding.SpinnerItemBinding
 import java.util.*
+import kotlin.collections.ArrayList
 import android.R as r
 
 class createActivity : AppCompatActivity() {
@@ -184,15 +192,26 @@ class createActivity : AppCompatActivity() {
     }
 
     private fun setcategorySpinner() {
-        val items = ArrayList<String>()
-        for ((key, value) in categoryMap) {
-            items.add(key)
-        }
+        val items = categoryMap.keys.toList()
+
         // 어댑터 생성
-        val adapter = ArrayAdapter(this, r.layout.simple_spinner_item, items)
+        val adapter = CustomArrayAdapter(this, items)
+//            object : ArrayAdapter<String>(this, R.layout.spinner_item, items){
+//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+//                var view = super.getView(position, convertView, parent)
+//
+//                val imageView = view.findViewById<ImageView>(R.id.spinnerImage)
+//                val textView = view.findViewById<TextView>(R.id.spinnerText)
+//
+//                imageView.setImageResource(categoryMap[items[position]]!!)
+//                textView.text = items[position]
+//
+//                return view
+//            }
+//        }
 
         // 드롭다운 목록 레이아웃 설정
-        adapter.setDropDownViewResource(r.layout.simple_spinner_dropdown_item)
+//        adapter.setDropDownViewResource(R.layout.spinner_item)
 
         // 카테고리에 어댑터 설정
         binding.category.adapter = adapter
@@ -212,5 +231,36 @@ class createActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+    inner class CustomArrayAdapter(context: Context, private val items: List<String>) : ArrayAdapter<String>(context, 0, items) {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            var view = convertView
+            if (view == null) {
+                view = LayoutInflater.from(context).inflate(R.layout.spinner_item, parent, false)
+            }
+
+            val imageView = view?.findViewById<ImageView>(R.id.spinnerImage)
+            val textView = view?.findViewById<TextView>(R.id.spinnerText)
+
+            imageView?.setImageResource(categoryMap[items[position]]!!)
+            textView?.text = items[position]
+
+            return view!!
+        }
+
+        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+            var view = convertView
+            if (view == null) {
+                view = LayoutInflater.from(context).inflate(R.layout.spinner_item, parent, false)
+            }
+
+            val imageView = view?.findViewById<ImageView>(R.id.spinnerImage)
+            val textView = view?.findViewById<TextView>(R.id.spinnerText)
+
+            imageView?.setImageResource(categoryMap[items[position]]!!)
+            textView?.text = items[position]
+
+            return view!!
+        }
     }
 }
