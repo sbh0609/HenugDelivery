@@ -9,11 +9,14 @@ import android.text.TextWatcher
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.tuk.shdelivery.Data.ChargePoint
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.databinding.ActivityChargeBinding
 import java.text.DecimalFormat
-import com.tuk.shdelivery.Data.ChargeRequest
+import java.text.SimpleDateFormat
+import java.util.*
+
 class ChargeActivity : AppCompatActivity() {
     val binding by lazy { ActivityChargeBinding.inflate(layoutInflater) }
 
@@ -35,27 +38,27 @@ class ChargeActivity : AppCompatActivity() {
         binding.done.setOnClickListener { sendChargeRequest() }
     }
     private fun sendChargeRequest() {
-        // 사용자가 입력한 충전 금액을 가져옵니다.
         val chargeAmount = binding.point.text.toString().replace("원", "").replace(",", "").toLong()
-
-        // 현재 로그인된 사용자를 가져옵니다.
         val user = FirebaseAuth.getInstance().currentUser!!
 
         val firebaseDatabase = FirebaseDatabase.getInstance()
-        val databaseReference = firebaseDatabase.getReference("ChargeRequest")
+        val formatterKey = SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREA)
+        val chargeDateKey = formatterKey.format(Date())
+        val chargePoint = ChargePoint(user.uid, chargeAmount, 0) // chargeDate는 이제 키로 사용되므로 ChargePoint 객체에 포함시키지 않습니다.
 
-        val chargeRequest = ChargeRequest(user.uid, chargeAmount) //ChargeRequest는 사용자 ID와 충전 요청 금액을 포함하는 데이터 클래스입니다.
+        // Use chargeDateKey for each charge request
+        val databaseReference = firebaseDatabase.getReference("users").child(user.uid).child("ChargePoint").child(chargeDateKey)
 
-        databaseReference.child(user.uid).setValue(chargeRequest)
+        databaseReference.setValue(chargePoint)
             .addOnSuccessListener {
-                //요청 정보를 데이터베이스에 성공적으로 저장한 후, done 함수를 호출합니다.
-                done(chargeAmount)
+                // "충전 요청이 성공적으로 전송되었습니다." 토스트 메시지 표시
             }
             .addOnFailureListener {
-                //데이터베이스에 요청 정보를 저장하는데 실패한 경우의 작업을 여기에 코딩합니다.
-                //예를 들어, "충전 요청 전송에 실패하였습니다. 다시 시도해주세요."라는 토스트 메시지를 표시할 수 있습니다.
+                // "충전 요청 전송에 실패하였습니다. 다시 시도해주세요." 토스트 메시지 표시
             }
     }
+
+
     private fun done(inputPoint: Long) {
         val user = intent.getSerializableExtra("user") as User
         user.userPoint += inputPoint

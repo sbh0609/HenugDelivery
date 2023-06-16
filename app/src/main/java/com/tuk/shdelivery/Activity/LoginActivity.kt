@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.database.FirebaseDatabase
 import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.KakaoSdk
@@ -19,6 +20,7 @@ import com.tuk.shdelivery.UserDao
 import com.tuk.shdelivery.databinding.ActivityLoginBinding
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
+import com.tuk.shdelivery.Data.ChargePoint
 
 
 // 로그인 관련 Activity
@@ -113,6 +115,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                 Log.e(TAG, "사용자 정보 요청 실패 $error")
             } else if (user != null) {
                 Log.e(TAG, "사용자 정보 요청 성공 : $user")
+                // ChargePoint 노드 초기화는 더 이상 필요 없습니다.
                 val intent = Intent(this, HomeActivity::class.java)
                 Udao.getUser(user.id.toString()){
                     var result = it
@@ -136,6 +139,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
             }
         }
     }
+
 
 
     // 이메일 로그인 콜백

@@ -3,9 +3,14 @@ package com.tuk.shdelivery.Data
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
-data class ChargeRequest(
-    var userID: String = "",
-    var chargeAmount: Long = 0
+//data class ChargeRequest(
+//    var userID: String = "",
+//    var chargeAmount: Long = 0
+//)
+data class ChargePoint(
+    var userId: String = "",
+    var chargeRequest: Long = 0,
+    var chargeAllow: Int = 0
 )
 
 //매치룸에 대한 정보를 포함한다.
