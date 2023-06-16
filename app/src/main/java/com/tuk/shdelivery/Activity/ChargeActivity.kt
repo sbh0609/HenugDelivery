@@ -1,6 +1,7 @@
 package com.tuk.shdelivery.Activity
 
 import android.app.Activity
+import android.content.ContentValues.TAG
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -10,6 +11,10 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.tuk.shdelivery.Data.ChargePoint
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
@@ -39,18 +44,42 @@ class ChargeActivity : AppCompatActivity() {
     }
 
     private fun done() {
-        //백업
+        // 사용자 정보 가져오기
         val user = intent.getSerializableExtra("user") as User
+
+        // 사용자가 입력한 금액
         val inputPoint = binding.point.text.toString().replace("원", "").replace(",", "").toLong()
-        user.userPoint += inputPoint
-        intent.putExtra("user",user)
-        intent.putExtra("inputPoint", inputPoint)
-        //충전 하기
-        UserDao.updateUser(user) {
-            setResult(Activity.RESULT_OK, intent)
+
+        // 충전 요청 데이터 생성
+        val chargePoint = ChargePoint(
+            userId = user.userId,
+            chargeRequest = inputPoint
+        )
+
+        // 충전 요청을 데이터베이스에 저장
+        UserDao.saveChargeRequest(user.userId, chargePoint) {
+            Toast.makeText(this, "충전 요청이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+            //테스트 할 때 주석 풀기
+//            val chargePointRef = UserDao.getUserRef().child(user.userId).child("ChargePoint")
+//            chargePointRef.addValueEventListener(object : ValueEventListener {
+//                override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                    val chargePoint = dataSnapshot.getValue(ChargePoint::class.java)
+//                    if (chargePoint != null) {
+//                        when (chargePoint.chargeAllow) {
+//                            -1 -> Toast.makeText(this@ChargeActivity, "충전이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+//                            else -> Toast.makeText(this@ChargeActivity, "${chargePoint.chargeAllow} 원 충전이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                }
+//
+//                override fun onCancelled(databaseError: DatabaseError) {
+//                    Log.w(TAG, "Failed to read value.", databaseError.toException())
+//                }
+//            })
             finish()
         }
     }
+
 
     private fun inputSetting() {
         binding.point.addTextChangedListener(object : TextWatcher {

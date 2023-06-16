@@ -3,7 +3,11 @@ package com.tuk.shdelivery.Data
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
-
+data class ChargePoint(
+    var userId: String = "",
+    var chargeRequest: Long = 0,
+    var chargeAllow: Int = 0
+)
 data class MatchRoomData(
     var id: String= "",
     var menu: String = "",

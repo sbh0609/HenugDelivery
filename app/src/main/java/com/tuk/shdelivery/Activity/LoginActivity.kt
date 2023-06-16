@@ -35,26 +35,8 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user1 = User("2", "원찬1", "", 100L, 0L)
 
-        val intent = Intent(this, HomeActivity::class.java)
-        Udao.getUser(user1.userId){
-            var result = it
-            //새로운 유저라면
-            if (result == null) {
-                val newUser = user1
-                intent.putExtra("user", newUser)
-                Udao.addUser(newUser)
-            } else {
-                //이미 있는 유저라면 intent에 넣기
-                intent.putExtra("user", result)
-            }
-            startActivity(intent)
-            finish()
-        }
-
-
-//        kakaoLogin()
+        kakaoLogin()
     }
 
     private fun kakaoLogin() {
