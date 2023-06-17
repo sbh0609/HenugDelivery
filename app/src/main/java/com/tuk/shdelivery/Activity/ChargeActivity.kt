@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.tuk.shdelivery.Data.ChargePoint
+import com.tuk.shdelivery.Data.MatchDao.childEventListener
 import com.tuk.shdelivery.Data.User
 import com.tuk.shdelivery.R
 import com.tuk.shdelivery.UserDao
@@ -26,7 +27,8 @@ import java.util.*
 
 class ChargeActivity : AppCompatActivity() {
     val binding by lazy { ActivityChargeBinding.inflate(layoutInflater) }
-
+    // 이전 chargeAllow 값을 저장하는 변수
+    private var prevChargeAllow: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -63,14 +65,22 @@ class ChargeActivity : AppCompatActivity() {
             finish()
             //테스트 할 때 주석 풀기
             val chargePointRef = UserDao.getUserRef()?.child(user.userId)?.child("ChargePoint")
-            chargePointRef?.addChildEventListener(object : ChildEventListener {
+
+            // Remove previous listener
+            childEventListener?.let {
+                chargePointRef?.removeEventListener(it)
+            }
+
+            // Create a new listener
+            childEventListener = object : ChildEventListener {
                 override fun onChildAdded(dataSnapshot: DataSnapshot, prevChildKey: String?) {
                     // No action required
                 }
 
                 override fun onChildChanged(dataSnapshot: DataSnapshot, prevChildKey: String?) {
                     val chargePoint = dataSnapshot.getValue(ChargePoint::class.java)
-                    if (chargePoint != null && chargePoint.chargeAllow != 0) {
+                    if (chargePoint != null && chargePoint.chargeAllow != prevChargeAllow) {
+                        prevChargeAllow = chargePoint.chargeAllow
                         when (chargePoint.chargeAllow) {
                             -1 -> Toast.makeText(this@ChargeActivity, "충전이 거부되었습니다.", Toast.LENGTH_SHORT).show()
                             else -> Toast.makeText(this@ChargeActivity, "${chargePoint.chargeAllow} 원 충전이 완료되었습니다.", Toast.LENGTH_SHORT).show()
@@ -89,9 +99,15 @@ class ChargeActivity : AppCompatActivity() {
                 override fun onCancelled(databaseError: DatabaseError) {
                     Log.w(TAG, "Failed to read value.", databaseError.toException())
                 }
-            })
+            }
+
+            // Add the new listener
+            childEventListener?.let {
+                chargePointRef?.addChildEventListener(it)
+            }
         }
     }
+
 
 
     private fun inputSetting() {
