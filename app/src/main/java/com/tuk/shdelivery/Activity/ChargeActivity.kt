@@ -60,6 +60,7 @@ class ChargeActivity : AppCompatActivity() {
         // 충전 요청을 데이터베이스에 저장
         UserDao.saveChargeRequest(user.userId, chargePoint) {
             Toast.makeText(this, "충전 요청이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+            finish()
             //테스트 할 때 주석 풀기
             val chargePointRef = UserDao.getUserRef()?.child(user.userId)?.child("ChargePoint")
             chargePointRef?.addChildEventListener(object : ChildEventListener {
