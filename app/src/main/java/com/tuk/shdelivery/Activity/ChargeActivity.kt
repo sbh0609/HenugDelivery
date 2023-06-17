@@ -70,7 +70,7 @@ class ChargeActivity : AppCompatActivity() {
 
                 override fun onChildChanged(dataSnapshot: DataSnapshot, prevChildKey: String?) {
                     val chargePoint = dataSnapshot.getValue(ChargePoint::class.java)
-                    if (chargePoint != null) {
+                    if (chargePoint != null && chargePoint.chargeAllow != 0) {
                         when (chargePoint.chargeAllow) {
                             -1 -> Toast.makeText(this@ChargeActivity, "충전이 거부되었습니다.", Toast.LENGTH_SHORT).show()
                             else -> Toast.makeText(this@ChargeActivity, "${chargePoint.chargeAllow} 원 충전이 완료되었습니다.", Toast.LENGTH_SHORT).show()
