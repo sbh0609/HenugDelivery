@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -60,23 +61,34 @@ class ChargeActivity : AppCompatActivity() {
         UserDao.saveChargeRequest(user.userId, chargePoint) {
             Toast.makeText(this, "충전 요청이 전송되었습니다.", Toast.LENGTH_SHORT).show()
             //테스트 할 때 주석 풀기
-//            val chargePointRef = UserDao.getUserRef().child(user.userId).child("ChargePoint")
-//            chargePointRef.addValueEventListener(object : ValueEventListener {
-//                override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                    val chargePoint = dataSnapshot.getValue(ChargePoint::class.java)
-//                    if (chargePoint != null) {
-//                        when (chargePoint.chargeAllow) {
-//                            -1 -> Toast.makeText(this@ChargeActivity, "충전이 거부되었습니다.", Toast.LENGTH_SHORT).show()
-//                            else -> Toast.makeText(this@ChargeActivity, "${chargePoint.chargeAllow} 원 충전이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-//                        }
-//                    }
-//                }
-//
-//                override fun onCancelled(databaseError: DatabaseError) {
-//                    Log.w(TAG, "Failed to read value.", databaseError.toException())
-//                }
-//            })
-            finish()
+            val chargePointRef = UserDao.getUserRef()?.child(user.userId)?.child("ChargePoint")
+            chargePointRef?.addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(dataSnapshot: DataSnapshot, prevChildKey: String?) {
+                    // No action required
+                }
+
+                override fun onChildChanged(dataSnapshot: DataSnapshot, prevChildKey: String?) {
+                    val chargePoint = dataSnapshot.getValue(ChargePoint::class.java)
+                    if (chargePoint != null) {
+                        when (chargePoint.chargeAllow) {
+                            -1 -> Toast.makeText(this@ChargeActivity, "충전이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+                            else -> Toast.makeText(this@ChargeActivity, "${chargePoint.chargeAllow} 원 충전이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+                override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                    // No action required
+                }
+
+                override fun onChildMoved(dataSnapshot: DataSnapshot, prevChildKey: String?) {
+                    // No action required
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.w(TAG, "Failed to read value.", databaseError.toException())
+                }
+            })
         }
     }
 

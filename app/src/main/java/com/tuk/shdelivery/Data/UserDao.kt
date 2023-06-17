@@ -19,9 +19,9 @@ object UserDao {
         userRef = db.getReference("user")
     }
     //테스트 시 주석 풀기
-//    fun getUserRef(): DatabaseReference? {
-//        return userRef
-//    }
+    fun getUserRef(): DatabaseReference? {
+        return userRef
+    }
 
     /**
      * input: user <User 객체>
