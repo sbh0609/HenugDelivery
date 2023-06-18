@@ -143,12 +143,17 @@ class ChatListFragment : Fragment() {
             user.userPoint -= point
             user.matchPoint = if (point > 0) point.toLong() else 0L
             intent.putExtra("user", user)
-
             MatchDao.updateOrderPoint(user.participateMatchId, point) {
-                UserDao.updateUser(user) {
+                val updateFields = mapOf("userPoint" to user.userPoint, "matchPoint" to user.matchPoint)
+                UserDao.updateUserFields(user.userId, updateFields) {
                     binding.orderAccept.isEnabled = true
                 }
             }
+//            MatchDao.updateOrderPoint(user.participateMatchId, point) {
+//                UserDao.updateUser(user) {
+//                    binding.orderAccept.isEnabled = true
+//                }
+//            }
         }
     }
 
@@ -262,10 +267,19 @@ class ChatListFragment : Fragment() {
             }
             user.matchPoint = 0L
             intent.putExtra("user", user)
-            UserDao.updateUser(user) {
+            val fieldsToUpdate = mapOf(
+                "userPoint" to user.userPoint,
+                "matchPoint" to user.matchPoint,
+                "participateMatchId" to user.participateMatchId
+            )
+            UserDao.updateUserFields(user.userId, fieldsToUpdate) {
                 updateSubTitle()
                 ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
             }
+//            UserDao.updateUser(user) {
+//                updateSubTitle()
+//                ((activity as HomeActivity).listFragment[0] as HomeFragment).reFresh()
+//            }
         }
     }
 

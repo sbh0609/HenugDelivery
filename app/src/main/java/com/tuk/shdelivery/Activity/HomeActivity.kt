@@ -112,7 +112,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, fetchIntent: Intent?) {
 
-        //create데이터가 왔다면
+//        //create데이터가 왔다면
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
             var newCreateData = fetchIntent?.getSerializableExtra("createData") as MatchRoomData
             var user = (intent.getSerializableExtra("user") as User)
@@ -120,8 +120,8 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
             intent.putExtra("user", user)
             val fragment1 = listFragment.get(1) as ChatListFragment
             val fragment0 = listFragment.get(0) as HomeFragment
-            UserDao.updateUser(user) {
-                //입장 메세지 보내고 들어가기
+            val updateFields = mapOf("participateMatchId" to newCreateData.id)
+            UserDao.updateUserFields(user.userId, updateFields) {
                 var chat = Chat("입장", user.userName, "님이 입장하였습니다.")
                 MatchDao.sendMessageToFirebase(chat, user.participateMatchId) {
                     fragment1.enterChatRoom() {
@@ -169,6 +169,7 @@ class HomeActivity : AppCompatActivity(), CoroutineScope {
 
         super.onActivityResult(requestCode, resultCode, intent)
     }
+
 
     override fun onBackPressed() {
 

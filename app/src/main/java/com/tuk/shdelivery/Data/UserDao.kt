@@ -71,6 +71,12 @@ object UserDao {
             callback()
         }
     }
+    fun updateUserFields(userId: String, fields: Map<String, Any>, callback: () -> Unit) {
+        userRef?.child(userId)?.updateChildren(fields)?.addOnSuccessListener {
+            callback()
+        }
+    }
+
 
     fun userListener(user: User, callback: (user: User?) -> Unit) {
         userRef?.child(user.userId)?.addValueEventListener(object : ValueEventListener {

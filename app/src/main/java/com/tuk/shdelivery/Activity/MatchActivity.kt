@@ -61,12 +61,20 @@ class MatchActivity : AppCompatActivity() {
                         if (matchRoomData.id != "start") {
                             user.participateMatchId = selectData.id
                             intent.putExtra("user", user)
-                            userDao.updateUser(user) {
+                            val updateFields = mapOf("participateMatchId" to selectData.id)
+                            UserDao.updateUserFields(user.userId, updateFields) {
                                 MatchDao.joinUserMatchRoom(user, selectData) {
                                     setResult(RESULT_OK, intent)
                                     finish()
                                 }
                             }
+//                            userDao.updateUser(user) {
+//                                MatchDao.joinUserMatchRoom(user, selectData) {
+//                                    setResult(RESULT_OK, intent)
+//                                    finish()
+//                                }
+//                            }
+
                         } else {
                             // 배달이 시작됬으면
                             showToast("배달이 시작된 방입니다.")
